@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Browser-based access to your local terminal and Claude Code from any device",
+  "description": "Installable mobile and web cockpit for real terminals, SSH/SFTP, multi-machine access, and agent workflows",
   "license": "MIT",
   "author": "termora contributors",
   "homepage": "https://termora.dev",
@@ -17,14 +17,20 @@
   "keywords": [
     "terminal",
     "remote-terminal",
-    "phone-terminal",
-    "claude-code",
-    "xterm",
+    "mobile-terminal",
     "pwa",
+    "developer-tools",
+    "ssh",
+    "sftp",
+    "xterm",
     "node-pty",
     "websocket",
-    "ngrok",
-    "developer-tools"
+    "tmux",
+    "typescript",
+    "ai-agents",
+    "worktrees",
+    "git",
+    "self-hosted"
   ],
   "workspaces": [
     "packages/*"

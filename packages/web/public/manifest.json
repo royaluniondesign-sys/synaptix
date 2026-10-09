@@ -1,7 +1,7 @@
 {
-  "name": "termora",
-  "short_name": "termora",
-  "description": "Your terminal, in your pocket",
+  "name": "Termora",
+  "short_name": "Termora",
+  "description": "Installable cockpit for real terminals, machines, and developer workflows",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#141413",

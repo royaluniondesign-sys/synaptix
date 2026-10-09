@@ -1,61 +1,26 @@
 # Security Policy
 
-## Reporting a Vulnerability
+Termora provides authenticated access to real terminals. Treat every deployment as sensitive infrastructure.
 
-If you discover a security vulnerability in termora, please report it responsibly.
+## Supported versions
 
-**Do NOT open a public GitHub issue for security vulnerabilities.**
+Security fixes target the `main` branch until the project starts publishing versioned releases.
 
-### Contact
+## Reporting a vulnerability
 
-Email: **security@termora.dev**
+Open a private GitHub security advisory or contact the maintainers directly. Do not publish exploit details before a fix is available.
 
-### What to Include
+## Security model
 
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (if you have one)
+- The agent runs locally on the user's machine/server.
+- Browser/mobile access is authenticated through bootstrap/static tokens and JWT sessions.
+- SSH/SFTP APIs require authenticated requests.
+- Raw secrets must not be logged, committed, or exposed through the web UI.
+- Destructive operations should require explicit confirmation.
 
-### Response Timeline
+## Recommended deployment
 
-- **48 hours**: We will acknowledge receipt of your report
-- **7 days**: We will triage the vulnerability and provide an initial assessment
-- **30 days**: We aim to release a fix for confirmed vulnerabilities
-
-### Scope
-
-**In scope:**
-
-- Authentication and authorization bypasses
-- Token/session hijacking or leakage
-- WebSocket security issues
-- PTY escape or command injection
-- ngrok tunnel exposure issues
-- Sensitive data leakage
-- Dependencies with known CVEs
-
-**Out of scope:**
-
-- Issues requiring physical access to the host machine
-- Social engineering attacks
-- Denial of service (the agent runs locally)
-- Issues in third-party services (ngrok, Resend)
-- Vulnerabilities in outdated versions (please update first)
-
-## Supported Versions
-
-| Version | Supported |
-|---------|-----------|
-| Latest  | Yes       |
-
-## Recognition
-
-We appreciate responsible disclosure. With your permission, we will credit you in the release notes and in a SECURITY_ACKNOWLEDGMENTS.md file.
-
-## Security Best Practices for Users
-
-- Keep your `NGROK_AUTHTOKEN` private — never commit it to version control
-- Use the one-time bootstrap token flow; do not share session JWTs
-- Run termora on a trusted network when possible
-- Keep Node.js and dependencies up to date
+- Prefer localhost/Tailscale/LAN for private use.
+- Use static HTTPS tunnels only when needed.
+- Rotate tokens if a URL was shared too broadly.
+- Keep Node.js and dependencies current.

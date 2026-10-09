@@ -1,7 +1,7 @@
 {
   "name": "@termora/web",
   "version": "0.2.0",
-  "description": "termora web frontend \u2014 terminal UI with MacBook Pro frame",
+  "description": "Installable Termora web cockpit for terminals, sessions, machines, and developer workflows",
   "license": "MIT",
   "repository": {
     "type": "git",
