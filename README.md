@@ -12,7 +12,7 @@
 
 **Real terminal and agent control from any phone, tablet, or browser.**
 
-A local-first, installable cockpit for Mac/Linux machines: real PTYs, SSH/SFTP, multi-session terminal control, multi-machine access, secure QR onboarding, persistent sessions, and a roadmap toward full agent/worktree orchestration.
+A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-session terminal control, secure QR onboarding, tunnel status, persistent sessions, and a roadmap toward full SSH/SFTP, multi-machine, Git, worktree, and agent orchestration.
 
 [Quickstart](#quickstart) · [Features](#features) · [How it works](#how-it-works) · [Multi-machine](#multi-machine) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
@@ -21,18 +21,24 @@ A local-first, installable cockpit for Mac/Linux machines: real PTYs, SSH/SFTP, 
 ---
 
 <div align="center">
+
+![Termora mobile walkthrough](docs/images/termora-mobile-tour.gif)
+
 <table>
 <tr>
-<td align="center"><img src="docs/images/phone-terminal.png" width="200" /><br /><sub><b>Real Terminal</b></sub></td>
-<td align="center"><img src="docs/images/phone-commands.png" width="200" /><br /><sub><b>Quick Commands</b></sub></td>
-<td align="center"><img src="docs/images/phone-grid.png" width="200" /><br /><sub><b>Session Grid</b></sub></td>
+<td align="center"><img src="docs/images/phone-dashboard.png" width="200" /><br /><sub><b>Live Dashboard</b></sub></td>
+<td align="center"><img src="docs/images/phone-terminal.png" width="200" /><br /><sub><b>Touch Terminal</b></sub></td>
+<td align="center"><img src="docs/images/phone-tunnels.png" width="200" /><br /><sub><b>Tunnel Control</b></sub></td>
 </tr>
 <tr>
-<td align="center"><img src="docs/images/phone-status.png" width="200" /><br /><sub><b>Connection Status</b></sub></td>
-<td align="center"><img src="docs/images/phone-settings.png" width="200" /><br /><sub><b>Machine Control</b></sub></td>
-<td></td>
+<td align="center"><img src="docs/images/phone-sessions.png" width="200" /><br /><sub><b>Session Overview</b></sub></td>
+<td align="center"><img src="docs/images/phone-settings.png" width="200" /><br /><sub><b>Machine Settings</b></sub></td>
+<td align="center"><img src="docs/images/desktop-dashboard.png" width="260" /><br /><sub><b>Desktop Web UI</b></sub></td>
 </tr>
 </table>
+
+[MP4 demo](docs/images/termora-mobile-tour.mp4)
+
 </div>
 
 ---
@@ -45,7 +51,7 @@ Compared with classic mobile SSH clients, Termora gives you a full browser/PWA i
 
 Compared with cloud IDEs, Termora keeps the work on your own Mac/Linux/server. No hosted workspace lock-in, no fake shell, no remote filesystem copy. It streams your real PTY and local agent processes.
 
-Compared with single-agent dashboards, Termora is designed to become the machine cockpit: terminals, files, SSH/SFTP, Git, agents, worktrees, browser previews, notifications, and verification gates in one installable app.
+Compared with single-agent dashboards, Termora is designed to become the machine cockpit: terminals first today, then files, SSH/SFTP, Git, agents, worktrees, browser previews, notifications, and verification gates in one installable app.
 
 ## What works now
 
@@ -54,10 +60,8 @@ Compared with single-agent dashboards, Termora is designed to become the machine
 - **Secure onboarding** — QR/bootstrap token, JWT session auth, rate-limited auth endpoints.
 - **Multi-session control** — create, rename, close, reconnect, preview, and resume terminal sessions.
 - **Session persistence** — tmux control mode when available, with fallback to raw PTY.
-- **Multi-machine usage** — run one agent per machine/server, bookmark each URL, or use static ngrok domains.
-- **Connectivity fallback** — ngrok static URL, localhost.run SSH tunnel, or LAN/Wi-Fi fallback.
-- **SSH host manager** — save SSH targets, connect from the UI, verify host keys.
-- **SFTP file transfer** — browse, upload, and download files through authenticated routes.
+- **Machine/tunnel status UI** — live dashboard, tunnel cards, QR pairing, and copyable access URL.
+- **Connectivity fallback** — LAN/Wi-Fi today, with ngrok/SSH tunnel plumbing in the agent.
 - **Shared protocol package** — typed WebSocket protocol shared by agent and web client.
 - **CLI wrapper** — project prepared for `termora` command packaging.
 - **CI-ready monorepo** — lint, typecheck, test, and build via Turborepo.
@@ -191,7 +195,7 @@ Stop it with `Ctrl+C` in the terminal where `npm run dev` is running.
 - Turborepo tasks for lint/typecheck/test/build.
 - CI workflow on Node 20 and 22.
 - Shared protocol package for client/server message contracts.
-- Vitest coverage for auth, SSH hosts, known_hosts, SSH command safety, SFTP, and protocol lifecycle.
+- Vitest coverage for auth, protocol lifecycle, session persistence, worktree fan-out, and device revocation.
 
 ---
 
