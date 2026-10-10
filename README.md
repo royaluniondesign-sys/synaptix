@@ -22,16 +22,16 @@ A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-sess
 
 <div align="center">
 
-![Termora cockpit walkthrough](docs/images/termora-mobile-tour.gif)
+![Termora cockpit walkthrough](docs/images/cockpit-tour-v2.gif)
 
 <table>
 <tr>
-<td align="center"><img src="docs/images/desktop-dashboard.png" width="560" /><br /><sub><b>Desktop cockpit</b></sub></td>
-<td align="center"><img src="docs/images/phone-dashboard.png" width="190" /><br /><sub><b>Mobile companion</b></sub></td>
+<td align="center"><img src="docs/images/cockpit-desktop-v2.png" width="560" /><br /><sub><b>Desktop cockpit</b></sub></td>
+<td align="center"><img src="docs/images/mobile-companion-v2.png" width="190" /><br /><sub><b>Mobile companion</b></sub></td>
 </tr>
 </table>
 
-[MP4 demo](docs/images/termora-mobile-tour.mp4)
+[MP4 demo](docs/images/cockpit-tour-v2.mp4)
 
 </div>
 
