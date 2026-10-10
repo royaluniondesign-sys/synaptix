@@ -62,23 +62,21 @@ Compared with single-agent dashboards, Termora is designed to become the machine
 - **Session persistence** — tmux control mode when available, with fallback to raw PTY.
 - **Machine/tunnel status UI** — live dashboard, tunnel cards, QR pairing, and copyable access URL.
 - **Connectivity fallback** — LAN/Wi-Fi today, with ngrok/SSH tunnel plumbing in the agent.
-- **Shared protocol package** — typed WebSocket protocol shared by agent and web client.
-- **CLI wrapper** — project prepared for `termora` command packaging.
-- **CI-ready monorepo** — lint, typecheck, test, and build via Turborepo.
 
 ## Where it is going
 
 Termora is evolving into an installable, multi-device developer cockpit:
 
+- SSH/SFTP UI;
+- Git/worktrees;
+- agents/workers visual UI;
+- files and previews;
+- notifications and multi-machine central cockpit;
 - project/workspace registry;
-- isolated git worktrees per task;
-- launch and monitor CLI agents from mobile;
 - diff/source-control review from phone;
-- browser previews per worktree;
 - push notifications when work finishes or needs input;
 - run records with lint/typecheck/test/build gates;
-- MCP/webhook integrations for external automation;
-- desktop-grade panes: file tree, editor, terminal splits, logs, previews, command palette.
+- desktop-grade panes: file tree, editor, terminal splits, logs, command palette.
 
 See:
 
@@ -165,15 +163,6 @@ Stop it with `Ctrl+C` in the terminal where `npm run dev` is running.
 - QR onboarding.
 - ngrok/SSH/LAN tunnel modes.
 - Static URL support per machine.
-- Multi-machine workflow through separate installable PWAs/bookmarks.
-
-### SSH and files
-
-- SSH host CRUD routes.
-- Host-key verification helpers.
-- SSH session creation from web UI.
-- SFTP browse/upload/download.
-- JWT-protected SSH/SFTP APIs.
 
 ### Security
 

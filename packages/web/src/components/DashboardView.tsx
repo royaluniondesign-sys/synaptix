@@ -122,6 +122,115 @@ function KPIRow() {
   );
 }
 
+function StatusPill({ label, tone }: { label: string; tone: 'live' | 'next' | 'planned' }) {
+  const color = tone === 'live' ? S.success : tone === 'next' ? S.warning : S.text3;
+  return (
+    <span style={{
+      fontSize: 8,
+      fontWeight: 700,
+      letterSpacing: 0.5,
+      color,
+      background: `${color}12`,
+      border: `1px solid ${color}35`,
+      padding: '2px 6px',
+      borderRadius: 999,
+      textTransform: 'uppercase',
+      whiteSpace: 'nowrap',
+    }}>
+      {label}
+    </span>
+  );
+}
+
+function CockpitCommandCenter({ sessionCount, connectionStatus }: { sessionCount: number; connectionStatus: ConnectionStatus }) {
+  const online = connectionStatus === 'connected';
+  const lanes: Array<{ title: string; value: string; detail: string; tone: 'live' | 'next' | 'planned' }> = [
+    { title: 'Local machine', value: online ? 'online' : 'offline', detail: 'Real PTY + PWA control', tone: online ? 'live' : 'planned' },
+    { title: 'Terminal sessions', value: String(sessionCount), detail: 'Create, resume, preview', tone: 'live' },
+    { title: 'Agents/worktrees', value: 'next', detail: 'Visual orchestration planned', tone: 'next' },
+  ];
+
+  return (
+    <div style={{
+      marginBottom: 14,
+      border: `1px solid ${S.border}`,
+      borderRadius: 18,
+      background: `linear-gradient(145deg, ${S.surface}, #111118 48%, #171121)`,
+      boxShadow: '0 18px 50px rgba(0, 0, 0, 0.28)',
+      overflow: 'hidden',
+    }}>
+      <div style={{ padding: '15px 16px 12px', borderBottom: `1px solid ${S.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
+          <div>
+            <div style={{ fontSize: 10, color: S.text3, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>Cockpit</div>
+            <div style={{ fontSize: 20, lineHeight: 1.05, color: S.text1, fontWeight: 800, letterSpacing: -0.9 }}>Machine command center</div>
+          </div>
+          <StatusPill label={online ? 'live' : 'offline'} tone={online ? 'live' : 'planned'} />
+        </div>
+        <p style={{ margin: 0, color: S.text2, fontSize: 11, lineHeight: 1.45 }}>
+          Real terminal control today. Multi-machine, agents, files, Git/worktrees and previews are being wired as explicit roadmap lanes.
+        </p>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8, padding: 10 }}>
+        {lanes.map((lane) => (
+          <div key={lane.title} style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            gap: 10,
+            alignItems: 'center',
+            background: 'rgba(255, 255, 255, 0.035)',
+            border: `1px solid ${S.border}`,
+            borderRadius: 12,
+            padding: '10px 11px',
+          }}>
+            <div>
+              <div style={{ color: S.text1, fontSize: 12, fontWeight: 700, letterSpacing: -0.2 }}>{lane.title}</div>
+              <div style={{ color: S.text3, fontSize: 10, marginTop: 3 }}>{lane.detail}</div>
+            </div>
+            <StatusPill label={lane.value} tone={lane.tone} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RoadmapRail() {
+  const cards: Array<{ title: string; status: 'next' | 'planned'; detail: string }> = [
+    { title: 'Agents', status: 'planned', detail: 'OpenCode/Hermes worker control from mobile' },
+    { title: 'Worktrees', status: 'next', detail: 'Isolated task branches with verification gates' },
+    { title: 'Files/SFTP', status: 'planned', detail: 'Browse, upload, download and host-key trust UI' },
+    { title: 'Previews', status: 'planned', detail: 'Per-project browser previews and logs' },
+  ];
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: S.text3, letterSpacing: 0.8, textTransform: 'uppercase' }}>Next cockpit lanes</span>
+        <StatusPill label="roadmap" tone="next" />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {cards.map((card) => (
+          <div key={card.title} style={{
+            minHeight: 78,
+            background: S.surface2,
+            border: `1px solid ${S.border}`,
+            borderRadius: 12,
+            padding: 10,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 7 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: S.text1 }}>{card.title}</span>
+              <StatusPill label={card.status} tone={card.status === 'next' ? 'next' : 'planned'} />
+            </div>
+            <div style={{ fontSize: 10, lineHeight: 1.35, color: S.text3 }}>{card.detail}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SessionCardFull({ session, isActive, onSelect, onClose }: {
   session: Session;
   isActive: boolean;
@@ -343,6 +452,9 @@ export function DashboardView({
       <DashHeader connectionStatus={connectionStatus} latencyMs={latencyMs} />
 
       <div style={{ flex: 1, overflow: 'auto', padding: '12px 12px 80px' }}>
+        <CockpitCommandCenter sessionCount={sessions.length} connectionStatus={connectionStatus} />
+        <RoadmapRail />
+
         {/* KPI row */}
         <KPIRow />
 
