@@ -16,6 +16,7 @@ import {
 import { deriveDeviceName } from './device-name.js';
 import { createSSERouter } from './sse-handler.js';
 import { getTunnelInfo } from './tunnel.js';
+import { mountCockpitRoutes } from './cockpit.js';
 import type { DbStatements } from './db.js';
 import type { AgentConfig } from './config.js';
 
@@ -109,6 +110,8 @@ export function createAppServer(
 
   // Auth routes
   mountAuthRoutes(app, config, statements, authLimiter);
+
+  mountCockpitRoutes(app, (req, res) => requireAuth(req, res, config, statements));
 
   // SSE routes
   const sseRouter = createSSERouter();

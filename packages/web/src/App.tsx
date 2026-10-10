@@ -572,6 +572,7 @@ export function App() {
               onCloseSession={closeSession}
               connectionStatus={connectionStatus}
               latencyMs={latencyMs}
+              authToken={auth.token}
             />
           )}
           {view === 'terminal' && !activeSession && (

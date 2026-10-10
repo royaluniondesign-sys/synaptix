@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Session } from '../lib/types';
 import type { ConnectionStatus } from '../lib/ws-client';
 
@@ -10,6 +10,7 @@ interface DashboardViewProps {
   onCloseSession: (id: string) => void;
   connectionStatus: ConnectionStatus;
   latencyMs: number | null;
+  authToken: string | null;
 }
 
 type IconName = 'terminal' | 'branch' | 'bot' | 'files' | 'search' | 'settings' | 'close' | 'desktop' | 'plus' | 'mobile' | 'github' | 'activity';
@@ -18,6 +19,8 @@ type DotTone = 'green' | 'orange' | 'red' | 'muted';
 type TaskItem = { id: string; title: string; meta: string; status: DotTone; agent: string; next: string; command: string };
 type AgentItem = { id: string; name: string; state: 'thinking' | 'running' | 'queued' | 'blocked'; work: string; tone: DotTone };
 type FileItem = { path: string; kind: 'dir' | 'file'; status?: 'modified' | 'new' | 'clean' };
+type CockpitStatus = { machine: string; root: string; git: { branch: string; dirty: boolean; status: string; lastCommit: string }; agents: Array<{ id: string; name: string; state: string; available: boolean; version?: string }>; recentJobs: Array<{ id: string; action: string; status: string; output: string }>; files: { entries: Array<{ name: string; path: string; kind: 'dir' | 'file'; size: number; modifiedAt: string }> } };
+
 
 const TASKS: TaskItem[] = [
   { id: 'ui-shell', title: 'UI shell parity', meta: 'multi-pane workspace + phone control', status: 'orange', agent: 'Hermes', next: 'verify responsive splits', command: 'npm run build' },
@@ -207,13 +210,13 @@ function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, o
   );
 }
 
-function FileTreeRail({ activeFile, onFileSelect }: { activeFile: string; onFileSelect: (path: string) => void }) {
+function FileTreeRail({ activeFile, files, onFileSelect, onFileAction }: { activeFile: string; files: FileItem[]; onFileSelect: (path: string) => void; onFileAction: (action: string) => void }) {
   return (
     <aside className="tm-oct-filetree">
       <div className="tm-oct-file-head"><strong>termora</strong><div><Icon name="search" /><Icon name="settings" /></div></div>
       <div className="tm-oct-file-search"><Icon name="search" /><span>filter files / SFTP paths</span></div>
       <div className="tm-oct-tree-list operational">
-        {FILES.map((file) => (
+        {files.map((file) => (
           <button type="button" className={file.path === activeFile ? 'selected' : ''} key={file.path} onClick={() => onFileSelect(file.path)}>
             <Icon name={file.kind === 'dir' ? 'files' : 'terminal'} />
             <span>{file.path}</span>
@@ -221,19 +224,19 @@ function FileTreeRail({ activeFile, onFileSelect }: { activeFile: string; onFile
           </button>
         ))}
       </div>
-      <div className="tm-oct-file-actions"><button type="button">Open</button><button type="button">Stage</button><button type="button">Upload</button></div>
+      <div className="tm-oct-file-actions"><button type="button" onClick={() => onFileAction('list-files')}>Open</button><button type="button" onClick={() => onFileAction('git-status')}>Stage</button><button type="button" onClick={() => onFileAction('git-status')}>Upload</button></div>
     </aside>
   );
 }
 
-function PhonePreview({ connectionStatus, latencyMs, activeTask, phoneMode, setPhoneMode, onCreateSession }: { connectionStatus: ConnectionStatus; latencyMs: number | null; activeTask: TaskItem; phoneMode: string; setPhoneMode: (mode: string) => void; onCreateSession: () => void }) {
+function PhonePreview({ connectionStatus, latencyMs, activeTask, phoneMode, setPhoneMode, onCreateSession, onAction }: { connectionStatus: ConnectionStatus; latencyMs: number | null; activeTask: TaskItem; phoneMode: string; setPhoneMode: (mode: string) => void; onCreateSession: () => void; onAction: (action: string) => void }) {
   const online = connectionStatus === 'connected';
   return (
     <aside className="tm-oct-phone">
       <div className="tm-phone-status"><span>3:53</span><span>⌁ ◒ 44</span></div>
       <div className="tm-phone-brand"><img src="/termora-logo.svg" alt="" /><strong>Termora</strong><Icon name="settings" /></div>
       <h2>Control from mobile</h2>
-      <div className="tm-phone-mode-tabs">{['desktop', 'agents', 'files'].map((mode) => <button key={mode} type="button" className={phoneMode === mode ? 'active' : ''} onClick={() => setPhoneMode(mode)}>{mode}</button>)}</div>
+      <div className="tm-phone-mode-tabs">{['desktop', 'agents', 'files'].map((mode) => <button key={mode} type="button" className={phoneMode === mode ? 'active' : ''} onClick={() => { setPhoneMode(mode); onAction(mode === 'files' ? 'list-files' : mode === 'agents' ? 'opencode-smoke' : 'git-status'); }}>{mode}</button>)}</div>
       <div className="tm-phone-stats">
         <div><Icon name="bot" /><strong>{AGENTS.length}</strong><span>Agent lanes</span></div>
         <div><Icon name="activity" /><strong>{TASKS.length}</strong><span>Tasks live</span></div>
@@ -244,32 +247,71 @@ function PhonePreview({ connectionStatus, latencyMs, activeTask, phoneMode, setP
       <label>Resume task</label>
       <div className="tm-phone-card"><Icon name="terminal" /><div><strong>{activeTask.title}</strong><span>{activeTask.next}</span></div><em>›</em></div>
       <label>Quick actions</label>
-      <div className="tm-phone-actions"><button type="button"><Icon name="desktop" /> Pair</button><button type="button" onClick={onCreateSession}><Icon name="plus" /> Terminal</button></div>
-      <div className="tm-phone-actions"><button type="button"><Icon name="bot" /> Agent</button><button type="button"><Icon name="files" /> Files</button></div>
+      <div className="tm-phone-actions"><button type="button" onClick={() => onAction('git-status')}><Icon name="desktop" /> Pair</button><button type="button" onClick={onCreateSession}><Icon name="plus" /> Terminal</button></div>
+      <div className="tm-phone-actions"><button type="button" onClick={() => onAction('opencode-smoke')}><Icon name="bot" /> Agent</button><button type="button" onClick={() => onAction('list-files')}><Icon name="files" /> Files</button></div>
       <div className="tm-phone-home" />
     </aside>
   );
 }
 
-export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCreateSession, onCloseSession, connectionStatus, latencyMs }: DashboardViewProps) {
+export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCreateSession, onCloseSession, connectionStatus, latencyMs, authToken }: DashboardViewProps) {
   const [activeTaskId, setActiveTaskId] = useState(TASKS[0].id);
   const [activeAgentId, setActiveAgentId] = useState(AGENTS[0].id);
   const [activeFile, setActiveFile] = useState('packages/web/src/components/DashboardView.tsx');
   const [activeCommand, setActiveCommand] = useState('run gates');
   const [phoneMode, setPhoneMode] = useState('desktop');
+  const [cockpitStatus, setCockpitStatus] = useState<CockpitStatus | null>(null);
+  const [cockpitError, setCockpitError] = useState<string | null>(null);
+  const [lastBackendAction, setLastBackendAction] = useState<string>('status');
+
+  const authHeaders = useMemo(() => authToken ? { Authorization: `Bearer ${authToken}` } : undefined, [authToken]);
+
+  const refreshCockpitStatus = useCallback(async () => {
+    if (!authHeaders) return;
+    try {
+      const response = await fetch('/api/cockpit/status', { headers: authHeaders });
+      if (!response.ok) throw new Error(`status ${response.status}`);
+      setCockpitStatus(await response.json() as CockpitStatus);
+      setCockpitError(null);
+    } catch (error) {
+      setCockpitError(error instanceof Error ? error.message : 'cockpit status failed');
+    }
+  }, [authHeaders]);
+
+  useEffect(() => { void refreshCockpitStatus(); }, [refreshCockpitStatus]);
+
+  const runBackendAction = useCallback(async (action: string) => {
+    setActiveCommand(action);
+    setLastBackendAction(action);
+    if (!authHeaders) return;
+    if (action === 'new terminal') { onCreateSession(); return; }
+    const backendAction = action === 'spawn agent' ? 'opencode-smoke' : action === 'open file tree' ? 'list-files' : action === 'capture UI' ? 'git-status' : action === 'watch CI' ? 'git-status' : action;
+    try {
+      const response = await fetch('/api/cockpit/actions', { method: 'POST', headers: { ...authHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: backendAction, path: '.' }) });
+      if (!response.ok) throw new Error(`action ${backendAction} ${response.status}`);
+      await response.json();
+      await refreshCockpitStatus();
+      setCockpitError(null);
+    } catch (error) {
+      setCockpitError(error instanceof Error ? error.message : 'cockpit action failed');
+    }
+  }, [authHeaders, onCreateSession, refreshCockpitStatus]);
   const activeTask = useMemo(() => TASKS.find((task) => task.id === activeTaskId) ?? TASKS[0], [activeTaskId]);
   const activeAgent = useMemo(() => AGENTS.find((agent) => agent.id === activeAgentId) ?? AGENTS[0], [activeAgentId]);
+  const backendFiles: FileItem[] = useMemo(() => cockpitStatus?.files.entries.map((entry) => ({ path: entry.path, kind: entry.kind, status: entry.path === activeFile ? 'modified' : 'clean' })) ?? FILES, [activeFile, cockpitStatus]);
+  const backendAgent = cockpitStatus?.agents.find((agent) => agent.id === activeAgentId);
+  const effectiveAgent = backendAgent ? { ...activeAgent, state: backendAgent.state === 'ready' ? 'queued' as const : activeAgent.state, work: backendAgent.available ? 'backend connected' : 'backend unavailable' } : activeAgent;
 
   return (
     <div className="tm-orca-stage">
       <WindowChrome activeTask={activeTask} />
-      <CommandStrip activeCommand={activeCommand} onCommand={setActiveCommand} onCreateSession={onCreateSession} />
+      <CommandStrip activeCommand={activeCommand} onCommand={runBackendAction} onCreateSession={onCreateSession} />
       <div className="tm-orca-grid operational">
-        <WorkspaceSidebar activeTaskId={activeTaskId} activeCommand={activeCommand} onTaskSelect={setActiveTaskId} onCommand={setActiveCommand} onCreateSession={onCreateSession} />
+        <WorkspaceSidebar activeTaskId={activeTaskId} activeCommand={activeCommand} onTaskSelect={setActiveTaskId} onCommand={runBackendAction} onCreateSession={onCreateSession} />
         <main className="tm-orca-center operational">
-          <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} activeTask={activeTask} activeAgent={activeAgent} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} />
+          <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} activeTask={activeTask} activeAgent={effectiveAgent} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} />
           <div className="tm-oct-split-stack operational">
-            <UtilityPanel activeTask={activeTask} activeCommand={activeCommand} />
+            <UtilityPanel activeTask={activeTask} activeCommand={`${activeCommand} · backend ${lastBackendAction}${cockpitError ? ` · ${cockpitError}` : ''}`} />
             <AgentQueue activeAgentId={activeAgentId} onAgentSelect={setActiveAgentId} />
             <TerminalPane title="selected file / run output" subtitle={activeFile} active>
 {`file: ${activeFile}
@@ -282,10 +324,10 @@ This pane is the operational inspector: selecting tasks, agents or files changes
             </TerminalPane>
           </div>
         </main>
-        <FileTreeRail activeFile={activeFile} onFileSelect={setActiveFile} />
+        <FileTreeRail activeFile={activeFile} files={backendFiles} onFileSelect={setActiveFile} onFileAction={runBackendAction} />
       </div>
       <div className="tm-oct-bottom"><span><Dot tone="orange" /> task: {activeTask.title}</span><span>agent: {activeAgent.name}</span><span>file: {activeFile.split('/').pop()}</span><span>cmd: {activeCommand}</span></div>
-      <PhonePreview connectionStatus={connectionStatus} latencyMs={latencyMs} activeTask={activeTask} phoneMode={phoneMode} setPhoneMode={setPhoneMode} onCreateSession={onCreateSession} />
+      <PhonePreview connectionStatus={connectionStatus} latencyMs={latencyMs} activeTask={activeTask} phoneMode={phoneMode} setPhoneMode={setPhoneMode} onCreateSession={onCreateSession} onAction={runBackendAction} />
     </div>
   );
 }
