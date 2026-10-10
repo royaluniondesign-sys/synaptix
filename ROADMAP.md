@@ -112,3 +112,13 @@ A feature is done only when:
 - it handles disconnects and failures safely;
 - it has tests for backend/shared behavior where applicable;
 - `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` pass.
+## Milestone 7 — Desktop/mobile app packaging
+
+- [ ] Extract a programmatic `startAgent()` API from `packages/agent`.
+- [ ] Build Electron desktop shell that starts the local agent and loads the web UI.
+- [ ] Package macOS DMG/ZIP unsigned local build, then signed release.
+- [ ] Package Linux AppImage after native module smoke tests.
+- [ ] Package Windows NSIS after native module rebuild is stable.
+- [ ] Expose the Termora CLI from desktop installers.
+- [ ] Keep PWA as mobile baseline; add Expo shell for push/deep links/upload.
+- [ ] Add relay/push only after local pairing and mobile shell are stable.

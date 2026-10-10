@@ -43,7 +43,8 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "postinstall": "node scripts/fix-node-pty.js"
+    "postinstall": "node scripts/fix-node-pty.js",
+    "check:app-scaffold": "node scripts/check-app-scaffold.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
