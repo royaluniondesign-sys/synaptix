@@ -4,6 +4,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { hostname } from 'node:os';
 import type { Express } from 'express';
+import { createFanoutWorktrees, listFanoutWorktrees, removeWorktree, slugify } from './worktree.js';
 
 type JobStatus = 'running' | 'success' | 'failed';
 
@@ -22,6 +23,13 @@ type AuthGuard = (
   req: express.Request,
   res: express.Response,
 ) => Promise<{ jti: string } | null>;
+
+type WorktreeLaunchBody = {
+  prompt?: string;
+  count?: number;
+  agentCommand?: string;
+  runAgents?: boolean;
+};
 
 const repoRoot = resolve(import.meta.dirname, '..', '..', '..');
 const jobs = new Map<string, CockpitJob>();
@@ -68,7 +76,7 @@ function listFiles(pathValue = '.', limit = 80) {
   };
 }
 
-function startJob(action: string, command: string, args: string[]): CockpitJob {
+function startJob(action: string, command: string, args: string[], cwd = repoRoot): CockpitJob {
   const id = `${action}-${Date.now().toString(36)}`;
   const job: CockpitJob = {
     id,
@@ -82,7 +90,7 @@ function startJob(action: string, command: string, args: string[]): CockpitJob {
   };
   jobs.set(id, job);
 
-  const child = spawn(command, args, { cwd: repoRoot, shell: false, env: process.env });
+  const child = spawn(command, args, { cwd, shell: false, env: process.env });
   const append = (chunk: Buffer) => {
     job.output = `${job.output}${chunk.toString()}`.slice(-MAX_OUTPUT);
   };
@@ -101,6 +109,38 @@ function startJob(action: string, command: string, args: string[]): CockpitJob {
   });
 
   return job;
+}
+
+
+async function launchWorktreeFanout(body: WorktreeLaunchBody) {
+  const prompt = String(body.prompt ?? '').trim();
+  if (!prompt) throw new Error('prompt is required');
+  const count = Math.min(Math.max(Number(body.count ?? 2), 1), 5);
+  const promptSlug = slugify(prompt);
+  const worktrees = await createFanoutWorktrees(repoRoot, count, promptSlug);
+  const runAgents = body.runAgents === true && process.env.TERMORA_ENABLE_AGENT_SPAWN === '1';
+  const agentCommand = String(body.agentCommand ?? '').trim();
+  const agentJobs: CockpitJob[] = [];
+
+  if (body.runAgents === true && !runAgents) {
+    return {
+      prompt,
+      count: worktrees.length,
+      worktrees,
+      agentJobs,
+      agentSpawn: 'disabled',
+      note: 'Set TERMORA_ENABLE_AGENT_SPAWN=1 to execute external agent commands from this endpoint.',
+    };
+  }
+
+  if (runAgents && agentCommand) {
+    const [command, ...args] = agentCommand.split(/\s+/);
+    for (const worktree of worktrees) {
+      agentJobs.push(startJob('agent-worktree', command, args.map((arg) => arg === '{prompt}' ? prompt : arg), worktree.path));
+    }
+  }
+
+  return { prompt, count: worktrees.length, worktrees, agentJobs, agentSpawn: runAgents ? 'started' : 'not-requested' };
 }
 
 async function buildStatus() {
@@ -128,7 +168,8 @@ async function buildStatus() {
       { id: 'ci', name: 'GitHub CI', state: 'remote', available: true },
     ],
     gates: ['lint', 'typecheck', 'test', 'build'],
-    commands: ['git-status', 'run-gates', 'list-files', 'opencode-smoke'],
+    commands: ['git-status', 'run-gates', 'list-files', 'opencode-smoke', 'create-worktree-fanout', 'list-worktrees'],
+    worktrees: await listFanoutWorktrees(repoRoot),
     recentJobs: [...jobs.values()].slice(-8).reverse(),
     files: listFiles('.', 40),
   };
@@ -173,11 +214,55 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
         case 'opencode-smoke':
           res.json({ action: body.action, result: await runCommand('/home/rud/.opencode/bin/opencode', ['--version']) });
           return;
+        case 'list-worktrees':
+          res.json({ action: body.action, result: await listFanoutWorktrees(repoRoot) });
+          return;
+        case 'create-worktree-fanout':
+          res.status(201).json({ action: body.action, result: await launchWorktreeFanout(req.body as WorktreeLaunchBody) });
+          return;
         default:
           res.status(400).json({ error: `Unsupported cockpit action: ${body.action ?? 'missing'}` });
       }
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : 'Action failed' });
+    }
+  });
+
+
+  app.get('/api/cockpit/worktrees', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    try {
+      res.json({ worktrees: await listFanoutWorktrees(repoRoot) });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unable to list worktrees' });
+    }
+  });
+
+  app.post('/api/cockpit/worktrees/fanout', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    try {
+      res.status(201).json(await launchWorktreeFanout(req.body as WorktreeLaunchBody));
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : 'Unable to create worktree fan-out' });
+    }
+  });
+
+  app.delete('/api/cockpit/worktrees', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    try {
+      const force = String(req.query.force ?? 'false') === 'true';
+      const worktrees = await listFanoutWorktrees(repoRoot);
+      const removed: string[] = [];
+      for (const worktree of worktrees) {
+        await removeWorktree(repoRoot, worktree.path, force);
+        removed.push(worktree.path);
+      }
+      res.json({ removed });
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unable to remove worktrees' });
     }
   });
 

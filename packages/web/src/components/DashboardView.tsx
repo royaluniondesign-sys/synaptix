@@ -19,7 +19,9 @@ type DotTone = 'green' | 'orange' | 'red' | 'muted';
 type TaskItem = { id: string; title: string; meta: string; status: DotTone; agent: string; next: string; command: string };
 type AgentItem = { id: string; name: string; state: 'thinking' | 'running' | 'queued' | 'blocked'; work: string; tone: DotTone };
 type FileItem = { path: string; kind: 'dir' | 'file'; status?: 'modified' | 'new' | 'clean' };
-type CockpitStatus = { machine: string; root: string; git: { branch: string; dirty: boolean; status: string; lastCommit: string }; agents: Array<{ id: string; name: string; state: string; available: boolean; version?: string }>; recentJobs: Array<{ id: string; action: string; status: string; output: string }>; files: { entries: Array<{ name: string; path: string; kind: 'dir' | 'file'; size: number; modifiedAt: string }> } };
+type CockpitStatus = { machine: string; root: string; git: { branch: string; dirty: boolean; status: string; lastCommit: string }; agents: Array<{ id: string; name: string; state: string; available: boolean; version?: string }>; worktrees?: Array<{ index: number; path: string; branch: string }>; recentJobs: Array<{ id: string; action: string; status: string; output: string }>; files: { entries: Array<{ name: string; path: string; kind: 'dir' | 'file'; size: number; modifiedAt: string }> } };
+type CapabilityState = 'live' | 'backend' | 'planned';
+type CapabilityItem = { name: string; state: CapabilityState; detail: string; action: string };
 
 
 const TASKS: TaskItem[] = [
@@ -50,6 +52,25 @@ const FILES: FileItem[] = [
 ];
 
 const COMMANDS = ['new terminal', 'spawn agent', 'open file tree', 'run gates', 'capture UI', 'watch CI'];
+
+const CAPABILITIES: CapabilityItem[] = [
+  { name: 'Mobile Companion', state: 'live', detail: 'phone pairing, resume, steering surface', action: 'push notifications + native wrappers' },
+  { name: 'Parallel Worktrees', state: 'backend', detail: 'worktree tests/foundation', action: 'fan-out UI + compare winner' },
+  { name: 'Terminal Splits', state: 'backend', detail: 'real PTY/tmux sessions', action: 'user-created split layouts' },
+  { name: 'Design Mode', state: 'planned', detail: 'browser capture tooling exists', action: 'DOM/CSS/screenshot prompt capture' },
+  { name: 'GitHub & Linear', state: 'planned', detail: 'CI/GitHub verified externally', action: 'in-app PR/issues/task boards' },
+  { name: 'SSH Worktrees', state: 'planned', detail: 'remote server workflow proven', action: 'host registry + SSH spawn' },
+  { name: 'Annotate AI Diffs', state: 'planned', detail: 'git status endpoints started', action: 'inline diff comments to agent' },
+  { name: 'Drag Files to Agents', state: 'backend', detail: 'file-tree API foundation', action: 'attachments into prompts' },
+  { name: 'Termora CLI', state: 'planned', detail: 'npm scripts today', action: 'worktree/snapshot/click/fill commands' },
+  { name: 'Quick Open', state: 'backend', detail: 'command strip prototype', action: 'global search across repo/context' },
+  { name: 'Usage Tracking', state: 'planned', detail: 'provider constraints documented', action: 'rate-limit/account UI' },
+  { name: 'Rich Repo Previews', state: 'planned', detail: 'docs/media previews today', action: 'Markdown/image/PDF preview panes' },
+  { name: 'Computer Use', state: 'planned', detail: 'Hermes automation used in QA', action: 'safe visible-UI workflows' },
+  { name: 'Notifications', state: 'planned', detail: 'status visible in cockpit', action: 'done/failed/needs-input push + unread' },
+  { name: 'Any CLI Agent', state: 'backend', detail: 'terminal-host model', action: 'agent registry + parser hooks' },
+];
+
 
 function Icon({ name }: { name: IconName }) {
   if (name === 'github') return <span className="tm-oct-icon-text">GH</span>;
@@ -152,6 +173,25 @@ function UtilityPanel({ activeTask, activeCommand }: { activeTask: TaskItem; act
       </div>
       <div className="tm-oct-gates">
         {['lint', 'typecheck', 'test', 'build', 'capture', 'ci'].map((gate, idx) => <span key={gate} className={idx < 4 ? 'done' : idx === 4 ? 'active' : ''}><Dot tone={idx < 5 ? 'green' : 'muted'} />{gate}</span>)}
+      </div>
+    </section>
+  );
+}
+
+
+function CapabilityCoverage({ onAction }: { onAction: (action: string) => void }) {
+  const visible = CAPABILITIES.slice(0, 9);
+  return (
+    <section className="tm-oct-capability-pane">
+      <div className="tm-oct-pane-head"><div><Icon name="activity" /><strong>Feature buildout</strong></div><span>{CAPABILITIES.length} surfaces</span></div>
+      <div className="tm-oct-capability-grid">
+        {visible.map((item) => (
+          <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} onClick={() => onAction(item.state === 'planned' ? 'git-status' : 'run-gates')}>
+            <div><strong>{item.name}</strong><em>{item.state}</em></div>
+            <span>{item.detail}</span>
+            <small>{item.action}</small>
+          </button>
+        ))}
       </div>
     </section>
   );
@@ -285,9 +325,9 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
     setLastBackendAction(action);
     if (!authHeaders) return;
     if (action === 'new terminal') { onCreateSession(); return; }
-    const backendAction = action === 'spawn agent' ? 'opencode-smoke' : action === 'open file tree' ? 'list-files' : action === 'capture UI' ? 'git-status' : action === 'watch CI' ? 'git-status' : action;
+    const backendAction = action === 'spawn agent' ? 'create-worktree-fanout' : action === 'open file tree' ? 'list-files' : action === 'capture UI' ? 'git-status' : action === 'watch CI' ? 'git-status' : action;
     try {
-      const response = await fetch('/api/cockpit/actions', { method: 'POST', headers: { ...authHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: backendAction, path: '.' }) });
+      const response = await fetch('/api/cockpit/actions', { method: 'POST', headers: { ...authHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: backendAction, path: '.', prompt: activeTask.next, count: 2 }) });
       if (!response.ok) throw new Error(`action ${backendAction} ${response.status}`);
       await response.json();
       await refreshCockpitStatus();
@@ -313,6 +353,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
           <div className="tm-oct-split-stack operational">
             <UtilityPanel activeTask={activeTask} activeCommand={`${activeCommand} · backend ${lastBackendAction}${cockpitError ? ` · ${cockpitError}` : ''}`} />
             <AgentQueue activeAgentId={activeAgentId} onAgentSelect={setActiveAgentId} />
+            <CapabilityCoverage onAction={runBackendAction} />
             <TerminalPane title="selected file / run output" subtitle={activeFile} active>
 {`file: ${activeFile}
 status: ${FILES.find((f) => f.path === activeFile)?.status ?? 'clean'}
@@ -326,7 +367,7 @@ This pane is the operational inspector: selecting tasks, agents or files changes
         </main>
         <FileTreeRail activeFile={activeFile} files={backendFiles} onFileSelect={setActiveFile} onFileAction={runBackendAction} />
       </div>
-      <div className="tm-oct-bottom"><span><Dot tone="orange" /> task: {activeTask.title}</span><span>agent: {activeAgent.name}</span><span>file: {activeFile.split('/').pop()}</span><span>cmd: {activeCommand}</span></div>
+      <div className="tm-oct-bottom"><span><Dot tone="orange" /> task: {activeTask.title}</span><span>agent: {activeAgent.name}</span><span>worktrees: {cockpitStatus?.worktrees?.length ?? 0}</span><span>file: {activeFile.split('/').pop()}</span><span>cmd: {activeCommand}</span></div>
       <PhonePreview connectionStatus={connectionStatus} latencyMs={latencyMs} activeTask={activeTask} phoneMode={phoneMode} setPhoneMode={setPhoneMode} onCreateSession={onCreateSession} onAction={runBackendAction} />
     </div>
   );

@@ -15,6 +15,29 @@ Termora is moving from mobile terminal access to a complete installable cockpit 
 - [x] Multi-machine usage docs and connection panel.
 - [x] PWA shell, manifest, icons, and service worker.
 
+
+## Capability parity tracker
+
+These are first-class product surfaces, not cosmetic labels. Each item must end with backend/API support, UI controls, failure states, and verification.
+
+| Surface | State | Acceptance criteria |
+| --- | --- | --- |
+| Mobile Companion | Beta/live PWA | Pair from phone, monitor agents/sessions, send follow-ups, receive notifications, resume from anywhere. |
+| Parallel Worktrees | Backend foundation | Launch N isolated worktrees from one prompt, track N agents, compare diffs, merge winner, archive losers. |
+| Terminal Splits | Partial | Create/resize/save split layouts; preserve scrollback across restart; WebGL terminal remains fast. |
+| Design Mode | Planned | Click Chromium element; capture DOM/CSS/screenshot; attach to prompt/run record. |
+| GitHub & Linear | Planned | Browse PRs/issues/boards; create worktree from task; review/merge without leaving app. |
+| SSH Worktrees | Planned | Remote host registry, SSH launch, file editing, git, terminal, reconnect, port forwarding. |
+| Annotate AI Diffs | Planned | Inline comments on generated diffs; send comments to agent; commit from reviewed diff. |
+| Drag Files to Agents | Planned | Drag files/images into prompt; backend stores attachment; agent runner receives safe path/context. |
+| Termora CLI | Planned | Script worktrees, snapshots, browser clicks/fills, agent runs, and gate watches. |
+| Quick Open | Planned | One search for files, commands, sessions, agents, worktrees, repo docs. |
+| Usage Tracking | Planned | Claude/Codex/OpenCode/Hermes usage, reset timers, provider/account switching. |
+| Rich Repo Previews | Planned | Markdown, images, PDFs, docs, logs, web previews in cockpit panes. |
+| Computer Use | Planned | Safe visible-UI operation for apps/browsers when CLI-only is insufficient. |
+| Notifications/unread | Planned | Push done/failed/needs-input/rate-limit-reset; unread task/session markers. |
+| Any CLI Agent | Planned | Command-template registry for any terminal-based agent with status parser hooks. |
+
 ## Milestone 1 — Professional mobile cockpit
 
 - [ ] Polish responsive project/session navigation.
