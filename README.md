@@ -4,11 +4,20 @@
 
 <br /><br />
 
-[![CI](https://github.com/royaluniondesign-sys/termora/actions/workflows/ci.yml/badge.svg)](https://github.com/royaluniondesign-sys/termora/actions/workflows/ci.yml)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white)](https://typescriptlang.org)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green?logo=node.js&logoColor=white)](https://nodejs.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-111111.svg)](LICENSE)
-[![PWA](https://img.shields.io/badge/PWA-installable-7170ff?logo=pwa&logoColor=white)]()
+[![CI](https://img.shields.io/github/actions/workflow/status/royaluniondesign-sys/termora/ci.yml?branch=main&style=flat-square&label=CI&labelColor=08090a&color=10b981)](https://github.com/royaluniondesign-sys/termora/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?style=flat-square&logo=typescript&logoColor=white&labelColor=08090a)](https://typescriptlang.org)
+[![Node.js](https://img.shields.io/badge/Node.js-20%20%7C%2022%20%7C%2024-10b981?style=flat-square&logo=node.js&logoColor=white&labelColor=08090a)](https://nodejs.org)
+[![PWA](https://img.shields.io/badge/Mobile-PWA%20installable-7170ff?style=flat-square&logo=pwa&logoColor=white&labelColor=08090a)](#quickstart)
+[![Terminal](https://img.shields.io/badge/PTY-real%20sessions-d0d6e0?style=flat-square&labelColor=08090a)](#terminal-cockpit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-f7f8f8?style=flat-square&labelColor=08090a)](LICENSE)
+
+<br />
+
+<sub>
+  <b>Local-first</b> · <b>Real PTYs</b> · <b>QR pairing</b> · <b>WebSocket streaming</b> · <b>tmux persistence</b> · <b>Agent cockpit roadmap</b>
+</sub>
+
+<br /><br />
 
 **Real terminal and agent control from any phone, tablet, or browser.**
 
@@ -114,32 +123,62 @@ Stop it with `Ctrl+C` in the terminal where `npm run dev` is running.
 
 ## How it works
 
-```text
-  Phone / Tablet / Browser
-        |
-        | HTTPS + WebSocket
-        v
-  +---------------------------+
-  |  Tunnel auto-selection    |
-  |  1. ngrok static URL      |
-  |  2. localhost.run SSH     |
-  |  3. LAN / Wi-Fi fallback  |
-  +------------+--------------+
-               v
-  +---------------------------+
-  | termora agent             |
-  | real PTYs + tmux control  |
-  | SSH/SFTP + auth + routes  |
-  | up to 8 live sessions     |
-  +---------------------------+
-```
+Termora is a local agent plus a mobile/browser cockpit. Your phone never talks to a fake shell: it streams authenticated input/output to real PTYs running on your machine.
 
-1. `npm run dev` starts the backend agent and React frontend.
-2. The agent spawns real terminal sessions through `node-pty`.
-3. A tunnel exposes the agent over HTTPS or LAN.
-4. A short-lived bootstrap token pairs your browser/phone.
-5. xterm.js renders full ANSI terminal output with WebGL acceleration.
-6. tmux keeps sessions alive across reconnects and restarts when installed.
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="28%">
+  <h3>Client</h3>
+  <p><code>Phone</code> · <code>Tablet</code> · <code>Browser</code> · <code>PWA</code></p>
+  <sub>Installable mobile UI, QR pairing, terminal controls, cockpit panels.</sub>
+</td>
+<td align="center" width="8%">
+  <h3>↕</h3>
+  <p><code>HTTPS</code></p>
+  <p><code>WebSocket</code></p>
+</td>
+<td align="center" width="30%">
+  <h3>Tunnel selection</h3>
+  <p><code>1</code> ngrok static URL<br /><code>2</code> localhost.run SSH<br /><code>3</code> LAN / Wi‑Fi fallback</p>
+  <sub>Best route wins; local network remains available for private use.</sub>
+</td>
+<td align="center" width="8%">
+  <h3>↕</h3>
+  <p><code>JWT</code></p>
+  <p><code>events</code></p>
+</td>
+<td align="center" width="30%">
+  <h3>termora agent</h3>
+  <p><code>real PTYs</code> · <code>tmux control</code><br /><code>SSH/SFTP routes</code> · <code>auth</code><br /><code>up to 8 live sessions</code></p>
+  <sub>Your machine stays the runtime: shells, repos, agents, and files remain local.</sub>
+</td>
+</tr>
+</table>
+
+</div>
+
+### Runtime path
+
+| Step | Layer | What happens |
+| --- | --- | --- |
+| `01` | Start | `npm run dev` launches the backend agent and React cockpit. |
+| `02` | Pair | The agent prints a QR/bootstrap URL; the client exchanges it for a session JWT. |
+| `03` | Connect | The client uses HTTPS + WebSocket through ngrok, localhost.run, or LAN/Wi‑Fi. |
+| `04` | Execute | `node-pty` spawns real shells; tmux keeps sessions alive when available. |
+| `05` | Stream | xterm.js renders full ANSI output with fast terminal input, keyboard helpers, and backpressure. |
+| `06` | Control | The cockpit can create, rename, close, reconnect, preview, and resume sessions. |
+
+### Core guarantees
+
+<p>
+  <img src="https://img.shields.io/badge/runtime-local--first-7170ff?style=flat-square&labelColor=08090a" alt="local-first runtime" />
+  <img src="https://img.shields.io/badge/shell-real%20PTYs-d0d6e0?style=flat-square&labelColor=08090a" alt="real PTYs" />
+  <img src="https://img.shields.io/badge/auth-QR%20%2B%20JWT-10b981?style=flat-square&labelColor=08090a" alt="QR plus JWT auth" />
+  <img src="https://img.shields.io/badge/sessions-up%20to%208-8a8f98?style=flat-square&labelColor=08090a" alt="up to 8 live sessions" />
+  <img src="https://img.shields.io/badge/transport-HTTPS%20%2B%20WebSocket-f7f8f8?style=flat-square&labelColor=08090a" alt="HTTPS and WebSocket" />
+</p>
 
 ---
 
@@ -209,7 +248,7 @@ Current/target agent families include: Claude Code, Codex, Grok, Cursor/Copilot-
 
 - TypeScript monorepo with npm workspaces.
 - Turborepo tasks for lint/typecheck/test/build.
-- CI workflow on Node 20 and 22.
+- CI workflow on Node 20, 22, and 24.
 - Shared protocol package for client/server message contracts.
 - Vitest coverage for auth, protocol lifecycle, session persistence, worktree fan-out, and device revocation.
 
