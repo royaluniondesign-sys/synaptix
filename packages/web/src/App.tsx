@@ -12,18 +12,18 @@ import type { View } from './lib/types';
 import type { ConnectionStatus, TerminalWSClient } from './lib/ws-client';
 
 const S = {
-  bg: '#09090b',
-  surface: '#0c0c0f',
-  surface2: '#18181b',
-  surface3: '#27272a',
-  border: '#27272a',
-  primary: '#a78bfa',
-  success: '#34d399',
-  error: '#ef4444',
-  warning: '#fbbf24',
-  text1: '#fafafa',
-  text2: '#a1a1aa',
-  text3: '#71717a',
+  bg: '#15141a',
+  surface: '#18181b',
+  surface2: '#1f1e26',
+  surface3: '#2d2b36',
+  border: '#33313d',
+  primary: '#fcbb00',
+  success: '#00bb7f',
+  error: '#ff2357',
+  warning: '#fcbb00',
+  text1: '#fbfbfe',
+  text2: '#cfcfd8',
+  text3: '#8f8f9d',
 } as const;
 
 const TAB_CONFIG = [
@@ -551,7 +551,7 @@ export function App() {
       overflow: 'hidden',
       position: 'relative',
     }}>
-      {isDesktop && (
+      {isDesktop && view !== 'dashboard' && (
         <DesktopSidebar
           current={view}
           onChange={handleTabChange}

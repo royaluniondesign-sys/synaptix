@@ -3,19 +3,29 @@ import type { Session } from '../lib/types';
 import type { ConnectionStatus } from '../lib/ws-client';
 
 const S = {
-  bg: '#09090b',
-  surface: '#0c0c0f',
-  surface2: '#18181b',
-  surface3: '#27272a',
-  border: '#27272a',
-  borderLight: '#3f3f46',
-  primary: '#a78bfa',
-  success: '#34d399',
-  error: '#ef4444',
-  warning: '#fbbf24',
-  text1: '#fafafa',
-  text2: '#a1a1aa',
-  text3: '#71717a',
+  bg: '#15141a',
+  shell: '#0f0f14',
+  sidebar: '#18181b',
+  sidebar2: '#1c1b22',
+  panel: '#1f1e26',
+  panel2: '#25242d',
+  panel3: '#2d2b36',
+  border: '#33313d',
+  border2: '#454250',
+  text1: '#fbfbfe',
+  text2: '#cfcfd8',
+  text3: '#8f8f9d',
+  text4: '#5f5d6b',
+  accent: '#fcbb00',
+  accent2: '#f99c00',
+  violet: '#8d54ff',
+  blue: '#75beff',
+  cyan: '#00cadb',
+  green: '#00bb7f',
+  red: '#ff2357',
+  amberBg: '#332817',
+  greenBg: '#0f2a21',
+  blueBg: '#152535',
 } as const;
 
 interface DashboardViewProps {
@@ -28,525 +38,242 @@ interface DashboardViewProps {
   latencyMs: number | null;
 }
 
-function DashHeader({ connectionStatus, latencyMs }: {
-  connectionStatus: ConnectionStatus;
-  latencyMs: number | null;
-}) {
-  const isConnected = connectionStatus === 'connected';
-  const isReconnecting = connectionStatus === 'reconnecting';
-  const statusColor = isConnected ? S.success : isReconnecting ? S.warning : S.error;
-  const statusLabel = isConnected ? 'LIVE' : isReconnecting ? 'SYNC' : 'OFFLINE';
+type Tone = 'live' | 'next' | 'planned' | 'warn' | 'muted';
 
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '10px 14px',
-      borderBottom: `1px solid ${S.border}`,
-      background: S.surface,
-      flexShrink: 0,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <img src="/termora-logo.svg" alt="" style={{ width: 24, height: 24 }} />
-        <span style={{ fontSize: 14, fontWeight: 700, color: S.text1, letterSpacing: -0.5 }}>termora</span>
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: 4,
-          fontSize: 9, fontWeight: 700, letterSpacing: 0.5,
-          color: statusColor,
-          background: `${statusColor}12`,
-          border: `1px solid ${statusColor}28`,
-          padding: '2px 7px', borderRadius: 5,
-        }}>
-          <span style={{
-            width: 5, height: 5, borderRadius: '50%', background: statusColor,
-            animation: isConnected ? 'pulse-dot 2s ease-in-out infinite' : 'none',
-          }} />
-          {statusLabel}
-        </span>
-        {isConnected && latencyMs !== null && (
-          <span style={{
-            fontSize: 9, color: S.text3,
-            fontFamily: "'Geist Mono', monospace",
-            background: S.surface2, padding: '2px 6px', borderRadius: 4,
-            border: `1px solid ${S.border}`,
-          }}>
-            {latencyMs}ms
-          </span>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {/* Wireless signal icon */}
-        <svg width="16" height="16" viewBox="0 0 24 24" stroke={isConnected ? S.success : S.text3} fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M1.42 9a16 16 0 0 1 21.16 0M5 12.55a11 11 0 0 1 14.08 0M10.71 17.4a6 6 0 0 1 2.58 0" />
-          <circle cx="12" cy="21" r="1" fill={isConnected ? S.success : S.text3} stroke="none" />
-        </svg>
-      </div>
-    </div>
-  );
+function toneColor(tone: Tone) {
+  switch (tone) {
+    case 'live': return S.green;
+    case 'next': return S.accent;
+    case 'warn': return S.red;
+    case 'planned': return S.blue;
+    default: return S.text3;
+  }
 }
 
-function KPIRow() {
-  // Mock system stats — replace with real data when agent exposes /stats endpoint
-  const kpis = [
-    { label: 'CPU LOAD', value: '12', unit: '%', color: S.success, bar: 12 },
-    { label: 'MEMORY', value: '4.2', unit: 'GB', color: S.primary, bar: 52 },
-  ];
-
+function StatusPill({ label, tone = 'muted' }: { label: string; tone?: Tone }) {
+  const color = toneColor(tone);
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-      {kpis.map((k) => (
-        <div key={k.label} style={{
-          background: S.surface2,
-          border: `1px solid ${S.border}`,
-          borderRadius: 10,
-          padding: '10px 12px',
-        }}>
-          <div style={{ fontSize: 8, fontWeight: 700, color: S.text3, letterSpacing: 0.8, marginBottom: 5 }}>
-            {k.label}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 7 }}>
-            <span style={{ fontSize: 20, fontWeight: 700, color: k.color, letterSpacing: -1, fontFamily: "'Geist Mono', monospace" }}>
-              {k.value}
-            </span>
-            <span style={{ fontSize: 10, color: S.text3, fontWeight: 500 }}>{k.unit}</span>
-          </div>
-          <div style={{ height: 3, background: S.surface3, borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${k.bar}%`, background: k.color,
-              borderRadius: 2, transition: 'width 600ms ease-out',
-            }} />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function StatusPill({ label, tone }: { label: string; tone: 'live' | 'next' | 'planned' }) {
-  const color = tone === 'live' ? S.success : tone === 'next' ? S.warning : S.text3;
-  return (
-    <span style={{
-      fontSize: 8,
-      fontWeight: 700,
-      letterSpacing: 0.5,
-      color,
-      background: `${color}12`,
-      border: `1px solid ${color}35`,
-      padding: '2px 6px',
-      borderRadius: 999,
-      textTransform: 'uppercase',
-      whiteSpace: 'nowrap',
-    }}>
+    <span className="tm-status-pill" style={{ color, borderColor: `${color}55`, background: `${color}14` }}>
+      <span className="tm-status-dot" style={{ background: color }} />
       {label}
     </span>
   );
 }
 
-function CockpitCommandCenter({ sessionCount, connectionStatus }: { sessionCount: number; connectionStatus: ConnectionStatus }) {
+function Icon({ name, color = 'currentColor' }: { name: 'terminal' | 'branch' | 'bot' | 'files' | 'preview' | 'github' | 'linear' | 'jira' | 'slack' | 'activity' | 'settings' | 'close'; color?: string }) {
+  const stroke = color;
+  if (name === 'github') return <span className="tm-brand-icon" style={{ color }}>GH</span>;
+  if (name === 'linear') return <span className="tm-brand-icon" style={{ color }}>LN</span>;
+  if (name === 'jira') return <span className="tm-brand-icon" style={{ color }}>JR</span>;
+  if (name === 'slack') return <span className="tm-brand-icon" style={{ color }}>SL</span>;
+  const paths: Record<string, JSX.Element> = {
+    terminal: <><polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" /></>,
+    branch: <><circle cx="6" cy="5" r="2" /><circle cx="18" cy="19" r="2" /><path d="M8 5h3a3 3 0 0 1 3 3v8a3 3 0 0 0 3 3" /><path d="M6 7v10" /><circle cx="6" cy="19" r="2" /></>,
+    bot: <><rect x="5" y="8" width="14" height="10" rx="3" /><path d="M12 4v4" /><circle cx="9" cy="13" r="1" /><circle cx="15" cy="13" r="1" /><path d="M9 17h6" /></>,
+    files: <><path d="M4 4h6l2 3h8v13H4z" /><path d="M4 10h16" /></>,
+    preview: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M8 10h8M8 14h5" /></>,
+    activity: <><path d="M3 12h4l3-8 4 16 3-8h4" /></>,
+    settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3 1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8 1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1z" /></>,
+    close: <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>,
+  };
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
+}
+
+function Sidebar({ sessionCount, connectionStatus, onCreateSession }: { sessionCount: number; connectionStatus: ConnectionStatus; onCreateSession: () => void }) {
   const online = connectionStatus === 'connected';
-  const lanes: Array<{ title: string; value: string; detail: string; tone: 'live' | 'next' | 'planned' }> = [
-    { title: 'Local machine', value: online ? 'online' : 'offline', detail: 'Real PTY + PWA control', tone: online ? 'live' : 'planned' },
-    { title: 'Terminal sessions', value: String(sessionCount), detail: 'Create, resume, preview', tone: 'live' },
-    { title: 'Agents/worktrees', value: 'next', detail: 'Visual orchestration planned', tone: 'next' },
+  const nav = [
+    { label: 'Overview', icon: 'activity' as const, active: true, badge: online ? 'live' : 'off' },
+    { label: 'Terminals', icon: 'terminal' as const, badge: String(sessionCount) },
+    { label: 'Agents', icon: 'bot' as const, badge: 'next' },
+    { label: 'Worktrees', icon: 'branch' as const, badge: 'next' },
+    { label: 'Files', icon: 'files' as const, badge: 'plan' },
+    { label: 'Previews', icon: 'preview' as const, badge: 'plan' },
   ];
-
   return (
-    <div style={{
-      marginBottom: 14,
-      border: `1px solid ${S.border}`,
-      borderRadius: 18,
-      background: `linear-gradient(145deg, ${S.surface}, #111118 48%, #171121)`,
-      boxShadow: '0 18px 50px rgba(0, 0, 0, 0.28)',
-      overflow: 'hidden',
-    }}>
-      <div style={{ padding: '15px 16px 12px', borderBottom: `1px solid ${S.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
-          <div>
-            <div style={{ fontSize: 10, color: S.text3, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>Cockpit</div>
-            <div style={{ fontSize: 20, lineHeight: 1.05, color: S.text1, fontWeight: 800, letterSpacing: -0.9 }}>Machine command center</div>
-          </div>
-          <StatusPill label={online ? 'live' : 'offline'} tone={online ? 'live' : 'planned'} />
+    <aside className="tm-cockpit-sidebar">
+      <div className="tm-app-mark">
+        <img src="/termora-logo.svg" alt="" />
+        <div>
+          <strong>termora</strong>
+          <span>machine cockpit</span>
         </div>
-        <p style={{ margin: 0, color: S.text2, fontSize: 11, lineHeight: 1.45 }}>
-          Real terminal control today. Multi-machine, agents, files, Git/worktrees and previews are being wired as explicit roadmap lanes.
-        </p>
       </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8, padding: 10 }}>
-        {lanes.map((lane) => (
-          <div key={lane.title} style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 10,
-            alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.035)',
-            border: `1px solid ${S.border}`,
-            borderRadius: 12,
-            padding: '10px 11px',
-          }}>
-            <div>
-              <div style={{ color: S.text1, fontSize: 12, fontWeight: 700, letterSpacing: -0.2 }}>{lane.title}</div>
-              <div style={{ color: S.text3, fontSize: 10, marginTop: 3 }}>{lane.detail}</div>
-            </div>
-            <StatusPill label={lane.value} tone={lane.tone} />
+      <button className="tm-primary-button" onClick={onCreateSession} type="button">
+        <Icon name="terminal" color={S.shell} /> New terminal
+      </button>
+      <div className="tm-nav-stack">
+        {nav.map((item) => (
+          <div key={item.label} className={`tm-nav-item ${item.active ? 'active' : ''}`}>
+            <Icon name={item.icon} color={item.active ? S.accent : S.text3} />
+            <span>{item.label}</span>
+            <em>{item.badge}</em>
           </div>
         ))}
+      </div>
+      <div className="tm-sidebar-footer">
+        <span>INTEGRATIONS</span>
+        <div className="tm-integration-strip">
+          <Icon name="github" color={S.text2} />
+          <Icon name="linear" color={S.blue} />
+          <Icon name="jira" color={S.accent} />
+          <Icon name="slack" color={S.green} />
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function TopBar({ sessionCount, connectionStatus, latencyMs }: { sessionCount: number; connectionStatus: ConnectionStatus; latencyMs: number | null }) {
+  const status = connectionStatus === 'connected' ? 'connected' : connectionStatus === 'reconnecting' ? 'syncing' : 'offline';
+  return (
+    <header className="tm-topbar">
+      <div>
+        <span className="tm-eyebrow">RUD-SERVER / Termora</span>
+        <h1>Operations cockpit</h1>
+      </div>
+      <div className="tm-top-actions">
+        <StatusPill label={status} tone={connectionStatus === 'connected' ? 'live' : 'warn'} />
+        <StatusPill label={`${sessionCount} sessions`} tone="muted" />
+        {latencyMs !== null && <StatusPill label={`${latencyMs} ms`} tone={latencyMs < 80 ? 'live' : 'next'} />}
+      </div>
+    </header>
+  );
+}
+
+function MetricCard({ label, value, suffix, tone, bars }: { label: string; value: string; suffix?: string; tone: Tone; bars: number[] }) {
+  const color = toneColor(tone);
+  return (
+    <div className="tm-metric-card">
+      <div className="tm-card-head">
+        <span>{label}</span>
+        <StatusPill label={tone} tone={tone} />
+      </div>
+      <div className="tm-metric-value"><strong>{value}</strong>{suffix && <em>{suffix}</em>}</div>
+      <div className="tm-bars" aria-hidden="true">
+        {bars.map((b, i) => <i key={i} style={{ height: `${Math.max(12, b)}%`, background: i === bars.length - 1 ? color : `${color}55` }} />)}
       </div>
     </div>
   );
 }
 
-function RoadmapRail() {
-  const cards: Array<{ title: string; status: 'next' | 'planned'; detail: string }> = [
-    { title: 'Agents', status: 'planned', detail: 'OpenCode/Hermes worker control from mobile' },
-    { title: 'Worktrees', status: 'next', detail: 'Isolated task branches with verification gates' },
-    { title: 'Files/SFTP', status: 'planned', detail: 'Browse, upload, download and host-key trust UI' },
-    { title: 'Previews', status: 'planned', detail: 'Per-project browser previews and logs' },
+function AgentChatFeed() {
+  const rows = [
+    { who: 'Hermes', text: 'Planning next build gate and checking repo state.', tone: 'live' as Tone },
+    { who: 'OpenCode', text: 'Worker lane ready for short isolated tasks.', tone: 'next' as Tone },
+    { who: 'Claude-style cue', text: 'Thinking while command output streams…', tone: 'planned' as Tone },
   ];
-
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: S.text3, letterSpacing: 0.8, textTransform: 'uppercase' }}>Next cockpit lanes</span>
-        <StatusPill label="roadmap" tone="next" />
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        {cards.map((card) => (
-          <div key={card.title} style={{
-            minHeight: 78,
-            background: S.surface2,
-            border: `1px solid ${S.border}`,
-            borderRadius: 12,
-            padding: 10,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 7 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: S.text1 }}>{card.title}</span>
-              <StatusPill label={card.status} tone={card.status === 'next' ? 'next' : 'planned'} />
-            </div>
-            <div style={{ fontSize: 10, lineHeight: 1.35, color: S.text3 }}>{card.detail}</div>
+    <section className="tm-panel tm-chat-panel">
+      <div className="tm-section-title"><span>Agent activity</span><StatusPill label="animated" tone="live" /></div>
+      {rows.map((row) => (
+        <div className="tm-chat-row" key={row.who}>
+          <div className="tm-avatar" style={{ borderColor: `${toneColor(row.tone)}66`, color: toneColor(row.tone) }}>{row.who.slice(0, 1)}</div>
+          <div className="tm-bubble">
+            <strong>{row.who}</strong>
+            <p>{row.text}</p>
+            <div className="tm-thinking"><i /><i /><i /></div>
           </div>
-        ))}
-      </div>
-    </div>
+        </div>
+      ))}
+    </section>
   );
 }
 
-function SessionCardFull({ session, isActive, onSelect, onClose }: {
-  session: Session;
-  isActive: boolean;
-  onSelect: (id: string) => void;
-  onClose: (id: string) => void;
-}) {
-  const [confirmClose, setConfirmClose] = useState(false);
-
-  const handleCloseClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setConfirmClose(true);
-  }, []);
-
-  const handleConfirm = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onClose(session.id);
-    setConfirmClose(false);
-  }, [onClose, session.id]);
-
-  const handleCancel = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setConfirmClose(false);
-  }, []);
-
-  const isRunning = session.status === 'run';
-  const dotColor = isRunning ? S.success : S.text3;
-  const shellBadge = session.shell === 'claude' ? 'AI ENABLED' : session.shell === 'tmux' ? 'TMUX' : 'ZSH';
-  const shellColor = session.shell === 'claude' ? S.primary : session.shell === 'tmux' ? '#60a5fa' : S.text3;
-
+function WorktreeBoard({ sessionCount }: { sessionCount: number }) {
+  const columns = [
+    { title: 'Inbox', count: 2, tone: 'muted' as Tone, rows: ['Capture UI debt', 'Define cockpit shell'] },
+    { title: 'Running', count: Math.max(1, sessionCount), tone: 'live' as Tone, rows: ['Live PTY session', 'CI monitor'] },
+    { title: 'Next', count: 4, tone: 'next' as Tone, rows: ['Agents UI', 'SFTP pane', 'Preview lane'] },
+  ];
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect(session.id)}
-      onKeyDown={(e) => e.key === 'Enter' && onSelect(session.id)}
-      style={{
-        background: isActive ? `${S.primary}08` : S.surface2,
-        border: `1px solid ${isActive ? `${S.primary}55` : S.border}`,
-        borderRadius: 10,
-        overflow: 'hidden',
-        cursor: 'pointer',
-        transition: 'border-color 150ms ease-out',
-        position: 'relative',
-      }}
-    >
-      {/* Card header row */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        padding: '8px 10px',
-        borderBottom: `1px solid ${S.border}`,
-      }}>
-        {/* Status dot */}
-        <span style={{
-          width: 7, height: 7, borderRadius: '50%', background: dotColor,
-          flexShrink: 0,
-          animation: isRunning ? 'pulse-dot 3s ease-in-out infinite' : 'none',
-        }} />
+    <section className="tm-board">
+      {columns.map((col) => (
+        <div className="tm-board-col" key={col.title}>
+          <div className="tm-board-head"><span>{col.title}</span><StatusPill label={String(col.count)} tone={col.tone} /></div>
+          {col.rows.map((row) => <div className="tm-task-card" key={row}>{row}<span /></div>)}
+        </div>
+      ))}
+    </section>
+  );
+}
 
-        {/* Session name */}
-        <span style={{
-          fontSize: 12, fontWeight: 600, color: S.text1,
-          flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          letterSpacing: -0.2,
-        }}>
-          {session.name}
-        </span>
-
-        {/* PID/TTY */}
-        <span style={{
-          fontSize: 9, color: S.text3, fontFamily: "'Geist Mono', monospace",
-          background: S.surface3, padding: '1px 6px', borderRadius: 4,
-          border: `1px solid ${S.border}`, flexShrink: 0,
-        }}>
-          pid:{session.pid}
-        </span>
-
-        {/* Close */}
-        <button
-          type="button"
-          onClick={handleCloseClick}
-          style={{
-            width: 18, height: 18, borderRadius: 4,
-            background: 'transparent', border: `1px solid transparent`,
-            color: S.text3, fontSize: 9, display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', flexShrink: 0, padding: 0,
-            transition: 'all 120ms',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = `${S.error}55`;
-            e.currentTarget.style.color = S.error;
-            e.currentTarget.style.background = `${S.error}10`;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'transparent';
-            e.currentTarget.style.color = S.text3;
-            e.currentTarget.style.background = 'transparent';
-          }}
-        >
-          <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+function SessionCard({ session, isActive, onSelect, onClose }: { session: Session; isActive: boolean; onSelect: (id: string) => void; onClose: (id: string) => void }) {
+  const [confirmClose, setConfirmClose] = useState(false);
+  const handleCloseClick = useCallback((e: React.MouseEvent) => { e.stopPropagation(); setConfirmClose(true); }, []);
+  const handleConfirm = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onClose(session.id); setConfirmClose(false); }, [onClose, session.id]);
+  const handleCancel = useCallback((e: React.MouseEvent) => { e.stopPropagation(); setConfirmClose(false); }, []);
+  const running = session.status === 'run';
+  return (
+    <div className={`tm-session-card ${isActive ? 'active' : ''}`} role="button" tabIndex={0} onClick={() => onSelect(session.id)} onKeyDown={(e) => e.key === 'Enter' && onSelect(session.id)}>
+      <div className="tm-session-head">
+        <Icon name="terminal" color={running ? S.green : S.text3} />
+        <div><strong>{session.name}</strong><span>{session.cwd.split('/').slice(-2).join('/') || session.cwd}</span></div>
+        <StatusPill label={running ? 'live' : 'idle'} tone={running ? 'live' : 'muted'} />
+        <button className="tm-icon-button" type="button" onClick={handleCloseClick}><Icon name="close" color={S.text3} /></button>
       </div>
-
-      {/* Terminal preview */}
-      <div style={{
-        background: S.bg, height: 72, overflow: 'hidden',
-        padding: '5px 10px', position: 'relative',
-      }}>
-        <pre
-          dangerouslySetInnerHTML={{
-            __html: session.snapshot || `<span style="color:${S.primary}">$ </span><span style="color:${S.text3}">_</span>`,
-          }}
-          style={{
-            fontSize: 7.5, lineHeight: 1.45,
-            fontFamily: "'Geist Mono', monospace",
-            color: S.text2, whiteSpace: 'pre', margin: 0,
-            overflow: 'hidden',
-          }}
-        />
-        {/* Fade bottom */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          height: 20, background: `linear-gradient(transparent, ${S.bg})`,
-          pointerEvents: 'none',
-        }} />
-      </div>
-
-      {/* Footer badges */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 5,
-        padding: '5px 10px',
-        borderTop: `1px solid ${S.border}`,
-      }}>
-        <span style={{
-          fontSize: 8, fontWeight: 600, letterSpacing: 0.4,
-          color: isRunning ? S.success : S.text3,
-          background: isRunning ? `${S.success}12` : `${S.text3}12`,
-          border: `1px solid ${isRunning ? `${S.success}30` : `${S.text3}30`}`,
-          padding: '1px 6px', borderRadius: 4,
-        }}>
-          {isRunning ? 'LIVE' : 'IDLE'}
-        </span>
-        <span style={{
-          fontSize: 8, fontWeight: 600, letterSpacing: 0.4,
-          color: shellColor,
-          background: `${shellColor}12`,
-          border: `1px solid ${shellColor}30`,
-          padding: '1px 6px', borderRadius: 4,
-        }}>
-          {shellBadge}
-        </span>
-        <span style={{
-          fontSize: 8, color: S.text3,
-          background: S.surface3, border: `1px solid ${S.border}`,
-          padding: '1px 6px', borderRadius: 4,
-        }}>
-          UTF-8
-        </span>
-        <span style={{
-          fontSize: 8, color: S.text3, marginLeft: 'auto',
-          fontFamily: "'Geist Mono', monospace",
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
-          {session.cwd.split('/').slice(-2).join('/')}
-        </span>
-      </div>
-
-      {/* Close confirmation overlay */}
+      <pre className="tm-terminal-preview" dangerouslySetInnerHTML={{ __html: session.snapshot || `<span style="color:${S.accent}">$</span> <span style="color:${S.text3}">awaiting command…</span>` }} />
       {confirmClose && (
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: 'absolute', inset: 0,
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(9,9,11,0.94)', borderRadius: 10, zIndex: 10, gap: 10,
-          }}
-        >
-          <span style={{ fontSize: 11, color: S.text2, fontFamily: "'Geist Mono', monospace" }}>
-            Close <span style={{ color: S.primary }}>{session.name}</span>?
-          </span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" onClick={handleConfirm} style={{
-              background: `${S.error}15`, border: `1px solid ${S.error}55`,
-              borderRadius: 6, color: S.error, fontSize: 11, fontWeight: 600,
-              fontFamily: 'inherit', padding: '5px 14px', cursor: 'pointer', minHeight: 32,
-            }}>
-              Close
-            </button>
-            <button type="button" onClick={handleCancel} style={{
-              background: S.surface3, border: `1px solid ${S.border}`,
-              borderRadius: 6, color: S.text2, fontSize: 11,
-              fontFamily: 'inherit', padding: '5px 14px', cursor: 'pointer', minHeight: 32,
-            }}>
-              Cancel
-            </button>
-          </div>
+        <div className="tm-confirm" onClick={(e) => e.stopPropagation()}>
+          <span>Close {session.name}?</span>
+          <div><button onClick={handleConfirm} type="button">Close</button><button onClick={handleCancel} type="button">Cancel</button></div>
         </div>
       )}
     </div>
   );
 }
 
-export function DashboardView({
-  sessions,
-  activeSessionId,
-  onSessionSelect,
-  onCreateSession,
-  onCloseSession,
-  connectionStatus,
-  latencyMs,
-}: DashboardViewProps) {
-  const [autoSync, setAutoSync] = useState(true);
-
+function SessionStrip({ sessions, activeSessionId, onSessionSelect, onCreateSession, onCloseSession }: Pick<DashboardViewProps, 'sessions' | 'activeSessionId' | 'onSessionSelect' | 'onCreateSession' | 'onCloseSession'>) {
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <DashHeader connectionStatus={connectionStatus} latencyMs={latencyMs} />
+    <section className="tm-panel tm-sessions-panel">
+      <div className="tm-section-title"><span>Live terminals</span><button type="button" onClick={onCreateSession}>New</button></div>
+      {sessions.length === 0 ? (
+        <div className="tm-empty-state">
+          <Icon name="terminal" color={S.text3} />
+          <strong>No active sessions</strong>
+          <p>Start a terminal to attach real command output to this cockpit.</p>
+          <button className="tm-primary-button compact" onClick={onCreateSession} type="button">Create terminal</button>
+        </div>
+      ) : (
+        <div className="tm-session-list">
+          {sessions.map((session) => <SessionCard key={session.id} session={session} isActive={session.id === activeSessionId} onSelect={onSessionSelect} onClose={onCloseSession} />)}
+        </div>
+      )}
+    </section>
+  );
+}
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '12px 12px 80px' }}>
-        <CockpitCommandCenter sessionCount={sessions.length} connectionStatus={connectionStatus} />
-        <RoadmapRail />
-
-        {/* KPI row */}
-        <KPIRow />
-
-        {/* Sessions section header */}
-        <div style={{
-          display: 'flex', alignItems: 'center',
-          marginBottom: 8,
-        }}>
-          <span style={{
-            fontSize: 10, fontWeight: 600, color: S.text3,
-            letterSpacing: 0.8, textTransform: 'uppercase', flex: 1,
-          }}>
-            Active Sessions
-          </span>
-          {sessions.length > 0 && (
-            <span style={{
-              fontSize: 9, fontWeight: 700,
-              background: `${S.primary}18`,
-              color: S.primary,
-              border: `1px solid ${S.primary}35`,
-              padding: '1px 7px', borderRadius: 8,
-              marginRight: 10,
-            }}>
-              {sessions.length}
-            </span>
-          )}
-          {/* Auto-sync toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ fontSize: 9, color: S.text3, letterSpacing: 0.3 }}>AUTO-SYNC</span>
-            <button
-              type="button"
-              onClick={() => setAutoSync((v) => !v)}
-              style={{
-                width: 30, height: 17, borderRadius: 9,
-                background: autoSync ? S.primary : S.surface3,
-                border: `1px solid ${autoSync ? S.primary : S.border}`,
-                padding: 0, cursor: 'pointer', position: 'relative',
-                transition: 'all 200ms ease-out',
-              }}
-            >
-              <span style={{
-                position: 'absolute',
-                top: 1, left: autoSync ? 14 : 1,
-                width: 13, height: 13, borderRadius: '50%',
-                background: S.text1,
-                transition: 'left 200ms ease-out',
-              }} />
-            </button>
+export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCreateSession, onCloseSession, connectionStatus, latencyMs }: DashboardViewProps) {
+  return (
+    <div className="tm-cockpit-shell">
+      <Sidebar sessionCount={sessions.length} connectionStatus={connectionStatus} onCreateSession={onCreateSession} />
+      <main className="tm-cockpit-main">
+        <TopBar sessionCount={sessions.length} connectionStatus={connectionStatus} latencyMs={latencyMs} />
+        <div className="tm-cockpit-scroll">
+          <div className="tm-metrics-grid">
+            <MetricCard label="CPU load" value="12" suffix="%" tone="live" bars={[18, 30, 22, 42, 28, 36, 25, 48, 31, 40, 29, 24]} />
+            <MetricCard label="Memory" value="4.2" suffix="GB" tone="next" bars={[40, 43, 38, 46, 49, 51, 48, 55, 52, 57, 53, 50]} />
+            <MetricCard label="Workers" value="3" tone="planned" bars={[22, 18, 35, 45, 28, 52, 48, 42, 64, 58, 50, 46]} />
+          </div>
+          <div className="tm-content-grid">
+            <div className="tm-left-flow">
+              <WorktreeBoard sessionCount={sessions.length} />
+              <SessionStrip sessions={sessions} activeSessionId={activeSessionId} onSessionSelect={onSessionSelect} onCreateSession={onCreateSession} onCloseSession={onCloseSession} />
+            </div>
+            <div className="tm-right-flow">
+              <AgentChatFeed />
+              <section className="tm-panel">
+                <div className="tm-section-title"><span>Utility lanes</span><StatusPill label="roadmap" tone="next" /></div>
+                <div className="tm-utility-list">
+                  <div><Icon name="files" color={S.blue} /><span>SFTP + file tree</span><em>planned</em></div>
+                  <div><Icon name="branch" color={S.accent} /><span>Git/worktrees</span><em>next</em></div>
+                  <div><Icon name="preview" color={S.green} /><span>Preview/log panes</span><em>planned</em></div>
+                  <div><Icon name="settings" color={S.text2} /><span>Verification gates</span><em>next</em></div>
+                </div>
+              </section>
+            </div>
           </div>
         </div>
-
-        {/* Session cards */}
-        {sessions.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 0' }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 10,
-              background: S.surface2, border: `1px solid ${S.border}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 10px',
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="4 17 10 11 4 5" />
-                <line x1="12" y1="19" x2="20" y2="19" />
-              </svg>
-            </div>
-            <p style={{ fontSize: 12, color: S.text3, margin: '0 0 14px' }}>No active sessions</p>
-            <button
-              type="button"
-              onClick={onCreateSession}
-              style={{
-                height: 38, padding: '0 18px', borderRadius: 8,
-                border: 'none', background: S.primary, color: S.bg,
-                fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >
-              New Session
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {sessions.map((session) => (
-              <SessionCardFull
-                key={session.id}
-                session={session}
-                isActive={session.id === activeSessionId}
-                onSelect={onSessionSelect}
-                onClose={onCloseSession}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      </main>
     </div>
   );
 }
