@@ -7,8 +7,8 @@
 [![CI](https://github.com/royaluniondesign-sys/termora/actions/workflows/ci.yml/badge.svg)](https://github.com/royaluniondesign-sys/termora/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green?logo=node.js&logoColor=white)](https://nodejs.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-111111.svg)](LICENSE)
+[![PWA](https://img.shields.io/badge/PWA-installable-7170ff?logo=pwa&logoColor=white)]()
 
 **Real terminal and agent control from any phone, tablet, or browser.**
 
@@ -22,18 +22,12 @@ A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-sess
 
 <div align="center">
 
-![Termora mobile walkthrough](docs/images/termora-mobile-tour.gif)
+![Termora cockpit walkthrough](docs/images/termora-mobile-tour.gif)
 
 <table>
 <tr>
-<td align="center"><img src="docs/images/phone-dashboard.png" width="200" /><br /><sub><b>Live Dashboard</b></sub></td>
-<td align="center"><img src="docs/images/phone-terminal.png" width="200" /><br /><sub><b>Touch Terminal</b></sub></td>
-<td align="center"><img src="docs/images/phone-tunnels.png" width="200" /><br /><sub><b>Tunnel Control</b></sub></td>
-</tr>
-<tr>
-<td align="center"><img src="docs/images/phone-sessions.png" width="200" /><br /><sub><b>Session Overview</b></sub></td>
-<td align="center"><img src="docs/images/phone-settings.png" width="200" /><br /><sub><b>Machine Settings</b></sub></td>
-<td align="center"><img src="docs/images/desktop-dashboard.png" width="260" /><br /><sub><b>Desktop Web UI</b></sub></td>
+<td align="center"><img src="docs/images/desktop-dashboard.png" width="560" /><br /><sub><b>Desktop cockpit</b></sub></td>
+<td align="center"><img src="docs/images/phone-dashboard.png" width="190" /><br /><sub><b>Mobile companion</b></sub></td>
 </tr>
 </table>
 

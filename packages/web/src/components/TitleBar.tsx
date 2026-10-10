@@ -5,7 +5,7 @@ const S = {
   surface2: '#18181b',
   border: '#27272a',
   primary: '#a78bfa',
-  success: '#34d399',
+  success: '#10b981',
   error: '#ef4444',
   text1: '#fafafa',
   text2: '#a1a1aa',
@@ -46,8 +46,8 @@ export function TitleBar({
       {/* Traffic lights — Obsidian style */}
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
         <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
-        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#fbbf24' }} />
-        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#34d399' }} />
+        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#7170ff' }} />
+        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981' }} />
       </div>
 
       {/* Session name */}

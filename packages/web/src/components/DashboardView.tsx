@@ -232,7 +232,7 @@ function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, o
     event.stopPropagation();
     if (confirmClose === session.id) { onCloseSession(session.id); setConfirmClose(null); } else { setConfirmClose(session.id); }
   }, [confirmClose, onCloseSession]);
-  const fallback = `<span style="color:#ff8f66">${activeAgent.name}</span> · ${activeAgent.state}\n<span style="color:#8f8f9d">/home/rud/termora · ${activeTask.id}</span>\n\nTask: ${activeTask.title}\nUtility: ${activeTask.meta}\nNext: ${activeTask.next}\nCommand: ${activeTask.command}\n\n$ ${activeTask.command}\n<span style="color:#8f8f9d">output streams here while the sidebars remain usable…</span>`;
+  const fallback = `<span style="color:#7170ff">${activeAgent.name}</span> · ${activeAgent.state}\n<span style="color:#8a8f98">/home/rud/termora · ${activeTask.id}</span>\n\nTask: ${activeTask.title}\nUtility: ${activeTask.meta}\nNext: ${activeTask.next}\nCommand: ${activeTask.command}\n\n$ ${activeTask.command}\n<span style="color:#8a8f98">output streams here while the sidebars remain usable…</span>`;
   return (
     <section className="tm-oct-live-pane">
       <div className="tm-oct-pane-head"><div><Icon name="terminal" /><strong>{active?.name ?? activeTask.title}</strong></div><span>{activeAgent.name} · {activeAgent.state}</span></div>

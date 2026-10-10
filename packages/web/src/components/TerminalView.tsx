@@ -11,9 +11,9 @@ const S = {
   surface3: '#27272a',
   border: '#27272a',
   primary: '#a78bfa',
-  success: '#34d399',
+  success: '#10b981',
   error: '#ef4444',
-  warning: '#fbbf24',
+  warning: '#7170ff',
   text1: '#fafafa',
   text2: '#a1a1aa',
   text3: '#71717a',
@@ -323,8 +323,8 @@ function KeyStrip({ onKey, keyboardMode, onKeyboardModeChange }: {
         style={{
           ...keyBase,
           display: 'flex', alignItems: 'center', gap: 4,
-          color: keyboardMode === 'physical' ? '#60a5fa' : keyboardMode === 'system' ? S.success : S.primary,
-          borderColor: keyboardMode === 'physical' ? '#60a5fa33' : keyboardMode === 'system' ? `${S.success}33` : `${S.primary}33`,
+          color: keyboardMode === 'physical' ? '#7170ff' : keyboardMode === 'system' ? S.success : S.primary,
+          borderColor: keyboardMode === 'physical' ? '#7170ff33' : keyboardMode === 'system' ? `${S.success}33` : `${S.primary}33`,
           background: 'transparent',
           padding: '0 8px',
         }}

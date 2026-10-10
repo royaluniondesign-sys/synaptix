@@ -13,9 +13,9 @@ const S = {
   border: '#27272a',
   borderLight: '#3f3f46',
   primary: '#a78bfa',
-  success: '#34d399',
+  success: '#10b981',
   error: '#ef4444',
-  warning: '#fbbf24',
+  warning: '#7170ff',
   text1: '#fafafa',
   text2: '#a1a1aa',
   text3: '#71717a',
@@ -198,7 +198,7 @@ function SkinGallery({ currentSkin, onSkinChange }: {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               gap: 2,
             }}>
-              {['#ef4444', '#fbbf24', '#34d399'].map((c) => (
+              {['#ef4444', '#7170ff', '#10b981'].map((c) => (
                 <div key={c} style={{ width: 5, height: 5, borderRadius: '50%', background: c }} />
               ))}
             </div>

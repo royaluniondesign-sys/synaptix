@@ -12,18 +12,18 @@ import type { View } from './lib/types';
 import type { ConnectionStatus, TerminalWSClient } from './lib/ws-client';
 
 const S = {
-  bg: '#15141a',
-  surface: '#18181b',
-  surface2: '#1f1e26',
-  surface3: '#2d2b36',
-  border: '#33313d',
-  primary: '#fcbb00',
-  success: '#00bb7f',
-  error: '#ff2357',
-  warning: '#fcbb00',
-  text1: '#fbfbfe',
-  text2: '#cfcfd8',
-  text3: '#8f8f9d',
+  bg: '#08090a',
+  surface: '#0f1011',
+  surface2: '#191a1b',
+  surface3: '#28282c',
+  border: 'rgba(255,255,255,0.08)',
+  primary: '#7170ff',
+  success: '#10b981',
+  error: '#ef4444',
+  warning: '#7170ff',
+  text1: '#f7f8f8',
+  text2: '#d0d6e0',
+  text3: '#8a8f98',
 } as const;
 
 const TAB_CONFIG = [
@@ -279,7 +279,7 @@ function TerminalEmpty({ onNewSession, onRunCommand, sessionCount }: {
     { cmd: 'claude --dangerously-skip-permissions', desc: 'Auto-approve mode', color: S.primary },
     { cmd: 'git status', desc: 'Check repo state', color: S.success },
     { cmd: 'git log --oneline -20', desc: 'Last 20 commits', color: S.success },
-    { cmd: 'npm run dev', desc: 'Start dev server', color: '#60a5fa' },
+    { cmd: 'npm run dev', desc: 'Start dev server', color: '#7170ff' },
     { cmd: 'htop', desc: 'System monitor', color: S.text2 },
   ];
 
@@ -540,7 +540,7 @@ export function App() {
     );
   }
 
-  const showFAB = (view === 'dashboard' || view === 'terminal') && connectionStatus === 'connected';
+  const showFAB = view === 'terminal' && connectionStatus === 'connected';
 
   return (
     <div style={{

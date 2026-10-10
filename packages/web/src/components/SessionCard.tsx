@@ -6,9 +6,9 @@ const S = {
   surface3: '#27272a',
   border: '#27272a',
   primary: '#a78bfa',
-  success: '#34d399',
+  success: '#10b981',
   error: '#ef4444',
-  warning: '#fbbf24',
+  warning: '#7170ff',
   text1: '#fafafa',
   text2: '#a1a1aa',
   text3: '#71717a',
@@ -74,8 +74,8 @@ export function SessionCard({ session, isActive, onSelect, onClose }: SessionCar
         height: 28, flexShrink: 0, borderBottom: `1px solid ${S.border}`,
       }}>
         <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#fbbf24', flexShrink: 0 }} />
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#34d399', flexShrink: 0 }} />
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#7170ff', flexShrink: 0 }} />
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
         <span style={{
           fontSize: 9, color: S.text3,
           fontFamily: "'Geist Mono', monospace",

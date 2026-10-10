@@ -13,8 +13,8 @@ const S = {
   surface3: '#27272a',
   border: '#27272a',
   primary: '#a78bfa',
-  success: '#34d399',
-  blue: '#60a5fa',
+  success: '#10b981',
+  blue: '#7170ff',
   text2: '#a1a1aa',
   text3: '#71717a',
 } as const;
