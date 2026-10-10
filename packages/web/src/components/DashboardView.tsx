@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Session } from '../lib/types';
 import type { ConnectionStatus } from '../lib/ws-client';
 
@@ -13,6 +13,40 @@ interface DashboardViewProps {
 }
 
 type IconName = 'terminal' | 'branch' | 'bot' | 'files' | 'search' | 'settings' | 'close' | 'desktop' | 'plus' | 'mobile' | 'github' | 'activity';
+type DotTone = 'green' | 'orange' | 'red' | 'muted';
+
+type TaskItem = { id: string; title: string; meta: string; status: DotTone; agent: string; next: string; command: string };
+type AgentItem = { id: string; name: string; state: 'thinking' | 'running' | 'queued' | 'blocked'; work: string; tone: DotTone };
+type FileItem = { path: string; kind: 'dir' | 'file'; status?: 'modified' | 'new' | 'clean' };
+
+const TASKS: TaskItem[] = [
+  { id: 'ui-shell', title: 'UI shell parity', meta: 'multi-pane workspace + phone control', status: 'orange', agent: 'Hermes', next: 'verify responsive splits', command: 'npm run build' },
+  { id: 'workers', title: 'Agent workers', meta: 'queue, lanes, model routing', status: 'green', agent: 'OpenCode', next: 'spawn short review worker', command: 'opencode run --pure' },
+  { id: 'files', title: 'SFTP/file utility', meta: 'right rail tree + file actions', status: 'green', agent: 'Hermes Linux', next: 'wire remote file browser', command: 'termora files open' },
+  { id: 'mobile', title: 'Mobile control', meta: 'pair, resume, quick actions', status: 'green', agent: 'Termora Mobile', next: 'promote actions to real routes', command: 'termora pair' },
+  { id: 'verify', title: 'Verification gates', meta: 'lint/typecheck/test/build/CI', status: 'muted', agent: 'CI', next: 'watch latest GitHub run', command: 'gh run watch' },
+];
+
+const AGENTS: AgentItem[] = [
+  { id: 'hermes', name: 'Hermes', state: 'thinking', work: 'orchestrating layout + gates', tone: 'orange' },
+  { id: 'opencode', name: 'OpenCode', state: 'queued', work: 'short isolated implementation lane', tone: 'green' },
+  { id: 'linux', name: 'Linux Hermes', state: 'running', work: 'server capture + verification', tone: 'green' },
+  { id: 'ci', name: 'GitHub CI', state: 'blocked', work: 'waits for push', tone: 'muted' },
+];
+
+const FILES: FileItem[] = [
+  { path: '.github/workflows/ci.yml', kind: 'file', status: 'clean' },
+  { path: 'docs/images/desktop-dashboard.png', kind: 'file', status: 'modified' },
+  { path: 'docs/images/phone-dashboard.png', kind: 'file', status: 'modified' },
+  { path: 'packages/web/src/App.tsx', kind: 'file', status: 'clean' },
+  { path: 'packages/web/src/components/DashboardView.tsx', kind: 'file', status: 'modified' },
+  { path: 'packages/web/src/components/TerminalView.tsx', kind: 'file', status: 'clean' },
+  { path: 'packages/web/src/index.css', kind: 'file', status: 'modified' },
+  { path: 'packages/agent/src/index.ts', kind: 'file', status: 'clean' },
+  { path: 'README.md', kind: 'file', status: 'clean' },
+];
+
+const COMMANDS = ['new terminal', 'spawn agent', 'open file tree', 'run gates', 'capture UI', 'watch CI'];
 
 function Icon({ name }: { name: IconName }) {
   if (name === 'github') return <span className="tm-oct-icon-text">GH</span>;
@@ -32,188 +66,226 @@ function Icon({ name }: { name: IconName }) {
   return <svg className="tm-oct-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
 }
 
-function Dot({ tone = 'green' }: { tone?: 'green' | 'orange' | 'red' | 'muted' }) {
+function Dot({ tone = 'green' }: { tone?: DotTone }) {
   return <span className={`tm-oct-dot ${tone}`} />;
 }
 
-function WindowChrome() {
+function WindowChrome({ activeTask }: { activeTask: TaskItem }) {
   return (
     <div className="tm-oct-windowbar">
       <div className="tm-oct-lights"><i /><i /><i /></div>
       <div className="tm-oct-window-title">Termora</div>
       <div className="tm-oct-tabs">
-        <span className="active">Claude Code</span>
-        <span>Analyze</span>
-        <span>Improve README</span>
-        <span>Terminal 3</span>
-        <span>grok</span>
+        <span className="active">{activeTask.title}</span>
+        <span>Agents</span>
+        <span>Files</span>
+        <span>Terminal</span>
+        <span>Mobile</span>
       </div>
-      <div className="tm-oct-window-actions">⌘ · ⌥ · ⌃</div>
+      <div className="tm-oct-window-actions">⌘K · ⌥A · ⇧Tab</div>
     </div>
   );
 }
 
-function WorkspaceSidebar({ onCreateSession }: { onCreateSession: () => void }) {
-  const pinned = ['.claude', 'main', 'master'];
-  const inProgress = [
-    { title: 'improve-readme', meta: 'RUD-SERVER · termora redesign', hot: true },
-    { title: '[Bug]: Rename project panes', meta: 'layout/sidebar/window splits', hot: false },
-    { title: '[Feature]: Add file tree rail', meta: 'right inspector + source tree', hot: false },
-    { title: '[Feature]: Mobile overlay', meta: 'phone card + quick actions', hot: false },
-    { title: 'Agent thinking details', meta: 'typing dots + run status', hot: false },
-  ];
+function CommandStrip({ activeCommand, onCommand, onCreateSession }: { activeCommand: string; onCommand: (cmd: string) => void; onCreateSession: () => void }) {
+  return (
+    <div className="tm-oct-command-strip">
+      {COMMANDS.map((cmd) => (
+        <button key={cmd} className={cmd === activeCommand ? 'active' : ''} type="button" onClick={() => { onCommand(cmd); if (cmd === 'new terminal') onCreateSession(); }}>
+          {cmd === 'new terminal' && <Icon name="plus" />}
+          {cmd === 'spawn agent' && <Icon name="bot" />}
+          {cmd === 'open file tree' && <Icon name="files" />}
+          {cmd === 'run gates' && <Icon name="activity" />}
+          {cmd === 'capture UI' && <Icon name="desktop" />}
+          {cmd === 'watch CI' && <Icon name="github" />}
+          <span>{cmd}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function WorkspaceSidebar({ activeTaskId, activeCommand, onTaskSelect, onCommand, onCreateSession }: { activeTaskId: string; activeCommand: string; onTaskSelect: (id: string) => void; onCommand: (cmd: string) => void; onCreateSession: () => void }) {
+  const pinned = ['rud-server', 'termora/main', 'worktrees', 'captures'];
   return (
     <aside className="tm-oct-workspace">
-      <div className="tm-oct-navline"><Icon name="activity" /> <span>Tasks</span></div>
-      <div className="tm-oct-navline"><Icon name="bot" /> <span>Automations</span></div>
-      <div className="tm-oct-navline"><Icon name="mobile" /> <span>Termora Mobile</span></div>
-      <div className="tm-oct-navline"><Icon name="search" /> <span>Search</span></div>
+      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('run gates')}><Icon name="activity" /> <span>Mission Control</span></button>
+      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('spawn agent')}><Icon name="bot" /> <span>Agents</span></button>
+      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('open file tree')}><Icon name="files" /> <span>SFTP / Files</span></button>
+      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('capture UI')}><Icon name="mobile" /> <span>Mobile Control</span></button>
       <div className="tm-oct-side-section">
         <div className="tm-oct-section-title"><span>Workspaces</span><button type="button" onClick={onCreateSession}><Icon name="plus" /></button></div>
-        <div className="tm-oct-subtitle">Pinned <em>3</em></div>
+        <div className="tm-oct-subtitle">Pinned <em>{pinned.length}</em></div>
         {pinned.map((item, idx) => (
-          <div className="tm-oct-pin" key={item}><Dot tone={idx === 0 ? 'orange' : 'green'} /><span>{item}</span><em>{idx === 1 ? 'primary' : 'folder'}</em></div>
+          <button type="button" className="tm-oct-pin" key={item} onClick={() => onCommand(idx < 2 ? 'new terminal' : 'open file tree')}><Dot tone={idx === 1 ? 'orange' : 'green'} /><span>{item}</span><em>{idx === 1 ? 'main' : 'live'}</em></button>
         ))}
       </div>
       <div className="tm-oct-side-section grow">
-        <div className="tm-oct-subtitle">In progress <em>{inProgress.length}</em></div>
+        <div className="tm-oct-subtitle">In progress <em>{TASKS.length}</em></div>
         <div className="tm-oct-task-list">
-          {inProgress.map((task) => (
-            <div className={`tm-oct-task ${task.hot ? 'active' : ''}`} key={task.title}>
-              <div><Dot tone={task.hot ? 'orange' : 'green'} /><strong>{task.title}</strong></div>
+          {TASKS.map((task) => (
+            <button type="button" className={`tm-oct-task ${task.id === activeTaskId ? 'active' : ''}`} key={task.id} onClick={() => onTaskSelect(task.id)}>
+              <div><Dot tone={task.status} /><strong>{task.title}</strong></div>
               <span>{task.meta}</span>
               <div className="tm-oct-task-icons"><Icon name="github" /><Icon name="bot" /><Icon name="terminal" /></div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
-      <div className="tm-oct-statusbar-mini"><span>78% sh</span><span>94% wk</span><span>100% ssh</span></div>
+      <div className="tm-oct-statusbar-mini"><span>cmd: {activeCommand}</span><span>ssh live</span></div>
     </aside>
+  );
+}
+
+function UtilityPanel({ activeTask, activeCommand }: { activeTask: TaskItem; activeCommand: string }) {
+  return (
+    <section className="tm-oct-utility-pane">
+      <div className="tm-oct-pane-head"><div><Icon name="activity" /><strong>Control state</strong></div><span>{activeCommand}</span></div>
+      <div className="tm-oct-detail-grid">
+        <div><span>Owner</span><strong>{activeTask.agent}</strong></div>
+        <div><span>Next action</span><strong>{activeTask.next}</strong></div>
+        <div><span>Command</span><strong>{activeTask.command}</strong></div>
+        <div><span>Mode</span><strong>operate · inspect</strong></div>
+      </div>
+      <div className="tm-oct-gates">
+        {['lint', 'typecheck', 'test', 'build', 'capture', 'ci'].map((gate, idx) => <span key={gate} className={idx < 4 ? 'done' : idx === 4 ? 'active' : ''}><Dot tone={idx < 5 ? 'green' : 'muted'} />{gate}</span>)}
+      </div>
+    </section>
+  );
+}
+
+function AgentQueue({ activeAgentId, onAgentSelect }: { activeAgentId: string; onAgentSelect: (id: string) => void }) {
+  return (
+    <section className="tm-oct-agent-pane">
+      <div className="tm-oct-pane-head"><div><Icon name="bot" /><strong>Agent queue</strong></div><span>4 lanes</span></div>
+      <div className="tm-oct-agent-list">
+        {AGENTS.map((agent) => (
+          <button type="button" key={agent.id} className={agent.id === activeAgentId ? 'active' : ''} onClick={() => onAgentSelect(agent.id)}>
+            <Dot tone={agent.tone} />
+            <div><strong>{agent.name}</strong><span>{agent.work}</span></div>
+            <em>{agent.state}</em>
+            {agent.state === 'thinking' && <i className="tm-oct-thinking"><b /><b /><b /></i>}
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
 function TerminalPane({ title, subtitle, children, active = false }: { title: string; subtitle?: string; children: React.ReactNode; active?: boolean }) {
   return (
     <section className={`tm-oct-pane ${active ? 'active' : ''}`}>
-      <div className="tm-oct-pane-head">
-        <div><Icon name="terminal" /><strong>{title}</strong></div>
-        {subtitle && <span>{subtitle}</span>}
-      </div>
+      <div className="tm-oct-pane-head"><div><Icon name="terminal" /><strong>{title}</strong></div>{subtitle && <span>{subtitle}</span>}</div>
       <pre className="tm-oct-terminal">{children}</pre>
     </section>
   );
 }
 
-function LiveSessionPane({ sessions, activeSessionId, onSessionSelect, onCloseSession }: Pick<DashboardViewProps, 'sessions' | 'activeSessionId' | 'onSessionSelect' | 'onCloseSession'>) {
+function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, onSessionSelect, onCloseSession }: Pick<DashboardViewProps, 'sessions' | 'activeSessionId' | 'onSessionSelect' | 'onCloseSession'> & { activeTask: TaskItem; activeAgent: AgentItem }) {
   const [confirmClose, setConfirmClose] = useState<string | null>(null);
   const active = sessions.find((s) => s.id === activeSessionId) ?? sessions[0];
+  const displaySessions = sessions.length ? sessions : [{ id: 'demo', name: activeTask.title, cwd: '/home/rud/termora', status: 'run', snapshot: '' } as Session];
   const handleClose = useCallback((session: Session) => (event: React.MouseEvent) => {
     event.stopPropagation();
-    if (confirmClose === session.id) {
-      onCloseSession(session.id);
-      setConfirmClose(null);
-    } else {
-      setConfirmClose(session.id);
-    }
+    if (confirmClose === session.id) { onCloseSession(session.id); setConfirmClose(null); } else { setConfirmClose(session.id); }
   }, [confirmClose, onCloseSession]);
+  const fallback = `<span style="color:#ff8f66">${activeAgent.name}</span> · ${activeAgent.state}\n<span style="color:#8f8f9d">/home/rud/termora · ${activeTask.id}</span>\n\nTask: ${activeTask.title}\nUtility: ${activeTask.meta}\nNext: ${activeTask.next}\nCommand: ${activeTask.command}\n\n$ ${activeTask.command}\n<span style="color:#8f8f9d">output streams here while the sidebars remain usable…</span>`;
   return (
     <section className="tm-oct-live-pane">
-      <div className="tm-oct-pane-head">
-        <div><Icon name="terminal" /><strong>{active?.name ?? 'Claude Code'}</strong></div>
-        <span>high · /effort</span>
-      </div>
+      <div className="tm-oct-pane-head"><div><Icon name="terminal" /><strong>{active?.name ?? activeTask.title}</strong></div><span>{activeAgent.name} · {activeAgent.state}</span></div>
       <div className="tm-oct-live-tabs">
-        {(sessions.length ? sessions : [{ id: 'demo', name: 'improve-readme', cwd: '/home/rud/termora', status: 'run', snapshot: '' } as Session]).slice(0, 4).map((session) => (
+        {displaySessions.slice(0, 4).map((session) => (
           <button key={session.id} type="button" className={session.id === active?.id ? 'active' : ''} onClick={() => onSessionSelect(session.id)}>
             <Dot tone={session.status === 'run' ? 'green' : 'muted'} /> {session.name}
             {sessions.length > 0 && <i onClick={handleClose(session)}>{confirmClose === session.id ? 'sure?' : '×'}</i>}
           </button>
         ))}
       </div>
-      <pre className="tm-oct-terminal main" dangerouslySetInnerHTML={{ __html: active?.snapshot || `<span style="color:#ff8f66">Claude Code v2.1.17</span>\n<span style="color:#8f8f9d">/home/rud/termora · /orchestrate</span>\n\n<span style="color:#ff8f66">Termora is live:</span> redesigning window distribution, sidebars and split panes.\n\n$ git status --short\n$ npm run build\n\n<span style="color:#8f8f9d">waiting for next agent output…</span>` }} />
-      <div className="tm-oct-inputbar"><span>›</span><em>type permissions on shift+tab to cycle / ↑ for agents</em></div>
+      <pre className="tm-oct-terminal main" dangerouslySetInnerHTML={{ __html: fallback }} />
+      <div className="tm-oct-inputbar"><span>›</span><em>Actions remain live: tasks, file tree, agents, mobile resume</em></div>
     </section>
   );
 }
 
-function FileTreeRail() {
-  const groups = ['.agents', '.claude', '.github', '.grok', '.husky', 'config', 'docs', 'mobile', 'packages', 'scripts'];
+function FileTreeRail({ activeFile, onFileSelect }: { activeFile: string; onFileSelect: (path: string) => void }) {
   return (
     <aside className="tm-oct-filetree">
       <div className="tm-oct-file-head"><strong>termora</strong><div><Icon name="search" /><Icon name="settings" /></div></div>
-      <div className="tm-oct-tree-list">
-        {groups.map((item, index) => (
-          <div className={index === 7 ? 'selected' : ''} key={item}><Icon name="files" /><span>{item}</span></div>
+      <div className="tm-oct-file-search"><Icon name="search" /><span>filter files / SFTP paths</span></div>
+      <div className="tm-oct-tree-list operational">
+        {FILES.map((file) => (
+          <button type="button" className={file.path === activeFile ? 'selected' : ''} key={file.path} onClick={() => onFileSelect(file.path)}>
+            <Icon name={file.kind === 'dir' ? 'files' : 'terminal'} />
+            <span>{file.path}</span>
+            {file.status && file.status !== 'clean' && <em>{file.status}</em>}
+          </button>
         ))}
       </div>
+      <div className="tm-oct-file-actions"><button type="button">Open</button><button type="button">Stage</button><button type="button">Upload</button></div>
     </aside>
   );
 }
 
-function PhonePreview({ connectionStatus, latencyMs, onCreateSession }: { connectionStatus: ConnectionStatus; latencyMs: number | null; onCreateSession: () => void }) {
+function PhonePreview({ connectionStatus, latencyMs, activeTask, phoneMode, setPhoneMode, onCreateSession }: { connectionStatus: ConnectionStatus; latencyMs: number | null; activeTask: TaskItem; phoneMode: string; setPhoneMode: (mode: string) => void; onCreateSession: () => void }) {
   const online = connectionStatus === 'connected';
   return (
     <aside className="tm-oct-phone">
       <div className="tm-phone-status"><span>3:53</span><span>⌁ ◒ 44</span></div>
       <div className="tm-phone-brand"><img src="/termora-logo.svg" alt="" /><strong>Termora</strong><Icon name="settings" /></div>
-      <h2>Welcome back</h2>
+      <h2>Control from mobile</h2>
+      <div className="tm-phone-mode-tabs">{['desktop', 'agents', 'files'].map((mode) => <button key={mode} type="button" className={phoneMode === mode ? 'active' : ''} onClick={() => setPhoneMode(mode)}>{mode}</button>)}</div>
       <div className="tm-phone-stats">
-        <div><Icon name="bot" /><strong>5,065</strong><span>Agents spawned</span></div>
-        <div><Icon name="activity" /><strong>26d 10h</strong><span>Agent time</span></div>
-        <div><Icon name="branch" /><strong>359</strong><span>PRs created</span></div>
+        <div><Icon name="bot" /><strong>{AGENTS.length}</strong><span>Agent lanes</span></div>
+        <div><Icon name="activity" /><strong>{TASKS.length}</strong><span>Tasks live</span></div>
+        <div><Icon name="branch" /><strong>6</strong><span>Gates</span></div>
       </div>
-      <label>Desktops</label>
+      <label>Desktop</label>
       <div className="tm-phone-card"><Icon name="desktop" /><div><strong>RUD-SERVER</strong><span><Dot tone={online ? 'green' : 'red'} /> {online ? 'Connected' : 'Offline'} · {latencyMs ?? 47}ms</span></div><em>›</em></div>
-      <label>Resume</label>
-      <div className="tm-phone-card"><Icon name="terminal" /><div><strong>improve-readme</strong><span>termora · redesign</span></div><em>›</em></div>
-      <label>Account usage</label>
-      <div className="tm-phone-usage"><strong>rud@termora</strong><span><i style={{ width: '93%' }} /></span><span><i style={{ width: '100%' }} /></span></div>
+      <label>Resume task</label>
+      <div className="tm-phone-card"><Icon name="terminal" /><div><strong>{activeTask.title}</strong><span>{activeTask.next}</span></div><em>›</em></div>
       <label>Quick actions</label>
-      <div className="tm-phone-actions"><button type="button"><Icon name="desktop" /> Pair Desktop</button><button type="button" onClick={onCreateSession}><Icon name="plus" /> New Worktree</button></div>
+      <div className="tm-phone-actions"><button type="button"><Icon name="desktop" /> Pair</button><button type="button" onClick={onCreateSession}><Icon name="plus" /> Terminal</button></div>
+      <div className="tm-phone-actions"><button type="button"><Icon name="bot" /> Agent</button><button type="button"><Icon name="files" /> Files</button></div>
       <div className="tm-phone-home" />
     </aside>
   );
 }
 
 export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCreateSession, onCloseSession, connectionStatus, latencyMs }: DashboardViewProps) {
+  const [activeTaskId, setActiveTaskId] = useState(TASKS[0].id);
+  const [activeAgentId, setActiveAgentId] = useState(AGENTS[0].id);
+  const [activeFile, setActiveFile] = useState('packages/web/src/components/DashboardView.tsx');
+  const [activeCommand, setActiveCommand] = useState('run gates');
+  const [phoneMode, setPhoneMode] = useState('desktop');
+  const activeTask = useMemo(() => TASKS.find((task) => task.id === activeTaskId) ?? TASKS[0], [activeTaskId]);
+  const activeAgent = useMemo(() => AGENTS.find((agent) => agent.id === activeAgentId) ?? AGENTS[0], [activeAgentId]);
+
   return (
     <div className="tm-orca-stage">
-      <WindowChrome />
-      <div className="tm-orca-grid">
-        <WorkspaceSidebar onCreateSession={onCreateSession} />
-        <main className="tm-orca-center">
-          <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} />
-          <div className="tm-oct-split-stack">
-            <TerminalPane title="OpenAI Codex" subtitle="v0.139.0">
-{`model: gpt-5.5 medium /model to change
-directory: ~/termora/workspaces/improve-readme
-permissions: YOLO mode
+      <WindowChrome activeTask={activeTask} />
+      <CommandStrip activeCommand={activeCommand} onCommand={setActiveCommand} onCreateSession={onCreateSession} />
+      <div className="tm-orca-grid operational">
+        <WorkspaceSidebar activeTaskId={activeTaskId} activeCommand={activeCommand} onTaskSelect={setActiveTaskId} onCommand={setActiveCommand} onCreateSession={onCreateSession} />
+        <main className="tm-orca-center operational">
+          <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} activeTask={activeTask} activeAgent={activeAgent} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} />
+          <div className="tm-oct-split-stack operational">
+            <UtilityPanel activeTask={activeTask} activeCommand={activeCommand} />
+            <AgentQueue activeAgentId={activeAgentId} onAgentSelect={setActiveAgentId} />
+            <TerminalPane title="selected file / run output" subtitle={activeFile} active>
+{`file: ${activeFile}
+status: ${FILES.find((f) => f.path === activeFile)?.status ?? 'clean'}
 
-Tip: run paired agents while Termora records output.`}
-            </TerminalPane>
-            <TerminalPane title="build output" subtitle="npm install" active>
-{`warning unsupported engine: wanted node >=24
-Lockfile is up to date
-resolution step skipped
+command: ${activeTask.command}
+next: ${activeTask.next}
 
-Ignored build scripts: agent-browser, electron-installer.
-Run verification before publishing.`}
-            </TerminalPane>
-            <TerminalPane title="grok / analyzer" subtitle="agent lane">
-{`analyzing ui distribution…
-✓ left workspace rail
-✓ split terminal grid
-✓ right source tree
-✓ mobile preview overlay
-
-ready for visual QA`}
+This pane is the operational inspector: selecting tasks, agents or files changes what the operator sees without leaving the cockpit.`}
             </TerminalPane>
           </div>
         </main>
-        <FileTreeRail />
+        <FileTreeRail activeFile={activeFile} onFileSelect={setActiveFile} />
       </div>
-      <div className="tm-oct-bottom"><span><Dot tone="orange" /> 78% sh</span><span>94% wk</span><span>100% ssh</span><span>80% pending</span></div>
-      <PhonePreview connectionStatus={connectionStatus} latencyMs={latencyMs} onCreateSession={onCreateSession} />
+      <div className="tm-oct-bottom"><span><Dot tone="orange" /> task: {activeTask.title}</span><span>agent: {activeAgent.name}</span><span>file: {activeFile.split('/').pop()}</span><span>cmd: {activeCommand}</span></div>
+      <PhonePreview connectionStatus={connectionStatus} latencyMs={latencyMs} activeTask={activeTask} phoneMode={phoneMode} setPhoneMode={setPhoneMode} onCreateSession={onCreateSession} />
     </div>
   );
 }
