@@ -11,10 +11,12 @@ const REQUIRED_FILES = [
   READINESS_DOC,
   'docs/app-packaging-blueprint.md',
   'docs/feature-platform-map.md',
+  'docs/desktop-unsigned-packaging.md',
   'apps/desktop/package.json',
   'apps/desktop/electron-builder.config.cjs',
   'apps/mobile/package.json',
   'apps/mobile/app.config.js',
+  'scripts/package-desktop-unsigned.mjs',
   '.github/workflows/ci.yml',
 ]
 
@@ -32,7 +34,14 @@ const REQUIRED_TOPICS = [
   'data handling',
 ]
 const REQUIRED_ARTIFACTS = ['.dmg', '.zip', 'NSIS', 'AppImage', '.deb', '.apk']
-const REQUIRED_DOC_SNIPPETS = ['Artifact evidence', 'check:platform-readiness', 'Do not claim']
+const REQUIRED_DOC_SNIPPETS = [
+  'Artifact evidence',
+  'check:platform-readiness',
+  'Do not claim',
+  'Unsigned local artifact',
+  '--publish never',
+  'pending/manual',
+]
 
 // Unqualified positive claims that may only be discussed (as disallowed) inside
 // the readiness doc. Anywhere else in public docs is a false-claim failure.
@@ -166,6 +175,48 @@ checkConfig(
   },
   'mobile app config',
 )
+
+// The unsigned packaging helper must stay dry-run by default and must never
+// sign, notarize, or publish. If it stops passing --publish never or starts
+// accepting credentials, readiness claims become unsafe.
+const UNSIGNED_HELPER = 'scripts/package-desktop-unsigned.mjs'
+if (existsSync(UNSIGNED_HELPER)) {
+  const helper = read(UNSIGNED_HELPER)
+  const helperInvariants = [
+    "'--publish','never'",
+    'CSC_IDENTITY_AUTO_DISCOVERY',
+    "'--run'",
+    'SIGNING_ENV_KEYS',
+    'PUBLISH_ENV_KEYS',
+    'pending/manual',
+    'process.exit(2)',
+    "spawnSync('npx'",
+  ]
+  for (const snippet of helperInvariants) {
+    if (!has(helper, snippet)) fail(`unsigned helper missing guardrail: ${snippet}`)
+  }
+  if (/secrets\./i.test(helper)) fail('unsigned helper must not reference secrets.*')
+}
+
+if (existsSync('apps/desktop/package.json')) {
+  try {
+    const desktopPkg = JSON.parse(read('apps/desktop/package.json'))
+    const scripts = desktopPkg.scripts ?? {}
+    const unsignedScripts = Object.entries(scripts).filter(([name]) =>
+      name.startsWith('package:unsigned'),
+    )
+    if (unsignedScripts.length === 0) {
+      fail('desktop package.json must expose package:unsigned scripts')
+    }
+    for (const [name, command] of unsignedScripts) {
+      if (!String(command).includes('package-desktop-unsigned.mjs')) {
+        fail(`desktop script "${name}" must call scripts/package-desktop-unsigned.mjs`)
+      }
+    }
+  } catch (error) {
+    fail(`could not read apps/desktop/package.json scripts: ${error.message}`)
+  }
+}
 
 if (existsSync('.github/workflows/ci.yml')) {
   const ci = read('.github/workflows/ci.yml')

@@ -53,6 +53,9 @@ jobs:
       - name: Desktop boundary contract
         run: npm run check:desktop-boundary
 
+      - name: Desktop smoke contract
+        run: npm run check:desktop-smoke
+
       - name: Platform readiness contract
         run: npm run check:platform-readiness
 

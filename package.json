@@ -46,8 +46,10 @@
     "postinstall": "node scripts/fix-node-pty.js",
     "check:app-scaffold": "node scripts/check-app-scaffold.mjs",
     "check:desktop-boundary": "node scripts/check-desktop-boundary.mjs",
+    "check:desktop-smoke": "node scripts/check-desktop-smoke.mjs",
     "check:platform-readiness": "node scripts/check-platform-readiness.mjs",
-    "check:security-audit": "npm audit --omit=dev --audit-level=moderate"
+    "check:security-audit": "npm audit --omit=dev --audit-level=moderate",
+    "package:desktop:unsigned": "node scripts/package-desktop-unsigned.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

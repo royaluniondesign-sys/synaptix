@@ -19,19 +19,19 @@ dependencies, reads secrets, or contacts a network.
 
 ## Platform matrix
 
-| Surface                             | Status      | Evidence                                    | Blocker                                                     |
-| ----------------------------------- | ----------- | ------------------------------------------- | ----------------------------------------------------------- |
-| Desktop shell (Electron)            | Gated       | `apps/desktop/**`, desktop boundary checker | Electron deps intentionally absent; not in root workspaces  |
-| macOS artifact (`.dmg`, `.zip`)     | Gated       | `apps/desktop/electron-builder.config.cjs`  | Unsigned; no notarization; never built in CI                |
-| Windows artifact (`NSIS`)           | Gated       | `apps/desktop/electron-builder.config.cjs`  | Native module rebuild unverified; unsigned                  |
-| Linux artifact (`AppImage`, `.deb`) | Gated       | `apps/desktop/electron-builder.config.cjs`  | Native module smoke test missing                            |
-| Signing and notarization            | Missing     | this doc                                    | No certificate values, no CI signing job                    |
-| Desktop auto-update                 | Missing     | `docs/app-packaging-blueprint.md`           | GitHub Releases feed not wired                              |
-| PWA mobile client                   | Implemented | `packages/web/**`, app scaffold contract    | Install/offline behavior covered by web build               |
-| Expo native mobile                  | Gated       | `apps/mobile/app.config.js`                 | Native builds disabled; APNs entitlement flow pending       |
-| GitHub Releases distribution        | Missing     | `ROADMAP.md` milestone 6                    | No release workflow, checksums, or artifact upload          |
-| CLI distribution                    | Gated       | `packages/cli/**`                           | npm/global publish not approved; installer bundling pending |
-| Relay and push cloud                | Missing     | `docs/feature-platform-map.md`              | Deliberately deferred until local pairing is stable         |
+| Surface                             | Status      | Evidence                                                                         | Blocker                                                     |
+| ----------------------------------- | ----------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Desktop shell (Electron)            | Gated       | `apps/desktop/**`, desktop boundary checker                                      | Electron deps intentionally absent; not in root workspaces  |
+| macOS artifact (`.dmg`, `.zip`)     | Gated       | `apps/desktop/electron-builder.config.cjs`, `docs/desktop-unsigned-packaging.md` | Unsigned; no notarization; unsigned helper never run in CI  |
+| Windows artifact (`NSIS`)           | Gated       | `apps/desktop/electron-builder.config.cjs`, `docs/desktop-unsigned-packaging.md` | Native module rebuild unverified; unsigned                  |
+| Linux artifact (`AppImage`, `.deb`) | Gated       | `apps/desktop/electron-builder.config.cjs`, `docs/desktop-unsigned-packaging.md` | Native module smoke test missing                            |
+| Signing and notarization            | Missing     | this doc                                                                         | No certificate values, no CI signing job                    |
+| Desktop auto-update                 | Missing     | `docs/app-packaging-blueprint.md`                                                | GitHub Releases feed not wired                              |
+| PWA mobile client                   | Implemented | `packages/web/**`, app scaffold contract                                         | Install/offline behavior covered by web build               |
+| Expo native mobile                  | Gated       | `apps/mobile/app.config.js`                                                      | Native builds disabled; APNs entitlement flow pending       |
+| GitHub Releases distribution        | Missing     | `ROADMAP.md` milestone 6                                                         | No release workflow, checksums, or artifact upload          |
+| CLI distribution                    | Gated       | `packages/cli/**`                                                                | npm/global publish not approved; installer bundling pending |
+| Relay and push cloud                | Missing     | `docs/feature-platform-map.md`                                                   | Deliberately deferred until local pairing is stable         |
 
 ## Desktop (Electron) readiness
 
@@ -44,6 +44,22 @@ dependencies, reads secrets, or contacts a network.
   notifications, and any future screen capture.
 - Data handling: the desktop app must not persist terminal output or repo contents outside
   the local agent data directory, and must never log tokens or pairing secrets.
+
+## Unsigned local artifact builds
+
+Packaging helpers exist so contributors can produce **unsigned** local artifacts for smoke
+testing. None of them sign, notarize, publish, or upload. See
+`docs/desktop-unsigned-packaging.md` for the full contract.
+
+- **Implemented:** `scripts/package-desktop-unsigned.mjs` and the `package:unsigned*` scripts.
+  The helper is dry-run by default, refuses signing/publish credentials, and always passes
+  `--publish never`.
+- **Gated:** a real unsigned build on each host, because Electron and electron-builder are
+  intentionally absent from the scaffold today.
+- **Missing:** signed/notarized artifacts and any release upload.
+- Commands: `npm run package:desktop:unsigned` (dry run) and
+  `npm --prefix apps/desktop run package:unsigned:{mac,linux,win}` (build on the matching host).
+- Every target is marked **pending/manual** until its artifact evidence row is satisfied.
 
 ## PWA readiness
 
@@ -83,16 +99,16 @@ dependencies, reads secrets, or contacts a network.
 No artifact may be described as supported, released, signed, notarized, or store-ready until
 its row below is satisfied and the artifact is recorded in a GitHub Release.
 
-| Artifact                 | Status  | Evidence required before claiming support                    |
-| ------------------------ | ------- | ------------------------------------------------------------ |
-| macOS `.dmg`             | Missing | Signed + notarized build installed and smoke-tested on macOS |
-| macOS `.zip`             | Missing | Zipped app launches agent and serves the web UI              |
-| Windows `NSIS` installer | Missing | Native modules rebuilt; installed app starts agent           |
-| Linux `AppImage`         | Missing | `node-pty`/`better-sqlite3` runtime verified on Linux        |
-| Linux `.deb`             | Missing | Package installs and starts after AppImage is stable         |
-| Android `.apk`           | Missing | Expo build on GitHub Releases with device smoke test         |
-| iOS App Store build      | Missing | APNs entitlement flow automated; TestFlight build verified   |
-| CLI binary               | Missing | Bundled by installers and runnable as `termora`              |
+| Artifact                 | Status  | Evidence required before claiming support                    | Exact next evidence (command → observation)                                                                 |
+| ------------------------ | ------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| macOS `.dmg`             | Missing | Signed + notarized build installed and smoke-tested on macOS | `npm --prefix apps/desktop run package:unsigned:mac` → `release/desktop/*.dmg` installs, agent + web UI run |
+| macOS `.zip`             | Missing | Zipped app launches agent and serves the web UI              | Same unsigned build → unzip `release/desktop/*.zip`, app serves the web UI                                  |
+| Windows `NSIS` installer | Missing | Native modules rebuilt; installed app starts agent           | `npm --prefix apps/desktop run package:unsigned:win` → installer runs, agent starts on win32                |
+| Linux `AppImage`         | Missing | `node-pty`/`better-sqlite3` runtime verified on Linux        | `npm --prefix apps/desktop run package:unsigned:linux` → AppImage opens a real terminal on linux            |
+| Linux `.deb`             | Missing | Package installs and starts after AppImage is stable         | `npm --prefix apps/desktop run package:unsigned:linux` → `.deb` installs and starts the agent               |
+| Android `.apk`           | Missing | Expo build on GitHub Releases with device smoke test         | `npx expo build` (mobile, gated) → APK installs on a physical device                                        |
+| iOS App Store build      | Missing | APNs entitlement flow automated; TestFlight build verified   | Mobile gated: automate `aps-environment` flow → TestFlight build launches                                   |
+| CLI binary               | Missing | Bundled by installers and runnable as `termora`              | After an installer build → run `termora --help` from the installed app                                      |
 
 ## What `npm run check:platform-readiness` enforces
 
@@ -100,6 +116,8 @@ its row below is satisfied and the artifact is recorded in a GitHub Release.
 - This checklist declares the `implemented`, `gated`, and `missing` status categories.
 - Platform, privacy, and release topics above are present.
 - Desktop/mobile configs contain only placeholders, never signing secrets or push credentials.
+- The unsigned packaging helper exists, defaults to dry-run, refuses signing/publish credentials,
+  and always passes `--publish never`.
 - PR CI does not reference signing secrets.
 - Public docs make no unqualified claims (for example "store-ready", "submission-ready",
   "fully notarized", or "signed release available") without artifact evidence.
@@ -107,7 +125,9 @@ its row below is satisfied and the artifact is recorded in a GitHub Release.
 ## Known blockers
 
 1. No signing/notarization credentials or CI release job.
-2. Desktop build is a scaffold; Electron runtime and installer builds are disabled.
+2. Desktop build is a scaffold; Electron runtime and installer builds are disabled. The unsigned
+   helper `scripts/package-desktop-unsigned.mjs` can produce local artifacts once Electron and
+   electron-builder are installed on the matching host.
 3. Native mobile builds and APNs entitlement flow are not automated.
 4. No GitHub Releases artifact publication or checksum verification.
 5. Relay/push cloud is deferred until local pairing and the mobile shell are stable.

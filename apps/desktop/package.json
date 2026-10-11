@@ -9,7 +9,12 @@
     "package": "echo \"desktop scaffold: lifecycle wired via injected startAgent; electron-builder packaging not enabled yet\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
-    "check": "node ../../scripts/check-desktop-boundary.mjs"
+    "check": "node ../../scripts/check-desktop-boundary.mjs",
+    "smoke": "node ../../scripts/check-desktop-smoke.mjs",
+    "package:unsigned": "node ../../scripts/package-desktop-unsigned.mjs",
+    "package:unsigned:mac": "node ../../scripts/package-desktop-unsigned.mjs --target mac",
+    "package:unsigned:linux": "node ../../scripts/package-desktop-unsigned.mjs --target linux",
+    "package:unsigned:win": "node ../../scripts/package-desktop-unsigned.mjs --target win"
   },
   "devDependencies": {
     "tsx": "^4.19.0"
