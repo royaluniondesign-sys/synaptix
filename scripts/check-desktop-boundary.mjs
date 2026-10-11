@@ -11,8 +11,12 @@ const REQUIRED_FILES = [
   'apps/desktop/src/ipc-contract.ts',
   'apps/desktop/src/shell.ts',
   'apps/desktop/src/dev.ts',
+  'apps/desktop/src/window.ts',
+  'apps/desktop/src/main-window.ts',
   'apps/desktop/src/__tests__/desktop-shell.test.ts',
   'apps/desktop/src/__tests__/desktop-dev-shell.test.ts',
+  'apps/desktop/src/__tests__/desktop-window.test.ts',
+  'apps/desktop/src/__tests__/desktop-main-window.test.ts',
 ]
 
 const ELECTRON_KEYS = ['electron', 'electron-builder', 'electron-builder-squirrel-windows']
@@ -123,7 +127,10 @@ if (existsSync('apps/desktop/src/ipc-contract.ts')) {
       'export const DESKTOP_IPC_CHANNELS',
       "getStatus: 'termora:shell-status:get'",
       "status: 'termora:shell-status'",
+      "start: 'termora:shell:start'",
+      "stop: 'termora:shell:stop'",
       'export interface DesktopShellStatus',
+      'export interface IpcMainLike',
       'export function createTermoraPreloadApi',
       'export function exposeTermoraPreload',
       "TERMORA_PRELOAD_KEY = 'termora'",
@@ -153,6 +160,46 @@ if (existsSync('apps/desktop/src/shell.ts')) {
 if (existsSync('apps/desktop/src/dev.ts')) {
   const dev = read('apps/desktop/src/dev.ts')
   checkSnippets(dev, ['loadAgentStartFn', 'runHeadlessDevShell'], 'dev.ts')
+}
+
+if (existsSync('apps/desktop/src/window.ts')) {
+  const win = read('apps/desktop/src/window.ts')
+  checkSnippets(
+    win,
+    [
+      'export async function createBrowserWindow',
+      'export async function loadElectron',
+      "ELECTRON_WINDOW_MODULE = 'electron'",
+      'loadURL(',
+      'options.onClosed?.()',
+      'webPreferences:',
+      'contextIsolation',
+      'import type { ShellWindow }',
+    ],
+    'window.ts',
+  )
+  if (has(win, "from 'electron'")) {
+    fail('window.ts must not statically import electron; resolve it via loadElectron')
+  }
+}
+
+if (existsSync('apps/desktop/src/main-window.ts')) {
+  const mainWindow = read('apps/desktop/src/main-window.ts')
+  checkSnippets(
+    mainWindow,
+    [
+      'export function createDesktopMain',
+      'export function wireDesktopIpc',
+      'createBrowserWindow(',
+      'shell.ready()',
+      'shell.dispose()',
+      'DESKTOP_IPC_CHANNELS.start',
+      'DESKTOP_IPC_CHANNELS.stop',
+      'ipc.handle(',
+      'ipc.removeHandler(',
+    ],
+    'main-window.ts',
+  )
 }
 
 if (problems.length > 0) {

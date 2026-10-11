@@ -31,12 +31,40 @@ import {
   exposeTermoraPreload,
   type DesktopShellState,
   type DesktopShellStatus,
+  type IpcMainLike,
   type TermoraPreloadApi,
 } from './ipc-contract.js'
+import {
+  DEFAULT_WINDOW_HEIGHT,
+  DEFAULT_WINDOW_WIDTH,
+  ELECTRON_WINDOW_MODULE,
+  ELECTRON_WINDOW_SYMBOL,
+  createBrowserWindow,
+  loadElectron,
+  type BrowserWindowConstructorLike,
+  type BrowserWindowLike,
+  type CreateBrowserWindowOptions,
+  type ElectronLoader,
+  type ElectronWindowModule,
+  type WindowOptions,
+} from './window.js'
+import {
+  createDesktopMain,
+  wireDesktopIpc,
+  type DesktopMain,
+  type DesktopMainWindowOptions,
+} from './main-window.js'
 
 export { desktopRuntimePlan, describeAgentLaunch, createAgentLifecycle }
 export { buildAgentWebUrl, createDesktopShell, loadAgentStartFn, runHeadlessDevShell }
 export { DESKTOP_IPC_CHANNELS, TERMORA_PRELOAD_KEY, createTermoraPreloadApi, exposeTermoraPreload }
+export { createBrowserWindow, loadElectron, createDesktopMain, wireDesktopIpc }
+export {
+  DEFAULT_WINDOW_HEIGHT,
+  DEFAULT_WINDOW_WIDTH,
+  ELECTRON_WINDOW_MODULE,
+  ELECTRON_WINDOW_SYMBOL,
+}
 export type {
   DesktopRuntimePlan,
   AgentLaunchDescriptor,
@@ -50,7 +78,16 @@ export type {
   ShellWindow,
   DesktopShellState,
   DesktopShellStatus,
+  IpcMainLike,
   TermoraPreloadApi,
+  WindowOptions,
+  CreateBrowserWindowOptions,
+  ElectronLoader,
+  ElectronWindowModule,
+  BrowserWindowLike,
+  BrowserWindowConstructorLike,
+  DesktopMain,
+  DesktopMainWindowOptions,
 }
 
 export type DesktopBootstrap = {

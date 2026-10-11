@@ -10,6 +10,12 @@ interface TerminalPaneProps {
   wsClient: TerminalWSClient | null;
   messageBus: MessageBus;
   label?: string;
+  /**
+   * Returns raw (ANSI-intact) output chunks for a session. When provided, the
+   * pane replays existing output on mount so a newly mounted split pane shows
+   * the session's current screen instead of an empty terminal.
+   */
+  getSessionOutput?: (sessionId: string) => string[];
   /** When provided and wsClient is null, plays this demo script. */
   demoScript?: DemoScript;
 }
@@ -26,10 +32,18 @@ export function TerminalPane({
   wsClient,
   messageBus,
   label,
+  getSessionOutput,
   demoScript,
 }: TerminalPaneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { terminal, write, getDimensions } = useTerminal(containerRef);
+
+  // Replay buffered history so a freshly mounted pane shows the current screen
+  // before live output starts streaming in.
+  useEffect(() => {
+    if (!terminal || !getSessionOutput) return;
+    for (const chunk of getSessionOutput(sessionId)) write(chunk);
+  }, [terminal, getSessionOutput, sessionId, write]);
 
   // Subscribe to server messages for this session
   useEffect(() => {

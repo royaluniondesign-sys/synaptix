@@ -621,6 +621,9 @@ export function App() {
               connectionStatus={connectionStatus}
               latencyMs={latencyMs}
               authToken={auth.token}
+              wsClient={wsClient}
+              messageBus={messageBus}
+              getSessionOutput={getSessionOutput}
             />
           )}
           {view === 'terminal' && !activeSession && (

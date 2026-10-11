@@ -5,6 +5,7 @@ import { join, relative, resolve } from 'node:path';
 import { hostname } from 'node:os';
 import type { Express } from 'express';
 import { createFanoutWorktrees, listFanoutWorktrees, removeWorktree, slugify } from './worktree.js';
+import { collectGithubStatus } from './github.js';
 import { notificationStore } from './event-bus.js';
 
 type JobStatus = 'running' | 'success' | 'failed';
@@ -225,7 +226,7 @@ async function buildStatus() {
       { id: 'ci', name: 'GitHub CI', state: 'remote', available: true },
     ],
     gates: ['lint', 'typecheck', 'test', 'build'],
-    commands: ['git-status', 'run-gates', 'list-files', 'read-file', 'opencode-smoke', 'create-worktree-fanout', 'list-worktrees'],
+    commands: ['git-status', 'run-gates', 'list-files', 'read-file', 'opencode-smoke', 'create-worktree-fanout', 'list-worktrees', 'github-status'],
     worktrees: await listFanoutWorktrees(repoRoot),
     recentJobs: [...jobs.values()].slice(-8).reverse(),
     files: listFiles('.', 40),
@@ -288,6 +289,9 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
         case 'opencode-smoke':
           res.json({ action: body.action, result: await runCommand('/home/rud/.opencode/bin/opencode', ['--version']) });
           return;
+        case 'github-status':
+          res.json({ action: body.action, result: await collectGithubStatus(runCommand) });
+          return;
         case 'list-worktrees':
           res.json({ action: body.action, result: await listFanoutWorktrees(repoRoot) });
           return;
@@ -302,6 +306,16 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
     }
   });
 
+
+  app.get('/api/cockpit/github', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    try {
+      res.json(await collectGithubStatus(runCommand));
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unable to read GitHub status' });
+    }
+  });
 
   app.get('/api/cockpit/worktrees', async (req, res) => {
     const auth = await requireAuth(req, res);

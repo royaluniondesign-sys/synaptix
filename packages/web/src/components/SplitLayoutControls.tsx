@@ -1,5 +1,5 @@
 import type { Session } from '../lib/types';
-import { SPLIT_MODES, type SplitMode } from '../lib/split-layout';
+import { SPLIT_MODES, type SplitLayout, type SplitMode } from '../lib/split-layout';
 import { useSplitLayout } from '../hooks/useSplitLayout';
 
 const S = {
@@ -30,24 +30,33 @@ interface SplitLayoutControlsProps {
   onSessionSelect: (sessionId: string) => void;
 }
 
+export interface SplitLayoutControlsViewProps {
+  layout: SplitLayout;
+  setMode: (mode: SplitMode) => void;
+  assignActiveSession: (paneId: string) => void;
+  clearPane: (paneId: string) => void;
+  sessions: Session[];
+  activeSessionId: string | null;
+  onSessionSelect: (sessionId: string) => void;
+}
+
 /**
- * Visible split-layout placeholder.
+ * Controlled split-layout controls.
  *
  * It edits the persisted layout contract and shows which real session occupies
  * each pane; selecting a filled pane focuses that session and an empty pane
  * receives the active one. This is intentionally not a PTY multiplexer yet —
  * it is the UI/state half that a real split engine can render behind.
  */
-export function SplitLayoutControls({
+export function SplitLayoutControlsView({
+  layout,
+  setMode,
+  assignActiveSession,
+  clearPane,
   sessions,
   activeSessionId,
   onSessionSelect,
-}: SplitLayoutControlsProps) {
-  const { layout, setMode, assignActiveSession, clearPane } = useSplitLayout(
-    sessions,
-    activeSessionId,
-  );
-
+}: SplitLayoutControlsViewProps) {
   const nameFor = (sessionId: string | null): string | null =>
     sessionId === null ? null : (sessions.find((session) => session.id === sessionId)?.name ?? null);
 
@@ -181,5 +190,33 @@ export function SplitLayoutControls({
         })}
       </div>
     </div>
+  );
+}
+
+/**
+ * Self-contained controls that own their own persisted layout state. Prefer
+ * `SplitLayoutControlsView` when a parent already owns the layout (e.g. so it
+ * can also drive `MultiPaneTerminal`) to keep both surfaces in sync.
+ */
+export function SplitLayoutControls({
+  sessions,
+  activeSessionId,
+  onSessionSelect,
+}: SplitLayoutControlsProps) {
+  const { layout, setMode, assignActiveSession, clearPane } = useSplitLayout(
+    sessions,
+    activeSessionId,
+  );
+
+  return (
+    <SplitLayoutControlsView
+      layout={layout}
+      setMode={setMode}
+      assignActiveSession={assignActiveSession}
+      clearPane={clearPane}
+      sessions={sessions}
+      activeSessionId={activeSessionId}
+      onSessionSelect={onSessionSelect}
+    />
   );
 }

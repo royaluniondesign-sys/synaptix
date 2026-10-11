@@ -12,6 +12,10 @@ export const DESKTOP_IPC_CHANNELS = {
   getStatus: 'termora:shell-status:get',
   /** Main -> renderer: push shell status updates. */
   status: 'termora:shell-status',
+  /** Renderer -> main: start the agent and open the shell window. */
+  start: 'termora:shell:start',
+  /** Renderer -> main: close the window and stop the agent. */
+  stop: 'termora:shell:stop',
 } as const
 
 /** Lifecycle state of the desktop dev shell. */
@@ -40,11 +44,21 @@ export interface ContextBridgeLike {
   exposeInMainWorld(key: string, api: unknown): void
 }
 
+/** Structural subset of Electron's `IpcMain` the main process bridge needs. */
+export interface IpcMainLike {
+  handle(channel: string, listener: (event: unknown, ...args: unknown[]) => unknown): void
+  removeHandler(channel: string): void
+}
+
 /** API surface the preload exposes to the renderer as `window.termora`. */
 export interface TermoraPreloadApi {
   getStatus(): Promise<DesktopShellStatus | null>
   /** Subscribes to status pushes; returns an unsubscribe function. */
   onStatus(listener: (status: DesktopShellStatus) => void): () => void
+  /** Starts the agent and opens the shell window; resolves with new status. */
+  start(): Promise<DesktopShellStatus | null>
+  /** Closes the window and stops the agent; resolves with new status. */
+  stop(): Promise<DesktopShellStatus | null>
 }
 
 /** Global key the preload bridge exposes the API under. */
@@ -68,6 +82,14 @@ export function createTermoraPreloadApi(ipc: IpcRendererLike): TermoraPreloadApi
       return () => {
         ipc.removeListener(DESKTOP_IPC_CHANNELS.status, handler)
       }
+    },
+    async start(): Promise<DesktopShellStatus | null> {
+      const status = await ipc.invoke(DESKTOP_IPC_CHANNELS.start)
+      return (status as DesktopShellStatus | null) ?? null
+    },
+    async stop(): Promise<DesktopShellStatus | null> {
+      const status = await ipc.invoke(DESKTOP_IPC_CHANNELS.stop)
+      return (status as DesktopShellStatus | null) ?? null
     },
   }
 }

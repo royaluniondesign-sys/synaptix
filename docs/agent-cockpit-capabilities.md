@@ -24,6 +24,8 @@ Target workflow: click any UI element in a real Chromium window, capture its DOM
 
 Termora should browse PRs/issues/project boards, launch worktrees from tasks, and support review without leaving the cockpit. GitHub CI verification is already part of the development workflow.
 
+The current slice (backend, live) reports local `gh` availability, auth state, detected repo (name + default branch), recent branch hints, and open-PR hints through `GET /api/cockpit/github` and the `github-status` cockpit action. It runs only whitelisted, read-only commands via the safe runner, redacts `GITHUB_TOKEN`/`GH_TOKEN` from any captured output, and never requires static credentials in code — remote repo/PR calls are skipped when `gh` is unauthenticated. The web dashboard surfaces this in a compact "GitHub workflow" pane. Auth bonuses, PR task mapping, and webhook-driven boards remain future (`feature-platform-map` backend OAuth/webhooks).
+
 ### SSH Worktrees
 
 Run agents on a remote box with full file editing, git, terminal, reconnect, and port forwarding. Current remote workflow is proven with RUD-SERVER over Tailscale SSH; product UI remains to be built.

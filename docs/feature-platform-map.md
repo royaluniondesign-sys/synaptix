@@ -9,6 +9,7 @@ This maps the required agent-cockpit features to desktop, mobile, backend, and o
 | Terminal Splits | Saved split layouts and real PTYs | Read summaries/logs, send approved commands | PTY multiplexing, scrollback | Stream compressed output |
 | Design Mode | Chromium preview, DOM/CSS/screenshot capture | Review and approve visual changes | Preview server + capture jobs | Optional preview tunnel |
 | GitHub & Linear | PR/issues/tasks inside app | Triage/review/approve | OAuth, webhooks, task mapping | Webhook receiver |
+| GitHub workflow (live) | gh auth/repo status + branch/PR hints via local `gh` | Triage/review/approve UI | `GET /api/cockpit/github`, `github-status` action | OAuth bonuses + webhooks |
 | SSH Worktrees | Remote host registry and worktree UI | Monitor remote agents | Remote agent install, SSH, port forward | NAT relay optional |
 | Annotate AI Diffs | Inline diff comments and review flow | Quick review/comment | Diff parser and prompt→change trace | Share review state |
 | Drag Files to Agents | Drag files/images into prompts | Upload photo/file/document | Attachment store, expiry, privacy | Optional transfer relay |

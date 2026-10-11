@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Session } from '../lib/types';
-import type { ConnectionStatus } from '../lib/ws-client';
-import { SplitLayoutControls } from './SplitLayoutControls';
+import type { ConnectionStatus, TerminalWSClient } from '../lib/ws-client';
+import type { MessageBus } from '../lib/message-bus';
+import { useSplitLayout } from '../hooks/useSplitLayout';
+import { SplitLayoutControlsView } from './SplitLayoutControls';
+import { MultiPaneTerminal } from './MultiPaneTerminal';
 
 interface DashboardViewProps {
   sessions: Session[];
@@ -12,6 +15,9 @@ interface DashboardViewProps {
   connectionStatus: ConnectionStatus;
   latencyMs: number | null;
   authToken: string | null;
+  wsClient: TerminalWSClient | null;
+  messageBus: MessageBus;
+  getSessionOutput: (sessionId: string) => string[];
 }
 
 type IconName = 'terminal' | 'branch' | 'bot' | 'files' | 'search' | 'settings' | 'close' | 'desktop' | 'plus' | 'mobile' | 'github' | 'activity';
@@ -24,6 +30,19 @@ type CockpitStatus = { machine: string; root: string; git: { branch: string; dir
 type CapabilityState = 'live' | 'backend' | 'planned';
 type CapabilityItem = { name: string; state: CapabilityState; detail: string; action: string };
 type FilePreview = { path: string; size: number; truncated: boolean; binary: boolean; content: string };
+type GithubStatus = {
+  installed: boolean;
+  version: string | null;
+  authenticated: boolean;
+  account: string | null;
+  host: string | null;
+  scopes: string[];
+  repo: { nameWithOwner: string | null; defaultBranch: string | null };
+  branchHints: string[];
+  prHints: Array<{ number: number; title: string; headRefName: string; state: string }>;
+  notes: string[];
+  checkedAt: string;
+};
 
 
 const TASKS: TaskItem[] = [
@@ -60,7 +79,7 @@ const CAPABILITIES: CapabilityItem[] = [
   { name: 'Parallel Worktrees', state: 'backend', detail: 'worktree tests/foundation', action: 'fan-out UI + compare winner' },
   { name: 'Terminal Splits', state: 'backend', detail: 'real PTY/tmux sessions', action: 'user-created split layouts' },
   { name: 'Design Mode', state: 'planned', detail: 'browser capture tooling exists', action: 'DOM/CSS/screenshot prompt capture' },
-  { name: 'GitHub & Linear', state: 'planned', detail: 'CI/GitHub verified externally', action: 'in-app PR/issues/task boards' },
+  { name: 'GitHub & Linear', state: 'backend', detail: 'gh auth/repo/branch status slice', action: 'in-app PR/issues/task boards' },
   { name: 'SSH Worktrees', state: 'planned', detail: 'remote server workflow proven', action: 'host registry + SSH spawn' },
   { name: 'Annotate AI Diffs', state: 'planned', detail: 'git status endpoints started', action: 'inline diff comments to agent' },
   { name: 'Drag Files to Agents', state: 'backend', detail: 'file-tree API foundation', action: 'attachments into prompts' },
@@ -191,13 +210,51 @@ function CapabilityCoverage({ onAction }: { onAction: (action: string) => void }
       <div className="tm-oct-pane-head"><div><Icon name="activity" /><strong>Feature buildout</strong></div><span>{CAPABILITIES.length} surfaces</span></div>
       <div className="tm-oct-capability-grid">
         {visible.map((item) => (
-          <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} onClick={() => onAction(item.name === 'Parallel Worktrees' ? 'list worktrees' : item.state === 'planned' ? 'git-status' : 'run-gates')}>
+          <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} onClick={() => onAction(item.name === 'Parallel Worktrees' ? 'list worktrees' : item.name === 'GitHub & Linear' ? 'github-status' : item.state === 'planned' ? 'git-status' : 'run-gates')}>
             <div><strong>{item.name}</strong><em>{item.state}</em></div>
             <span>{item.detail}</span>
             <small>{item.action}</small>
           </button>
         ))}
       </div>
+    </section>
+  );
+}
+
+function GithubWorkflowPane({ status, error, onRefresh }: { status: GithubStatus | null; error: string | null; onRefresh: () => void }) {
+  return (
+    <section className="tm-oct-github-pane">
+      <div className="tm-oct-pane-head">
+        <div><Icon name="github" /><strong>GitHub workflow</strong></div>
+        <button type="button" className="tm-oct-github-refresh" onClick={onRefresh}>Refresh</button>
+      </div>
+      {error ? (
+        <p className="tm-oct-github-note">{error}</p>
+      ) : !status ? (
+        <p className="tm-oct-github-note">Checking gh CLI…</p>
+      ) : (
+        <>
+          <div className="tm-oct-github-grid">
+            <div><span>gh</span><strong>{status.installed ? status.version ?? 'installed' : 'not installed'}</strong></div>
+            <div><span>auth</span><strong>{status.authenticated ? status.account ?? 'authenticated' : 'anonymous'}</strong></div>
+            <div><span>repo</span><strong>{status.repo.nameWithOwner ?? 'none detected'}</strong></div>
+            <div><span>default</span><strong>{status.repo.defaultBranch ?? '—'}</strong></div>
+          </div>
+          {status.branchHints.length > 0 && (
+            <div className="tm-oct-github-hints">
+              {status.branchHints.slice(0, 6).map((branch) => <em key={branch}>{branch}</em>)}
+            </div>
+          )}
+          {status.prHints.length > 0 && (
+            <div className="tm-oct-github-prs">
+              {status.prHints.slice(0, 3).map((pr) => (
+                <div key={pr.number}><strong>#{pr.number}</strong><span>{pr.title}</span><em>{pr.state}</em></div>
+              ))}
+            </div>
+          )}
+          {status.notes.length > 0 && <p className="tm-oct-github-note">{status.notes[0]}</p>}
+        </>
+      )}
     </section>
   );
 }
@@ -229,8 +286,10 @@ function TerminalPane({ title, subtitle, children, active = false }: { title: st
   );
 }
 
-function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, onSessionSelect, onCloseSession }: Pick<DashboardViewProps, 'sessions' | 'activeSessionId' | 'onSessionSelect' | 'onCloseSession'> & { activeTask: TaskItem; activeAgent: AgentItem }) {
+function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, onSessionSelect, onCloseSession, wsClient, messageBus, getSessionOutput }: Pick<DashboardViewProps, 'sessions' | 'activeSessionId' | 'onSessionSelect' | 'onCloseSession' | 'wsClient' | 'messageBus' | 'getSessionOutput'> & { activeTask: TaskItem; activeAgent: AgentItem }) {
   const [confirmClose, setConfirmClose] = useState<string | null>(null);
+  const { layout, setMode, assignActiveSession, clearPane } = useSplitLayout(sessions, activeSessionId);
+  const multiPane = layout.mode !== 'single';
   const active = sessions.find((s) => s.id === activeSessionId) ?? sessions[0];
   const displaySessions = sessions.length ? sessions : [{ id: 'demo', name: activeTask.title, cwd: '/home/rud/termora', status: 'run', snapshot: '' } as Session];
   const handleClose = useCallback((session: Session) => (event: React.MouseEvent) => {
@@ -249,12 +308,30 @@ function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, o
           </button>
         ))}
       </div>
-      <SplitLayoutControls
+      <SplitLayoutControlsView
+        layout={layout}
+        setMode={setMode}
+        assignActiveSession={assignActiveSession}
+        clearPane={clearPane}
         sessions={sessions}
         activeSessionId={activeSessionId}
         onSessionSelect={onSessionSelect}
       />
-      <pre className="tm-oct-terminal main" dangerouslySetInnerHTML={{ __html: fallback }} />
+      {multiPane ? (
+        <MultiPaneTerminal
+          layout={layout}
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          wsClient={wsClient}
+          messageBus={messageBus}
+          getSessionOutput={getSessionOutput}
+          onSessionSelect={onSessionSelect}
+          onAssignActiveSession={assignActiveSession}
+          onClearPane={clearPane}
+        />
+      ) : (
+        <pre className="tm-oct-terminal main" dangerouslySetInnerHTML={{ __html: fallback }} />
+      )}
       <div className="tm-oct-inputbar"><span>›</span><em>Actions remain live: tasks, file tree, agents, mobile resume</em></div>
     </section>
   );
@@ -304,7 +381,7 @@ function PhonePreview({ connectionStatus, latencyMs, activeTask, phoneMode, setP
   );
 }
 
-export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCreateSession, onCloseSession, connectionStatus, latencyMs, authToken }: DashboardViewProps) {
+export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCreateSession, onCloseSession, connectionStatus, latencyMs, authToken, wsClient, messageBus, getSessionOutput }: DashboardViewProps) {
   const [activeTaskId, setActiveTaskId] = useState(TASKS[0].id);
   const [activeAgentId, setActiveAgentId] = useState(AGENTS[0].id);
   const [activeFile, setActiveFile] = useState('packages/web/src/components/DashboardView.tsx');
@@ -312,6 +389,8 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   const [phoneMode, setPhoneMode] = useState('desktop');
   const [cockpitStatus, setCockpitStatus] = useState<CockpitStatus | null>(null);
   const [cockpitError, setCockpitError] = useState<string | null>(null);
+  const [githubStatus, setGithubStatus] = useState<GithubStatus | null>(null);
+  const [githubError, setGithubError] = useState<string | null>(null);
   const [lastBackendAction, setLastBackendAction] = useState<string>('status');
   const [filePreview, setFilePreview] = useState<FilePreview | null>(null);
   const [worktreeOutput, setWorktreeOutput] = useState<string | null>(null);
@@ -334,6 +413,20 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   }, [authHeaders]);
 
   useEffect(() => { void refreshCockpitStatus(); }, [refreshCockpitStatus]);
+
+  const refreshGithubStatus = useCallback(async () => {
+    if (!authHeaders) return;
+    try {
+      const response = await fetch('/api/cockpit/github', { headers: authHeaders });
+      if (!response.ok) throw new Error(`github ${response.status}`);
+      setGithubStatus(await response.json() as GithubStatus);
+      setGithubError(null);
+    } catch (error) {
+      setGithubError(error instanceof Error ? error.message : 'github status failed');
+    }
+  }, [authHeaders]);
+
+  useEffect(() => { void refreshGithubStatus(); }, [refreshGithubStatus]);
 
   useEffect(() => {
     if (!authHeaders) return;
@@ -410,11 +503,12 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
       if (!response.ok) throw new Error(`action ${backendAction} ${response.status}`);
       await response.json();
       await refreshCockpitStatus();
+      if (backendAction === 'github-status') void refreshGithubStatus();
       setCockpitError(null);
     } catch (error) {
       setCockpitError(error instanceof Error ? error.message : 'cockpit action failed');
     }
-  }, [authHeaders, onCreateSession, refreshCockpitStatus, runWorktreeAction]);
+  }, [authHeaders, onCreateSession, refreshCockpitStatus, refreshGithubStatus, runWorktreeAction]);
   const backendFiles: FileItem[] = useMemo(() => cockpitStatus?.files.entries.map((entry) => ({ path: entry.path, kind: entry.kind, status: entry.path === activeFile ? 'modified' : 'clean' })) ?? FILES, [activeFile, cockpitStatus]);
   const backendAgent = cockpitStatus?.agents.find((agent) => agent.id === activeAgentId);
   const effectiveAgent = backendAgent ? { ...activeAgent, state: backendAgent.state === 'ready' ? 'queued' as const : activeAgent.state, work: backendAgent.available ? 'backend connected' : 'backend unavailable' } : activeAgent;
@@ -429,11 +523,12 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
       <div className="tm-orca-grid operational">
         <WorkspaceSidebar activeTaskId={activeTaskId} activeCommand={activeCommand} onTaskSelect={setActiveTaskId} onCommand={runBackendAction} onCreateSession={onCreateSession} />
         <main className="tm-orca-center operational">
-          <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} activeTask={activeTask} activeAgent={effectiveAgent} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} />
+          <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} activeTask={activeTask} activeAgent={effectiveAgent} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} wsClient={wsClient} messageBus={messageBus} getSessionOutput={getSessionOutput} />
           <div className="tm-oct-split-stack operational">
             <UtilityPanel activeTask={activeTask} activeCommand={`${activeCommand} · backend ${lastBackendAction}${cockpitError ? ` · ${cockpitError}` : ''}`} />
             <AgentQueue activeAgentId={activeAgentId} onAgentSelect={setActiveAgentId} />
             <CapabilityCoverage onAction={runBackendAction} />
+            <GithubWorkflowPane status={githubStatus} error={githubError} onRefresh={() => void refreshGithubStatus()} />
             <TerminalPane title="selected file / run output" subtitle={activeFile} active>
 {previewText}
             </TerminalPane>
