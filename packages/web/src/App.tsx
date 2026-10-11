@@ -3,11 +3,13 @@ import { DashboardView } from './components/DashboardView';
 import { TerminalView } from './components/TerminalView';
 import { TunnelsView } from './components/TunnelsView';
 import { SettingsView } from './components/SettingsView';
+import { NotificationsView } from './components/NotificationsView';
 import { AuthScreen } from './components/AuthScreen';
 import { useAuth } from './hooks/useAuth';
 import { useSessionManager } from './hooks/useSessionManager';
 import { useSkin } from './hooks/useSkin';
 import { useLatency } from './hooks/useLatency';
+import { useNotifications } from './hooks/useNotifications';
 import type { View } from './lib/types';
 import type { ConnectionStatus, TerminalWSClient } from './lib/ws-client';
 
@@ -60,6 +62,16 @@ const TAB_CONFIG = [
     ),
   },
   {
+    id: 'notifications' as const,
+    label: 'Notifications',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+    ),
+  },
+  {
     id: 'settings' as const,
     label: 'Settings',
     icon: (
@@ -71,10 +83,11 @@ const TAB_CONFIG = [
   },
 ];
 
-function BottomTabBar({ current, onChange, sessionCount }: {
+function BottomTabBar({ current, onChange, sessionCount, unreadCount }: {
   current: View;
   onChange: (v: View) => void;
   sessionCount: number;
+  unreadCount: number;
 }) {
   return (
     <div style={{
@@ -134,6 +147,28 @@ function BottomTabBar({ current, onChange, sessionCount }: {
                 {sessionCount > 9 ? '9+' : sessionCount}
               </span>
             )}
+            {tab.id === 'notifications' && unreadCount > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: 6,
+                right: '50%',
+                transform: 'translateX(10px)',
+                minWidth: 14,
+                height: 14,
+                padding: '0 3px',
+                boxSizing: 'border-box',
+                borderRadius: 8,
+                background: S.error,
+                color: '#fff',
+                fontSize: 8,
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </button>
         );
       })}
@@ -178,11 +213,12 @@ function FABButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function DesktopSidebar({ current, onChange, onNewSession, sessionCount, connectionStatus }: {
+function DesktopSidebar({ current, onChange, onNewSession, sessionCount, unreadCount, connectionStatus }: {
   current: View;
   onChange: (v: View) => void;
   onNewSession: () => void;
   sessionCount: number;
+  unreadCount: number;
   connectionStatus: ConnectionStatus;
 }) {
   const isConnected = connectionStatus === 'connected';
@@ -255,6 +291,16 @@ function DesktopSidebar({ current, onChange, onNewSession, sessionCount, connect
                   padding: '1px 6px', borderRadius: 8,
                 }}>
                   {sessionCount}
+                </span>
+              )}
+              {tab.id === 'notifications' && unreadCount > 0 && (
+                <span style={{
+                  fontSize: 9, fontWeight: 700,
+                  background: S.error,
+                  color: '#fff',
+                  padding: '1px 6px', borderRadius: 8,
+                }}>
+                  {unreadCount}
                 </span>
               )}
             </button>
@@ -446,6 +492,7 @@ export function App() {
   } = useSessionManager(auth, handleUnauthorized);
   const { skin, setSkin, perKeyColors, setPerKeyColors, keyboardMode, setKeyboardMode } = useSkin();
   const latencyMs = useLatency(wsClient, connectionStatus);
+  const { notifications, unreadCount, markAllRead } = useNotifications(auth.token);
 
   const [view, setView] = useState<View>('dashboard');
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -557,6 +604,7 @@ export function App() {
           onChange={handleTabChange}
           onNewSession={handleCreateSession}
           sessionCount={sessions.length}
+          unreadCount={unreadCount}
           connectionStatus={connectionStatus}
         />
       )}
@@ -585,6 +633,14 @@ export function App() {
           {view === 'tunnels' && (
             <TunnelsView wsClient={wsClient} connectionStatus={connectionStatus} />
           )}
+          {view === 'notifications' && (
+            <NotificationsView
+              notifications={notifications}
+              unreadCount={unreadCount}
+              connectionStatus={connectionStatus}
+              onMarkAllRead={markAllRead}
+            />
+          )}
           {view === 'settings' && (
             <SettingsView
               skin={skin}
@@ -612,6 +668,7 @@ export function App() {
             current={view}
             onChange={handleTabChange}
             sessionCount={sessions.length}
+            unreadCount={unreadCount}
           />
         )}
       </div>

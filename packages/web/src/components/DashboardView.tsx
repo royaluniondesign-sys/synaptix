@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Session } from '../lib/types';
 import type { ConnectionStatus } from '../lib/ws-client';
+import { SplitLayoutControls } from './SplitLayoutControls';
 
 interface DashboardViewProps {
   sessions: Session[];
@@ -248,6 +249,11 @@ function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, o
           </button>
         ))}
       </div>
+      <SplitLayoutControls
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onSessionSelect={onSessionSelect}
+      />
       <pre className="tm-oct-terminal main" dangerouslySetInnerHTML={{ __html: fallback }} />
       <div className="tm-oct-inputbar"><span>›</span><em>Actions remain live: tasks, file tree, agents, mobile resume</em></div>
     </section>

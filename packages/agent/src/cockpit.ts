@@ -5,6 +5,7 @@ import { join, relative, resolve } from 'node:path';
 import { hostname } from 'node:os';
 import type { Express } from 'express';
 import { createFanoutWorktrees, listFanoutWorktrees, removeWorktree, slugify } from './worktree.js';
+import { notificationStore } from './event-bus.js';
 
 type JobStatus = 'running' | 'success' | 'failed';
 
@@ -144,15 +145,27 @@ function startJob(action: string, command: string, args: string[], cwd = repoRoo
     job.exitCode = code;
     job.status = code === 0 ? 'success' : 'failed';
     job.finishedAt = new Date().toISOString();
+    notifyJobFinished(job);
   });
   child.on('error', (error) => {
     job.exitCode = 1;
     job.status = 'failed';
     job.finishedAt = new Date().toISOString();
     job.output = `${job.output}\n${error.message}`.slice(-MAX_OUTPUT);
+    notifyJobFinished(job);
   });
 
   return job;
+}
+
+/** Surfaces a finished async job as a cockpit notification (unread event). */
+function notifyJobFinished(job: CockpitJob): void {
+  if (job.status === 'running') return;
+  notificationStore.push({
+    title: job.status === 'success' ? 'Job finished' : 'Job failed',
+    body: `${job.action} — ${job.command}${job.exitCode == null ? '' : ` (exit ${job.exitCode})`}`,
+    level: job.status === 'success' ? 'success' : 'failed',
+  });
 }
 
 

@@ -8,7 +8,11 @@ const REQUIRED_FILES = [
   'apps/desktop/src/runtime-plan.ts',
   'apps/desktop/src/agent-host.ts',
   'apps/desktop/src/agent-lifecycle.ts',
+  'apps/desktop/src/ipc-contract.ts',
+  'apps/desktop/src/shell.ts',
+  'apps/desktop/src/dev.ts',
   'apps/desktop/src/__tests__/desktop-shell.test.ts',
+  'apps/desktop/src/__tests__/desktop-dev-shell.test.ts',
 ]
 
 const ELECTRON_KEYS = ['electron', 'electron-builder', 'electron-builder-squirrel-windows']
@@ -47,6 +51,17 @@ if (desktopPkg) {
       if (key in deps) fail(`desktop ${section} declares ${key}; scaffold must not claim packaging`)
     }
   }
+}
+
+// The desktop app must stay outside root npm workspaces so a heavy desktop
+// dependency can never change the root install/CI surface.
+try {
+  const rootPkg = JSON.parse(read('package.json'))
+  const workspaces = rootPkg.workspaces ?? []
+  if (workspaces.some((pattern) => String(pattern).includes('apps/')))
+    fail('root workspaces must not include apps/**; desktop boundary stays isolated')
+} catch (error) {
+  fail(`could not read root package.json: ${error.message}`)
 }
 
 if (existsSync('apps/desktop/src/runtime-plan.ts')) {
@@ -93,6 +108,51 @@ if (existsSync('apps/desktop/src/main.ts')) {
     ['createDesktopBootstrap', 'desktopRuntimePlan', 'describeAgentLaunch', 'createAgentLifecycle'],
     'main.ts',
   )
+  checkSnippets(
+    main,
+    ['createDesktopShell', 'loadAgentStartFn', 'exposeTermoraPreload'],
+    'main.ts re-exports',
+  )
+}
+
+if (existsSync('apps/desktop/src/ipc-contract.ts')) {
+  const ipc = read('apps/desktop/src/ipc-contract.ts')
+  checkSnippets(
+    ipc,
+    [
+      'export const DESKTOP_IPC_CHANNELS',
+      "getStatus: 'termora:shell-status:get'",
+      "status: 'termora:shell-status'",
+      'export interface DesktopShellStatus',
+      'export function createTermoraPreloadApi',
+      'export function exposeTermoraPreload',
+      "TERMORA_PRELOAD_KEY = 'termora'",
+    ],
+    'ipc-contract.ts',
+  )
+}
+
+if (existsSync('apps/desktop/src/shell.ts')) {
+  const shell = read('apps/desktop/src/shell.ts')
+  checkSnippets(
+    shell,
+    [
+      'export function createDesktopShell',
+      'export async function loadAgentStartFn',
+      'export function buildAgentWebUrl',
+      'export async function runHeadlessDevShell',
+      'createAgentLifecycle(',
+      'AGENT_RUNTIME_SYMBOL',
+      'lifecycle.start()',
+      'lifecycle.stop()',
+    ],
+    'shell.ts',
+  )
+}
+
+if (existsSync('apps/desktop/src/dev.ts')) {
+  const dev = read('apps/desktop/src/dev.ts')
+  checkSnippets(dev, ['loadAgentStartFn', 'runHeadlessDevShell'], 'dev.ts')
 }
 
 if (problems.length > 0) {

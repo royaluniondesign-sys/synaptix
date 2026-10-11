@@ -1,6 +1,24 @@
 /** Shell types supported by the PTY manager. */
 export type ShellType = 'zsh' | 'tmux' | 'claude';
 
+/** Severity level of a cockpit notification event. */
+export type NotificationLevel = 'success' | 'failed' | 'info';
+
+/**
+ * A cockpit notification/event item in the unread model. Produced by the
+ * in-memory NotificationStore (packages/agent/src/event-bus.ts) and mirrored
+ * to the web UI. The web copy lives in packages/web/src/lib/types.ts — keep
+ * the two in sync.
+ */
+export interface NotificationEvent {
+  id: string;
+  title: string;
+  body: string;
+  level: NotificationLevel;
+  createdAt: string; // ISO 8601 UTC
+  read: boolean;
+}
+
 /** Messages sent from client to server over WebSocket. */
 export type ClientMessage =
   | { type: 'stdin'; sessionId: string; data: string }

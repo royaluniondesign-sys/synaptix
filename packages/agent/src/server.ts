@@ -17,6 +17,7 @@ import { deriveDeviceName } from './device-name.js';
 import { createSSERouter } from './sse-handler.js';
 import { getTunnelInfo } from './tunnel.js';
 import { mountCockpitRoutes } from './cockpit.js';
+import { notificationStore, type NotificationStore } from './event-bus.js';
 import type { DbStatements } from './db.js';
 import type { AgentConfig } from './config.js';
 
@@ -45,12 +46,17 @@ export interface ServerContext {
 /**
  * Creates and configures the Express app, HTTP server, and WebSocketServer.
  * Mounts auth routes, SSE routes, health check, and static file serving.
+ *
+ * `deps.notificationStore` lets tests inject an isolated store; production uses
+ * the shared singleton (also fed by cockpit job completions).
  */
 export function createAppServer(
   config: AgentConfig,
   statements: DbStatements,
+  deps: { notificationStore?: NotificationStore } = {},
 ): ServerContext {
   const app = express();
+  const store = deps.notificationStore ?? notificationStore;
 
   // Trust proxy headers only from the local tunnel process (cloudflared, ngrok,
   // SSH) — it connects over loopback and appends the real client IP to
@@ -113,8 +119,29 @@ export function createAppServer(
 
   mountCockpitRoutes(app, (req, res) => requireAuth(req, res, config, statements));
 
+  // Notification/event feed — in-memory unread model. The web UI polls these
+  // endpoints and live-streams updates over SSE. There are no external push
+  // credentials in the project, so the unread counter is the only signal that
+  // spans devices; no APNs/FCM here.
+  app.get('/api/events', async (req, res) => {
+    const auth = await requireAuth(req, res, config, statements);
+    if (!auth) return;
+    res.json({ events: store.getEvents(), unreadCount: store.getUnreadCount() });
+  });
+
+  app.post('/api/events/read', async (req, res) => {
+    const auth = await requireAuth(req, res, config, statements);
+    if (!auth) return;
+    store.markAllRead();
+    res.json({ unreadCount: 0 });
+  });
+
   // SSE routes
-  const sseRouter = createSSERouter();
+  const sseRouter = createSSERouter({
+    jwtSecret: config.jwtSecret,
+    statements,
+    notificationStore: store,
+  });
   app.use('/api/sse', sseRouter);
 
   // Static file serving (web dist)

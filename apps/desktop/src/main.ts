@@ -14,8 +14,29 @@ import {
   type StartAgentFn,
   type StartAgentOptionsLike,
 } from './agent-lifecycle.js'
+import {
+  buildAgentWebUrl,
+  createDesktopShell,
+  loadAgentStartFn,
+  runHeadlessDevShell,
+  type DesktopShell,
+  type DesktopShellOptions,
+  type HeadlessDevShell,
+  type ShellWindow,
+} from './shell.js'
+import {
+  DESKTOP_IPC_CHANNELS,
+  TERMORA_PRELOAD_KEY,
+  createTermoraPreloadApi,
+  exposeTermoraPreload,
+  type DesktopShellState,
+  type DesktopShellStatus,
+  type TermoraPreloadApi,
+} from './ipc-contract.js'
 
 export { desktopRuntimePlan, describeAgentLaunch, createAgentLifecycle }
+export { buildAgentWebUrl, createDesktopShell, loadAgentStartFn, runHeadlessDevShell }
+export { DESKTOP_IPC_CHANNELS, TERMORA_PRELOAD_KEY, createTermoraPreloadApi, exposeTermoraPreload }
 export type {
   DesktopRuntimePlan,
   AgentLaunchDescriptor,
@@ -23,6 +44,13 @@ export type {
   AgentLifecycle,
   StartAgentFn,
   StartAgentOptionsLike,
+  DesktopShell,
+  DesktopShellOptions,
+  HeadlessDevShell,
+  ShellWindow,
+  DesktopShellState,
+  DesktopShellStatus,
+  TermoraPreloadApi,
 }
 
 export type DesktopBootstrap = {

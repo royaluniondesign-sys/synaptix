@@ -5,10 +5,13 @@
   "description": "Desktop packaging scaffold for the Termora cockpit app.",
   "type": "module",
   "scripts": {
-    "dev": "echo \"desktop scaffold: startAgent() is extracted; wire Electron main to createAgentLifecycle(startAgent) and load packages/web/dist\"",
+    "dev": "npx --yes tsx src/dev.ts",
     "package": "echo \"desktop scaffold: lifecycle wired via injected startAgent; electron-builder packaging not enabled yet\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
     "check": "node ../../scripts/check-desktop-boundary.mjs"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
   }
 }

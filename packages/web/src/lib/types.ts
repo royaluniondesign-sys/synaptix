@@ -21,7 +21,26 @@ export interface Session {
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 
-export type View = 'dashboard' | 'terminal' | 'tunnels' | 'settings' | 'reconnect';
+export type View = 'dashboard' | 'terminal' | 'tunnels' | 'notifications' | 'settings' | 'reconnect';
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+export type NotificationLevel = 'success' | 'failed' | 'info';
+
+/**
+ * A cockpit notification/event item in the unread model. Mirrors the agent's
+ * NotificationEvent (packages/agent/src/types.ts) — keep the two in sync. The
+ * agent is the single source of truth; the web copy exists so the UI never has
+ * to reach into a server module.
+ */
+export interface NotificationEvent {
+  id: string;
+  title: string;
+  body: string;
+  level: NotificationLevel;
+  createdAt: string; // ISO 8601 UTC
+  read: boolean;
+}
 
 // ── Keyboard Skins ────────────────────────────────────────────────────────────
 
