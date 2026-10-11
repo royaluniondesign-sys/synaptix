@@ -58,13 +58,28 @@ Compared with single-agent dashboards, Termora is designed to become the machine
 
 ## What works now
 
+Termora now has a verified local-first cockpit foundation. The current repo state is intentionally split between **implemented**, **guarded**, and **roadmap** so the project page does not pretend platform work is finished before artifacts exist.
+
+### Implemented and verified
+
 - **Real PTY streaming** — zsh/bash/tmux/vim/htop/Claude Code/OpenCode work as real terminal sessions.
-- **PWA mobile UI** — install to home screen, fullscreen, custom terminal keyboard, touch action bar, session grid.
-- **Secure onboarding** — QR/bootstrap token, JWT session auth, rate-limited auth endpoints.
+- **PWA mobile/browser UI** — install to home screen, fullscreen, custom terminal keyboard, touch action bar, session grid, and responsive cockpit navigation.
+- **Secure onboarding** — QR/bootstrap token exchange, JWT session auth, rate-limited auth endpoints, and token-redacted dogfood checks.
 - **Multi-session control** — create, rename, close, reconnect, preview, and resume terminal sessions.
 - **Session persistence** — tmux control mode when available, with fallback to raw PTY.
-- **Machine/tunnel status UI** — live dashboard, tunnel cards, QR pairing, and copyable access URL.
-- **Connectivity fallback** — LAN/Wi-Fi today, with ngrok/SSH tunnel plumbing in the agent.
+- **Agent cockpit backend** — protected cockpit status, file listing, safe file preview, whitelisted actions, job status, fan-out/list/delete worktree routes, read-only GitHub status, events, and unread notification model.
+- **Cockpit UI slices** — file inspector, GitHub workflow status, notifications/unread panel, controlled split layout, and multi-pane terminal rendering foundations.
+- **CLI MVP** — `termora help`, `version`, `status`, and `file <path>` with local fallback or authenticated remote API mode.
+- **Desktop app boundary** — Electron main/preload/launcher contracts, dynamic Electron loader, desktop lifecycle tests, desktop smoke and launch-smoke contracts.
+- **Dogfood and release gates** — `check:cockpit`, `check:web-headless`, `check:desktop-boundary`, `check:desktop-smoke`, `check:desktop-launch`, `check:platform-readiness`, and `check:security-audit` run locally/CI.
+- **Security hygiene** — production audit gate is clean; desktop out-of-workspace audit is separately checked before release work.
+
+### Guarded, not yet released
+
+- **Unsigned desktop packaging** — dry-run helper and electron-builder config exist, but no `.dmg`, `.zip`, NSIS, AppImage, or `.deb` artifact is published yet.
+- **Electron GUI launch** — contracts and smoke checks exist; real host GUI launch and installed-app smoke remain pending.
+- **Native mobile** — Expo scaffold exists; secure storage, pairing flow, push, APK/TestFlight/App Store builds remain pending.
+- **Store/release readiness** — docs and checkers enforce honest claims, but signing, notarization, SBOM/provenance, release uploads, checksums, and store metadata remain pending.
 
 ## Where it is going
 
@@ -72,6 +87,31 @@ Termora is evolving into an installable, multi-device developer cockpit. The tar
 
 | Capability | Status | Termora target |
 | --- | --- | --- |
+| Mobile companion | **Live PWA / native scaffold** | Monitor sessions from phone, resume work, steer agents, and receive finish/needs-input notifications. Native wrappers/APK/App Store builds are roadmap. |
+| Parallel worktrees | **Backend foundation + UI actions** | Fan one prompt across isolated git worktrees, compare outputs, and merge the winner. Worktree tests/fan-out exist; full compare/winner UI is in progress. |
+| Terminal splits | **Partial UI + model** | Desktop-grade split panes, persistent scrollback, and restart-safe layouts. Current app has real PTYs, tmux persistence, and controlled multi-pane rendering. |
+| Design mode | **Roadmap** | Inspect a live Chromium surface, capture HTML/CSS/screenshot context, and send it into an agent prompt. |
+| GitHub/project workflows | **Read-only live status** | Browse PRs/issues/project boards, open worktrees from tasks, and review without context switching. Current slice reports local `gh` auth/repo/branch/PR hints. |
+| SSH worktrees | **Ops-proven, product pending** | Run agents on a remote box with file editing, git, terminals, reconnect, and port forwarding. Product host registry/UI is pending. |
+| Annotate AI diffs | **Roadmap** | Comment on generated diff lines and send review notes back to the agent before commit. |
+| Drag files/images to agents | **Roadmap** | Attach repo files, screenshots, and images directly to agent prompts. |
+| Termora CLI | **MVP** | Current commands cover help/version/status/file. Worktree/snapshot/click/fill/agent/gates commands remain roadmap. |
+| Quick open | **Roadmap** | Search across worktrees, files, agents, commands, and repo context. |
+| Usage tracking | **Roadmap** | Track Claude/Codex/OpenCode/Hermes usage, rate-limit resets, and account/provider switching. |
+| Rich repo previews | **File preview foundation** | Preview Markdown, images, PDFs, docs, browser panes, and logs in the workspace. |
+| Computer use | **Roadmap** | Let agents operate visible desktop/browser UI when a workflow needs real interaction. |
+| Notifications/unread state | **Backend + UI partial** | Know when an agent finishes or needs attention; mark threads/tasks unread for later. |
+
+See:
+
+- [Product evolution plan](docs/product-evolution.md)
+- [Roadmap](ROADMAP.md)
+- [Agent cockpit capabilities](docs/agent-cockpit-capabilities.md)
+- [Feature/platform map](docs/feature-platform-map.md)
+- [Platform readiness checklist](docs/platform-readiness-checklist.md)
+- [Desktop unsigned packaging contract](docs/desktop-unsigned-packaging.md)
+
+--- | --- | --- |
 | Mobile companion | **Beta/live PWA** | Monitor sessions from phone, resume work, steer agents, and receive finish/needs-input notifications. Native wrappers/APK/App Store builds are roadmap. |
 | Parallel worktrees | **Backend foundation** | Fan one prompt across isolated git worktrees, compare outputs, and merge the winner. Worktree tests/fan-out exist; full UI is in progress. |
 | Terminal splits | **Roadmap UI** | Desktop-grade split panes, persistent scrollback, and restart-safe terminal layouts. Current app has real PTYs and tmux persistence. |
@@ -91,9 +131,8 @@ See:
 
 - [Product evolution plan](docs/product-evolution.md)
 - [Roadmap](ROADMAP.md)
-- [Protocol](docs/protocol.md)
-- [Security](docs/security.md)
-- [Multi-machine](docs/multi-machine.md)
+- [Current status](docs/current-status.md)
+- [App packaging blueprint](docs/app-packaging-blueprint.md)
 
 ---
 
@@ -190,20 +229,20 @@ Termora tracks the full agent-cockpit surface explicitly so public docs do not p
 
 | Feature | Current implementation | Next backend/UI work |
 | --- | --- | --- |
-| **Mobile Companion** | Installable PWA, QR pairing, JWT auth, terminal/session cockpit. | Push notifications, unread state, native wrappers/APK/App Store packaging. |
-| **Parallel Worktrees** | Backend worktree utilities and tests; fan-out foundation exists. | UI for prompt fan-out, compare results, choose winner, archive losers. |
-| **Terminal Splits** | Real PTY sessions, tmux persistence, dashboard split cockpit. | True user-created split panes, saved layouts, split resize, long scrollback search. |
-| **Design Mode** | Browser/capture tooling exists for QA/media generation. | In-app Chromium inspector: click element → HTML/CSS/cropped screenshot → agent context. |
-| **GitHub & task workflows** | GitHub CI integration and local gh-based verification process. | In-app PR/issues/project boards, task-to-worktree launch, review UI. |
-| **SSH Worktrees** | Remote Linux server workflow verified manually via Tailscale SSH. | First-class remote host registry, SSH worktree spawn, reconnect and port-forward UI. |
-| **Annotate AI Diffs** | Git status endpoints and planned diff surface. | Inline diff comments shipped back to the active agent. |
-| **Drag Files to Agents** | File tree backend foundation. | Drag/drop files/images into prompts and persist attachments per run. |
-| **Termora CLI** | npm/dev scripts today. | `termora worktree create`, `snapshot`, `click`, `fill`, `agent run`, `gates watch`. |
-| **Quick Open** | Command strip prototype wired to backend actions. | Global search across commands/files/sessions/agents/worktrees. |
+| **Mobile Companion** | Installable PWA, QR pairing, JWT auth, terminal/session cockpit, native scaffold. | Native secure storage, QR/deep-link pairing, push, APK/TestFlight/App Store packaging. |
+| **Parallel Worktrees** | Backend worktree utilities, fan-out/list/delete routes, tests, and cockpit actions. | Compare diffs, choose winner, archive losers, and show run lanes. |
+| **Terminal Splits** | Real PTY sessions, tmux persistence, controlled split layout, multi-pane terminal rendering. | User-created resizeable layouts, saved presets, scrollback search. |
+| **Design Mode** | Browser/capture tooling used during development. | In-app Chromium inspector: click element → HTML/CSS/cropped screenshot → agent context. |
+| **GitHub workflows** | Read-only `gh` status endpoint/action plus compact dashboard status. | PR/issues/project UI, task-to-worktree launch, review/merge flow. |
+| **SSH Worktrees** | Remote Linux orchestration proven operationally over Tailscale SSH. | Product host registry, SSH worktree spawn, reconnect, file editing, port-forward UI. |
+| **Annotate AI Diffs** | Git status/diff direction documented. | Inline diff comments shipped back to the active agent. |
+| **Drag Files to Agents** | Safe file listing and preview backend. | Drag/drop files/images into prompts and persist attachments per run. |
+| **Termora CLI** | `help`, `version`, `status`, `file` with local and authenticated remote modes. | Worktree, snapshot, browser action, agent run, and gate-watch commands. |
+| **Quick Open** | Roadmap. | Global search across commands/files/sessions/agents/worktrees. |
 | **Usage Tracking** | Provider/model constraints documented for operations. | In-app usage/rate-limit reset display and account switcher. |
-| **Rich Repo Previews** | README media and image previews in docs. | Markdown/image/PDF/doc previews inside the cockpit. |
-| **Computer Use** | Hermes/browser automation used during development. | Expose safe visible-UI control as a Termora workflow. |
-| **Notifications** | Session status visible in app. | Done/failed/needs-input push notifications and unread markers. |
+| **Rich Repo Previews** | Safe text/image file preview foundation. | Markdown/image/PDF/doc previews inside the cockpit. |
+| **Computer Use** | Hermes/browser automation used during development. | Safe visible-UI control as a Termora workflow. |
+| **Notifications** | Event bus, SSE stream, unread model, notifications tab. | Push notifications and richer task/session unread markers. |
 
 ### Supported agent model
 
@@ -335,7 +374,7 @@ tokens — keep them in your env, not your logs.
 ```text
 packages/agent   Local machine agent, auth, PTY, SSH/SFTP, tunnels
 packages/web     Installable PWA/web cockpit
-packages/shared  Shared WebSocket protocol types
+packages/cli     Local/remote CLI MVP
 packages/cli     CLI wrapper and automation entrypoint
 docs/            Security, protocol, multi-machine, product evolution
 ```

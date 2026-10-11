@@ -10,11 +10,11 @@ Monitor and steer agents from a phone. The PWA already supports secure pairing, 
 
 ### Parallel Worktrees
 
-Fan one prompt across multiple isolated git worktrees, compare results, then merge the winner. Backend worktree primitives and tests exist; the remaining work is full UI orchestration, diff comparison, and winner/loser lifecycle.
+Fan one prompt across multiple isolated git worktrees, compare results, then merge the winner. Backend worktree primitives, tests, fan-out/list/delete routes, and cockpit actions exist; the remaining work is diff comparison and winner/loser lifecycle.
 
 ### Terminal Splits
 
-Termora already runs real PTYs and supports persistence via tmux. The target is saved split layouts, resizeable panes, long scrollback search, and terminal layout recovery across restart.
+Termora already runs real PTYs, supports persistence via tmux, and has a controlled split-layout/multi-pane rendering foundation. The target is saved resizeable layouts, long scrollback search, and terminal layout recovery across restart.
 
 ### Design Mode
 
@@ -36,11 +36,11 @@ Review AI-generated diffs with inline comments, send those comments back to the 
 
 ### Drag Files to Agents
 
-Drag files, screenshots, images, or repo docs directly into an agent prompt. The file-tree backend is the first foundation; prompt attachment transport remains to be implemented.
+Drag files, screenshots, images, or repo docs directly into an agent prompt. Safe file listing and file preview endpoints are the first foundation; prompt attachment transport remains to be implemented.
 
 ### Termora CLI
 
-Target commands include `termora worktree create`, `termora snapshot`, `termora click`, `termora fill`, `termora agent run`, and `termora gates watch`.
+The MVP commands are `termora help`, `termora version`, `termora status`, and `termora file <path>`. Target commands still include `termora worktree create`, `termora snapshot`, `termora click`, `termora fill`, `termora agent run`, and `termora gates watch`.
 
 ## Also in the box
 
@@ -48,7 +48,7 @@ Target commands include `termora worktree create`, `termora snapshot`, `termora 
 - Account switcher and usage tracking for Claude, Codex, OpenCode, Hermes, and custom providers.
 - Rich repo previews for Markdown, images, PDFs, docs, logs, and web previews.
 - Computer-use workflows for visible UI interaction when command-line control is not enough.
-- Notifications and unread state for done/failed/needs-input/rate-limit-reset events.
+- Notifications and unread state: event bus, SSE stream, read-all endpoint, and web notifications tab exist; push/mobile delivery remains roadmap.
 
 ## Supported agents
 

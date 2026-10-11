@@ -75,7 +75,7 @@ Current packages:
 
 - `packages/agent`: local daemon for PTY, auth, tunnels, SSH/SFTP, and future worktree/agent management.
 - `packages/web`: installable PWA and desktop web cockpit.
-- `packages/shared`: typed protocol and event contracts.
+- Protocol/event contracts currently live in the agent, web, and CLI packages; extract a shared package only when the boundary needs it.
 - `packages/cli`: lifecycle and automation CLI.
 
 Future packages:

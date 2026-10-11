@@ -4,17 +4,18 @@ Termora is moving from mobile terminal access to a complete installable cockpit 
 
 ## Completed foundation
 
-- [x] CI runs lint, typecheck, build, and tests.
+- [x] CI runs lint, typecheck, build, tests, app scaffold, desktop boundary/smoke/launch, platform readiness, security audit, cockpit dogfood, and web headless dogfood on Node 20/22/24.
 - [x] Unified port config: `TERMORA_PORT` > `PORT`.
 - [x] `TERMORA_MAX_SESSIONS` limit with WebSocket `max_sessions` error.
-- [x] Removed dead SSE path and sensitive unused env references.
-- [x] Created `packages/shared` for WebSocket protocol contracts.
-- [x] Prepared npm distribution wrapper and prepack safety.
-- [x] SSH host manager and known_hosts verification.
-- [x] SFTP browse/upload/download.
-- [x] Multi-machine usage docs and connection panel.
-- [x] PWA shell, manifest, icons, and service worker.
-
+- [x] Secure QR/bootstrap pairing with JWT session auth and rate-limited auth endpoints.
+- [x] Real PTY sessions with tmux persistence fallback.
+- [x] PWA shell, manifest, icons, and mobile-first terminal cockpit.
+- [x] Protected cockpit APIs: status, files, safe file preview, jobs, events, read-all, worktree fan-out/list/delete, and read-only GitHub status.
+- [x] Web cockpit slices: notifications/unread, file inspector, GitHub status, split layout controls, multi-pane terminal view model.
+- [x] CLI MVP: help/version/status/file with local fallback or authenticated remote mode.
+- [x] Desktop app boundary: programmatic agent runtime seam, Electron launcher contracts, preload bridge, dynamic Electron loader, desktop tests, smoke/launch checks.
+- [x] Unsigned desktop packaging dry-run helper and platform readiness checker.
+- [x] Security audit gate with production dependency audit clean.
 
 ## Capability parity tracker
 
@@ -22,20 +23,20 @@ These are first-class product surfaces, not cosmetic labels. Each item must end 
 
 | Surface | State | Acceptance criteria |
 | --- | --- | --- |
-| Mobile Companion | Beta/live PWA | Pair from phone, monitor agents/sessions, send follow-ups, receive notifications, resume from anywhere. |
-| Parallel Worktrees | Backend foundation | Launch N isolated worktrees from one prompt, track N agents, compare diffs, merge winner, archive losers. |
-| Terminal Splits | Partial | Create/resize/save split layouts; preserve scrollback across restart; WebGL terminal remains fast. |
+| Mobile Companion | Live PWA / native scaffold | Pair from phone, monitor agents/sessions, send follow-ups, receive notifications, resume from anywhere. |
+| Parallel Worktrees | Backend foundation + UI actions | Launch N isolated worktrees from one prompt, track N agents, compare diffs, merge winner, archive losers. |
+| Terminal Splits | Partial UI + model | Create/resize/save split layouts; preserve scrollback across restart; WebGL terminal remains fast. |
 | Design Mode | Planned | Click Chromium element; capture DOM/CSS/screenshot; attach to prompt/run record. |
-| GitHub & Linear | Planned | Browse PRs/issues/boards; create worktree from task; review/merge without leaving app. |
+| GitHub & task workflows | Read-only GitHub status live; task boards planned | Browse PRs/issues/boards; create worktree from task; review/merge without leaving app. |
 | SSH Worktrees | Planned | Remote host registry, SSH launch, file editing, git, terminal, reconnect, port forwarding. |
 | Annotate AI Diffs | Planned | Inline comments on generated diffs; send comments to agent; commit from reviewed diff. |
 | Drag Files to Agents | Planned | Drag files/images into prompt; backend stores attachment; agent runner receives safe path/context. |
-| Termora CLI | Planned | Script worktrees, snapshots, browser clicks/fills, agent runs, and gate watches. |
+| Termora CLI | MVP | Script worktrees, snapshots, browser clicks/fills, agent runs, and gate watches. |
 | Quick Open | Planned | One search for files, commands, sessions, agents, worktrees, repo docs. |
 | Usage Tracking | Planned | Claude/Codex/OpenCode/Hermes usage, reset timers, provider/account switching. |
 | Rich Repo Previews | Planned | Markdown, images, PDFs, docs, logs, web previews in cockpit panes. |
 | Computer Use | Planned | Safe visible-UI operation for apps/browsers when CLI-only is insufficient. |
-| Notifications/unread | Planned | Push done/failed/needs-input/rate-limit-reset; unread task/session markers. |
+| Notifications/unread | Backend + UI partial | Push done/failed/needs-input/rate-limit-reset; unread task/session markers. |
 | Any CLI Agent | Planned | Command-template registry for any terminal-based agent with status parser hooks. |
 
 ## Milestone 1 — Professional mobile cockpit
@@ -112,10 +113,11 @@ A feature is done only when:
 - it handles disconnects and failures safely;
 - it has tests for backend/shared behavior where applicable;
 - `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` pass.
-## Milestone 7 — Desktop/mobile app packaging
+## Milestone 8 — Desktop/mobile app packaging
 
-- [ ] Extract a programmatic `startAgent()` API from `packages/agent`.
-- [ ] Build Electron desktop shell that starts the local agent and loads the web UI.
+- [x] Extract a programmatic `startAgent()` API from `packages/agent`.
+- [x] Add Electron launcher/main/preload contracts that start the local agent and target the built web UI.
+- [ ] Run real host GUI launch and installed-app smoke tests.
 - [ ] Package macOS DMG/ZIP unsigned local build, then signed release.
 - [ ] Package Linux AppImage after native module smoke tests.
 - [ ] Package Windows NSIS after native module rebuild is stable.
