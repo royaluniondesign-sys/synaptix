@@ -65,5 +65,13 @@ jobs:
       - name: Security audit
         run: npm run check:security-audit
 
+      # Skip-safe: without TERMORA_URL/TERMORA_TOKEN this just prints a skip
+      # notice and exits 0, but still proves the script imports and degrades.
+      - name: Cockpit dogfood contract
+        run: npm run check:cockpit
+
+      - name: Web headless dogfood contract
+        run: npm run check:web-headless
+
       - name: Test
         run: npx turbo run test

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { DashboardView } from './components/DashboardView';
 import { TerminalView } from './components/TerminalView';
 import { TunnelsView } from './components/TunnelsView';
@@ -10,6 +10,7 @@ import { useSessionManager } from './hooks/useSessionManager';
 import { useSkin } from './hooks/useSkin';
 import { useLatency } from './hooks/useLatency';
 import { useNotifications } from './hooks/useNotifications';
+import { resolveAppSurface } from './lib/app-model';
 import type { View } from './lib/types';
 import type { ConnectionStatus, TerminalWSClient } from './lib/ws-client';
 
@@ -83,11 +84,11 @@ const TAB_CONFIG = [
   },
 ];
 
-function BottomTabBar({ current, onChange, sessionCount, unreadCount }: {
+function BottomTabBar({ current, onChange, sessionBadge, unreadBadge }: {
   current: View;
   onChange: (v: View) => void;
-  sessionCount: number;
-  unreadCount: number;
+  sessionBadge: string | null;
+  unreadBadge: string | null;
 }) {
   return (
     <div style={{
@@ -127,7 +128,7 @@ function BottomTabBar({ current, onChange, sessionCount, unreadCount }: {
             <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, letterSpacing: 0.1 }}>
               {tab.label}
             </span>
-            {tab.id === 'terminal' && sessionCount > 0 && (
+            {tab.id === 'terminal' && sessionBadge !== null && (
               <span style={{
                 position: 'absolute',
                 top: 6,
@@ -144,10 +145,10 @@ function BottomTabBar({ current, onChange, sessionCount, unreadCount }: {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                {sessionCount > 9 ? '9+' : sessionCount}
+                {sessionBadge}
               </span>
             )}
-            {tab.id === 'notifications' && unreadCount > 0 && (
+            {tab.id === 'notifications' && unreadBadge !== null && (
               <span style={{
                 position: 'absolute',
                 top: 6,
@@ -166,7 +167,7 @@ function BottomTabBar({ current, onChange, sessionCount, unreadCount }: {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                {unreadCount > 9 ? '9+' : unreadCount}
+                {unreadBadge}
               </span>
             )}
           </button>
@@ -213,12 +214,12 @@ function FABButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function DesktopSidebar({ current, onChange, onNewSession, sessionCount, unreadCount, connectionStatus }: {
+function DesktopSidebar({ current, onChange, onNewSession, sessionBadge, unreadBadge, connectionStatus }: {
   current: View;
   onChange: (v: View) => void;
   onNewSession: () => void;
-  sessionCount: number;
-  unreadCount: number;
+  sessionBadge: string | null;
+  unreadBadge: string | null;
   connectionStatus: ConnectionStatus;
 }) {
   const isConnected = connectionStatus === 'connected';
@@ -283,24 +284,24 @@ function DesktopSidebar({ current, onChange, onNewSession, sessionCount, unreadC
             >
               {tab.icon}
               <span style={{ flex: 1 }}>{tab.label}</span>
-              {tab.id === 'terminal' && sessionCount > 0 && (
+              {tab.id === 'terminal' && sessionBadge !== null && (
                 <span style={{
                   fontSize: 9, fontWeight: 700,
                   background: active ? `${S.primary}25` : S.surface3,
                   color: active ? S.primary : S.text3,
                   padding: '1px 6px', borderRadius: 8,
                 }}>
-                  {sessionCount}
+                  {sessionBadge}
                 </span>
               )}
-              {tab.id === 'notifications' && unreadCount > 0 && (
+              {tab.id === 'notifications' && unreadBadge !== null && (
                 <span style={{
                   fontSize: 9, fontWeight: 700,
                   background: S.error,
                   color: '#fff',
                   padding: '1px 6px', borderRadius: 8,
                 }}>
-                  {unreadCount}
+                  {unreadBadge}
                 </span>
               )}
             </button>
@@ -561,14 +562,27 @@ export function App() {
     }
   }, [activeSessionId, sessions]);
 
-  if (!auth.isAuthenticated) {
+  const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
+
+  // Single source of truth for which top-level surface to render — also the
+  // deterministic no-token / authenticated contract exercised by the headless
+  // dogfood tests (lib/__tests__/app-model.test.ts).
+  const surface = useMemo(() => resolveAppSurface({
+    isAuthenticated: auth.isAuthenticated,
+    view,
+    hasActiveSession: activeSession !== null,
+    isDesktop,
+    sessionCount: sessions.length,
+    unreadCount,
+    connectionStatus,
+  }), [auth.isAuthenticated, view, activeSession, isDesktop, sessions.length, unreadCount, connectionStatus]);
+
+  if (surface.kind === 'auth') {
     return <AuthScreen auth={auth} onBootstrapSubmit={authenticateWithBootstrap} />;
   }
 
-  const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
-
   // Terminal with active session — full-screen, no tab bar
-  if (view === 'terminal' && activeSession) {
+  if (surface.kind === 'terminal' && activeSession) {
     return (
       <TerminalView
         session={activeSession}
@@ -587,7 +601,8 @@ export function App() {
     );
   }
 
-  const showFAB = view === 'terminal' && connectionStatus === 'connected';
+  const { showSidebar, showTabBar, showFab, sessionBadge, unreadBadge } =
+    surface.kind === 'shell' ? surface.nav : { showSidebar: false, showTabBar: false, showFab: false, sessionBadge: null, unreadBadge: null };
 
   return (
     <div style={{
@@ -598,13 +613,13 @@ export function App() {
       overflow: 'hidden',
       position: 'relative',
     }}>
-      {isDesktop && view !== 'dashboard' && (
+      {showSidebar && (
         <DesktopSidebar
           current={view}
           onChange={handleTabChange}
           onNewSession={handleCreateSession}
-          sessionCount={sessions.length}
-          unreadCount={unreadCount}
+          sessionBadge={sessionBadge}
+          unreadBadge={unreadBadge}
           connectionStatus={connectionStatus}
         />
       )}
@@ -666,17 +681,17 @@ export function App() {
           )}
         </div>
 
-        {!isDesktop && (
+        {showTabBar && (
           <BottomTabBar
             current={view}
             onChange={handleTabChange}
-            sessionCount={sessions.length}
-            unreadCount={unreadCount}
+            sessionBadge={sessionBadge}
+            unreadBadge={unreadBadge}
           />
         )}
       </div>
 
-      {showFAB && !isDesktop && <FABButton onClick={handleCreateSession} />}
+      {showFab && <FABButton onClick={handleCreateSession} />}
     </div>
   );
 }

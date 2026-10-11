@@ -304,7 +304,14 @@ npm run lint        # eslint all packages
 npm run typecheck   # TypeScript checks
 npm test            # Vitest suites
 npm run build       # production build
+npm run check:cockpit  # exercise a live agent's cockpit API (skips without env)
 ```
+
+`npm run check:cockpit` is the dogfood check for a live agent. With
+`TERMORA_URL` (e.g. `http://127.0.0.1:4030`) and `TERMORA_TOKEN` set it
+exercises the health, status, files, README preview, github and events
+endpoints; without them it prints a skip notice and exits 0. It never prints
+tokens — keep them in your env, not your logs.
 
 ---
 

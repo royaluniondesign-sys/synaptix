@@ -49,8 +49,10 @@
     "check:desktop-smoke": "node scripts/check-desktop-smoke.mjs",
     "check:platform-readiness": "node scripts/check-platform-readiness.mjs",
     "check:security-audit": "npm audit --omit=dev --audit-level=moderate",
+    "check:cockpit": "node scripts/check-cockpit.mjs",
     "package:desktop:unsigned": "node scripts/package-desktop-unsigned.mjs",
-    "check:desktop-launch": "node scripts/smoke-desktop-launch.mjs"
+    "check:desktop-launch": "node scripts/smoke-desktop-launch.mjs",
+    "check:web-headless": "node scripts/check-web-headless.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
