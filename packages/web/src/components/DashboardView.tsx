@@ -52,7 +52,7 @@ const FILES: FileItem[] = [
   { path: 'README.md', kind: 'file', status: 'clean' },
 ];
 
-const COMMANDS = ['new terminal', 'spawn agent', 'open file tree', 'run gates', 'capture UI', 'watch CI'];
+const COMMANDS = ['new terminal', 'spawn agent', 'open file tree', 'run gates', 'capture UI', 'watch CI', 'fan out worktrees', 'list worktrees', 'clean worktrees'];
 
 const CAPABILITIES: CapabilityItem[] = [
   { name: 'Mobile Companion', state: 'live', detail: 'phone pairing, resume, steering surface', action: 'push notifications + native wrappers' },
@@ -123,6 +123,9 @@ function CommandStrip({ activeCommand, onCommand, onCreateSession }: { activeCom
           {cmd === 'run gates' && <Icon name="activity" />}
           {cmd === 'capture UI' && <Icon name="desktop" />}
           {cmd === 'watch CI' && <Icon name="github" />}
+          {cmd === 'fan out worktrees' && <Icon name="branch" />}
+          {cmd === 'list worktrees' && <Icon name="activity" />}
+          {cmd === 'clean worktrees' && <Icon name="close" />}
           <span>{cmd}</span>
         </button>
       ))}
@@ -187,7 +190,7 @@ function CapabilityCoverage({ onAction }: { onAction: (action: string) => void }
       <div className="tm-oct-pane-head"><div><Icon name="activity" /><strong>Feature buildout</strong></div><span>{CAPABILITIES.length} surfaces</span></div>
       <div className="tm-oct-capability-grid">
         {visible.map((item) => (
-          <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} onClick={() => onAction(item.state === 'planned' ? 'git-status' : 'run-gates')}>
+          <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} onClick={() => onAction(item.name === 'Parallel Worktrees' ? 'list worktrees' : item.state === 'planned' ? 'git-status' : 'run-gates')}>
             <div><strong>{item.name}</strong><em>{item.state}</em></div>
             <span>{item.detail}</span>
             <small>{item.action}</small>
@@ -305,8 +308,12 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   const [cockpitError, setCockpitError] = useState<string | null>(null);
   const [lastBackendAction, setLastBackendAction] = useState<string>('status');
   const [filePreview, setFilePreview] = useState<FilePreview | null>(null);
+  const [worktreeOutput, setWorktreeOutput] = useState<string | null>(null);
+  const [worktreeBusy, setWorktreeBusy] = useState(false);
 
   const authHeaders = useMemo(() => authToken ? { Authorization: `Bearer ${authToken}` } : undefined, [authToken]);
+  const activeTask = useMemo(() => TASKS.find((task) => task.id === activeTaskId) ?? TASKS[0], [activeTaskId]);
+  const activeAgent = useMemo(() => AGENTS.find((agent) => agent.id === activeAgentId) ?? AGENTS[0], [activeAgentId]);
 
   const refreshCockpitStatus = useCallback(async () => {
     if (!authHeaders) return;
@@ -338,7 +345,55 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
     return () => { cancelled = true; };
   }, [authHeaders, activeFile]);
 
+  const runWorktreeAction = useCallback(async (action: 'create' | 'list' | 'cleanup') => {
+    if (!authHeaders || worktreeBusy) return;
+    setWorktreeBusy(true);
+    setActiveCommand(action === 'create' ? 'fan out worktrees' : action === 'list' ? 'list worktrees' : 'clean worktrees');
+    setLastBackendAction(`worktrees:${action}`);
+    try {
+      if (action === 'create') {
+        const response = await fetch('/api/cockpit/worktrees/fanout', {
+          method: 'POST',
+          headers: { ...authHeaders, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: activeTask.next, count: 2 }),
+        });
+        if (!response.ok) throw new Error(`fanout ${response.status}`);
+        const result = await response.json() as { count?: number; worktrees?: Array<{ branch: string; path: string }> };
+        const created = result.worktrees ?? [];
+        setWorktreeOutput(created.length
+          ? `fan-out created (${created.length})\n\n${created.map((w) => `${w.branch}\n  ${w.path}`).join('\n')}`
+          : 'fan-out created synchronously');
+        setLastBackendAction(`worktrees:fanout:${result.count ?? created.length}`);
+      } else if (action === 'list') {
+        const response = await fetch('/api/cockpit/worktrees', { headers: authHeaders });
+        if (!response.ok) throw new Error(`list ${response.status}`);
+        const result = await response.json() as { worktrees?: Array<{ index: number; branch: string; path: string }> };
+        const worktrees = result.worktrees ?? [];
+        setWorktreeOutput(worktrees.length
+          ? `fan-out worktrees (${worktrees.length})\n\n${worktrees.map((w) => `${w.index}. ${w.branch}\n  ${w.path}`).join('\n')}`
+          : 'no fan-out worktrees yet — try "fan out worktrees"');
+        setLastBackendAction(`worktrees:list:${worktrees.length}`);
+      } else {
+        const response = await fetch('/api/cockpit/worktrees?force=true', { method: 'DELETE', headers: authHeaders });
+        if (!response.ok) throw new Error(`cleanup ${response.status}`);
+        const result = await response.json() as { removed?: string[] };
+        const removed = result.removed ?? [];
+        setWorktreeOutput(`cleaned up ${removed.length} worktree${removed.length === 1 ? '' : 's'}${removed.length ? `\n\n${removed.map((path) => `  ${path}`).join('\n')}` : ''}`);
+        setLastBackendAction(`worktrees:cleanup:${removed.length}`);
+      }
+      await refreshCockpitStatus();
+      setCockpitError(null);
+    } catch (error) {
+      setCockpitError(error instanceof Error ? error.message : 'worktree action failed');
+    } finally {
+      setWorktreeBusy(false);
+    }
+  }, [authHeaders, worktreeBusy, activeTask.next, refreshCockpitStatus]);
+
   const runBackendAction = useCallback(async (action: string) => {
+    if (action === 'fan out worktrees') { void runWorktreeAction('create'); return; }
+    if (action === 'list worktrees') { void runWorktreeAction('list'); return; }
+    if (action === 'clean worktrees') { void runWorktreeAction('cleanup'); return; }
     setActiveCommand(action);
     setLastBackendAction(action);
     if (!authHeaders) return;
@@ -353,15 +408,13 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
     } catch (error) {
       setCockpitError(error instanceof Error ? error.message : 'cockpit action failed');
     }
-  }, [authHeaders, onCreateSession, refreshCockpitStatus]);
-  const activeTask = useMemo(() => TASKS.find((task) => task.id === activeTaskId) ?? TASKS[0], [activeTaskId]);
-  const activeAgent = useMemo(() => AGENTS.find((agent) => agent.id === activeAgentId) ?? AGENTS[0], [activeAgentId]);
+  }, [authHeaders, onCreateSession, refreshCockpitStatus, runWorktreeAction]);
   const backendFiles: FileItem[] = useMemo(() => cockpitStatus?.files.entries.map((entry) => ({ path: entry.path, kind: entry.kind, status: entry.path === activeFile ? 'modified' : 'clean' })) ?? FILES, [activeFile, cockpitStatus]);
   const backendAgent = cockpitStatus?.agents.find((agent) => agent.id === activeAgentId);
   const effectiveAgent = backendAgent ? { ...activeAgent, state: backendAgent.state === 'ready' ? 'queued' as const : activeAgent.state, work: backendAgent.available ? 'backend connected' : 'backend unavailable' } : activeAgent;
-  const previewText = filePreview
+  const previewText = worktreeOutput ?? (filePreview
     ? `file: ${filePreview.path} · ${filePreview.size} bytes${filePreview.truncated ? ' · truncated' : ''}\n\n${filePreview.binary ? '(binary file — no text preview)' : filePreview.content}`
-    : `file: ${activeFile}\nstatus: ${FILES.find((f) => f.path === activeFile)?.status ?? 'clean'}\n\ncommand: ${activeTask.command}\nnext: ${activeTask.next}\n\nThis pane is the operational inspector: selecting tasks, agents or files changes what the operator sees without leaving the cockpit.`;
+    : `file: ${activeFile}\nstatus: ${FILES.find((f) => f.path === activeFile)?.status ?? 'clean'}\n\ncommand: ${activeTask.command}\nnext: ${activeTask.next}\n\nThis pane is the operational inspector: selecting tasks, agents or files changes what the operator sees without leaving the cockpit.`);
 
   return (
     <div className="tm-orca-stage">
