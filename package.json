@@ -44,7 +44,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "postinstall": "node scripts/fix-node-pty.js",
-    "check:app-scaffold": "node scripts/check-app-scaffold.mjs"
+    "check:app-scaffold": "node scripts/check-app-scaffold.mjs",
+    "check:desktop-boundary": "node scripts/check-desktop-boundary.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

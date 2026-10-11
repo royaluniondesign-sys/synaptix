@@ -1,16 +1,13 @@
-// @termora/agent -- entry point
-// Starts the local server, PTY sessions, tunnel, and prints QR code
+// @termora/agent -- CLI entry point
+// Starts the local agent, opens a tunnel, prints QR code, and handles signals.
+//
+// The core lifecycle lives in ./runtime.ts (startAgent) so desktop shells can
+// launch it programmatically. This file adds CLI-only behavior on top.
 
-import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
-import { loadConfig } from './config.js';
-import { initDatabase } from './db.js';
-import { generateBootstrapToken, hashToken } from './auth.js';
-import { createAppServer, startServer, resolveTunnelPort } from './server.js';
-import { setupWebSocketHandler } from './ws-handler.js';
-import { PTYManager } from './pty-manager.js';
+import { startAgent } from './runtime.js';
+import { resolveTunnelPort } from './server.js';
 import { createTunnel, printAccessInfo, startTunnelMonitor, registerShutdownHandlers } from './tunnel.js';
-import { isTmuxAvailable, ensureTmuxConfig } from './tmux.js';
 import { checkNetworkPersistence } from './power.js';
 
 /**
@@ -41,81 +38,35 @@ async function main(): Promise<void> {
   // 0b. Prevent macOS from sleeping while the agent is running
   const stopCaffeinate = preventSleep();
 
-  // 1. Load configuration
-  const config = loadConfig();
+  // 1. Start the core agent (config, DB, HTTP/WS, PTY)
+  const agent = await startAgent();
+  const { config, port } = agent;
 
-  // 2. Initialize database
-  const { db, statements } = initDatabase(config.dbPath);
-
-  // 3. Generate bootstrap token and store its hash
-  const bootstrapToken = generateBootstrapToken();
-  const tokenId = randomUUID();
-  const tokenHash = hashToken(bootstrapToken);
-  statements.insertBootstrapToken.run(tokenId, tokenHash);
-
-  // 4. tmux session persistence (control mode -CC for scrollback support)
-  //    Falls back to raw PTY if tmux is not installed or TERMORA_NO_TMUX=1
-  let tmuxEnabled = false;
-  let tmuxConfPath: string | null = null;
-
-  if (config.tmuxDisabled) {
-    console.log('  Session persistence disabled (TERMORA_NO_TMUX=1)');
-  } else if (!isTmuxAvailable()) {
-    console.log('  Sessions are ephemeral (tmux not found — install tmux for session persistence)');
-  } else {
-    tmuxConfPath = ensureTmuxConfig();
-    tmuxEnabled = true;
-    console.log('  Session persistence active (tmux control mode)');
-  }
-
-  // 5. Create HTTP + WebSocket server
-  const { httpServer, wss } = createAppServer(config, statements);
-
-  // 6. Set up PTY manager and WebSocket handler
-  const ptyManager = new PTYManager({
-    tmuxEnabled,
-    tmuxConfPath,
-    dbStatements: statements,
-  });
-
-  // 7. Recover sessions from previous server run (tmux sessions survive restarts)
-  if (tmuxEnabled) {
-    const recovered = ptyManager.rediscoverAll();
-    if (recovered.length > 0) {
-      console.log(`  Recovered ${String(recovered.length)} session(s) from previous run`);
-    }
-  }
-
-  setupWebSocketHandler(wss, ptyManager, config.jwtSecret, statements);
-
-  // 8. Start HTTP server (auto-finds open port if configured port is busy)
-  const actualPort = await startServer(httpServer, config.port);
-  if (actualPort !== config.port) {
-    console.log(`  Agent running on port ${String(actualPort)} (${String(config.port)} was busy)`);
-  }
-
-  // 9. Create tunnel — tries ngrok → SSH (localhost.run) → local network IP
+  // 2. Create tunnel — tries ngrok → SSH (localhost.run) → local network IP
   // In dev the tunnel targets WEB_PORT (Vite); in production it targets the
   // agent itself. resolveTunnelPort falls back when nothing serves WEB_PORT.
-  const tunnelPort = await resolveTunnelPort(config.webPort, actualPort);
-  const tunnel = await createTunnel(tunnelPort, config.ngrokAuthtoken, config.ngrokStaticDomain, config.tunnelMethod);
+  const tunnelPort = await resolveTunnelPort(config.webPort, port);
+  const tunnel = await createTunnel(
+    tunnelPort,
+    config.ngrokAuthtoken,
+    config.ngrokStaticDomain,
+    config.tunnelMethod,
+  );
 
-  // 10. Print clean startup info (use static token for persistent one-click access)
+  // 3. Print clean startup info (use static token for persistent one-click access)
   printAccessInfo(tunnel.url, config.staticToken, tunnel.method);
 
-  // 11. Monitor tunnel health — auto-recovers after sleep/wake or SSH death
+  // 4. Monitor tunnel health — auto-recovers after sleep/wake or SSH death
   const stopTunnelMonitor = startTunnelMonitor((newUrl, method) => {
     // Tunnel was recreated with a (possibly new) URL — reprint access info
     printAccessInfo(newUrl, config.staticToken, method);
   });
 
-  // 12. Register graceful shutdown handlers
-  registerShutdownHandlers(() => {
+  // 5. Register graceful shutdown handlers
+  registerShutdownHandlers(async () => {
     stopCaffeinate?.();
     stopTunnelMonitor();
-    ptyManager.destroyAll(); // Kills control clients but leaves tmux sessions alive
-    db.close();
-    httpServer.close();
+    await agent.close(); // Kills control clients but leaves tmux sessions alive
   });
 }
 

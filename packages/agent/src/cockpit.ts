@@ -1,6 +1,6 @@
 import express from 'express';
 import { execFile, spawn } from 'node:child_process';
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { closeSync, existsSync, openSync, readdirSync, readSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { hostname } from 'node:os';
 import type { Express } from 'express';
@@ -34,6 +34,8 @@ type WorktreeLaunchBody = {
 const repoRoot = resolve(import.meta.dirname, '..', '..', '..');
 const jobs = new Map<string, CockpitJob>();
 const MAX_OUTPUT = 32_000;
+const MAX_PREVIEW_BYTES = 256 * 1024;
+const BINARY_SNIFF_BYTES = 8_000;
 
 function runCommand(command: string, args: string[] = []): Promise<{ ok: boolean; output: string }> {
   return new Promise((resolveCommand) => {
@@ -73,6 +75,48 @@ function listFiles(pathValue = '.', limit = 80) {
     path: relative(repoRoot, target) || '.',
     parent: target === repoRoot ? null : relative(repoRoot, resolve(target, '..')) || '.',
     entries,
+  };
+}
+
+type FilePreview = {
+  path: string;
+  size: number;
+  truncated: boolean;
+  binary: boolean;
+  content: string;
+};
+
+/**
+ * Read-only preview of a repo file for cockpit panes (markdown, logs, diffs).
+ * Bounded by MAX_PREVIEW_BYTES so a huge file can never stream the whole repo
+ * into a response, and refuses directories/non-regular files. Reuses the same
+ * safePath guard as the file listing so a preview can never escape the repo root.
+ */
+function readFilePreview(pathValue = '.', maxBytes = MAX_PREVIEW_BYTES): FilePreview {
+  const target = safePath(pathValue);
+  const stats = statSync(target);
+  if (stats.isDirectory()) throw new Error('Path is a directory');
+  if (!stats.isFile()) throw new Error('Path is not a regular file');
+
+  const truncated = stats.size > maxBytes;
+  const readSize = Math.min(stats.size, maxBytes);
+  const buffer = Buffer.alloc(readSize);
+  const fd = openSync(target, 'r');
+  try {
+    readSync(fd, buffer, 0, readSize, 0);
+  } finally {
+    closeSync(fd);
+  }
+
+  const snifflen = Math.min(buffer.length, BINARY_SNIFF_BYTES);
+  const binary = buffer.subarray(0, snifflen).includes(0);
+
+  return {
+    path: relative(repoRoot, target) || '.',
+    size: stats.size,
+    truncated,
+    binary,
+    content: binary ? '' : buffer.toString('utf8'),
   };
 }
 
@@ -168,7 +212,7 @@ async function buildStatus() {
       { id: 'ci', name: 'GitHub CI', state: 'remote', available: true },
     ],
     gates: ['lint', 'typecheck', 'test', 'build'],
-    commands: ['git-status', 'run-gates', 'list-files', 'opencode-smoke', 'create-worktree-fanout', 'list-worktrees'],
+    commands: ['git-status', 'run-gates', 'list-files', 'read-file', 'opencode-smoke', 'create-worktree-fanout', 'list-worktrees'],
     worktrees: await listFanoutWorktrees(repoRoot),
     recentJobs: [...jobs.values()].slice(-8).reverse(),
     files: listFiles('.', 40),
@@ -196,6 +240,20 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
     }
   });
 
+  app.get('/api/cockpit/file', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    try {
+      const requested = Number(req.query.maxBytes ?? MAX_PREVIEW_BYTES);
+      const maxBytes = Number.isFinite(requested)
+        ? Math.min(Math.max(Math.trunc(requested), 1), MAX_PREVIEW_BYTES)
+        : MAX_PREVIEW_BYTES;
+      res.json(readFilePreview(String(req.query.path ?? '.'), maxBytes));
+    } catch (error) {
+      res.status(400).json({ error: error instanceof Error ? error.message : 'Unable to read file' });
+    }
+  });
+
   app.post('/api/cockpit/actions', async (req, res) => {
     const auth = await requireAuth(req, res);
     if (!auth) return;
@@ -204,6 +262,9 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
       switch (body.action) {
         case 'list-files':
           res.json({ action: body.action, result: listFiles(body.path ?? '.', 80) });
+          return;
+        case 'read-file':
+          res.json({ action: body.action, result: readFilePreview(body.path ?? '.') });
           return;
         case 'git-status':
           res.json({ action: body.action, result: await runCommand('git', ['status', '--short', '--branch']) });

@@ -22,6 +22,7 @@ type FileItem = { path: string; kind: 'dir' | 'file'; status?: 'modified' | 'new
 type CockpitStatus = { machine: string; root: string; git: { branch: string; dirty: boolean; status: string; lastCommit: string }; agents: Array<{ id: string; name: string; state: string; available: boolean; version?: string }>; worktrees?: Array<{ index: number; path: string; branch: string }>; recentJobs: Array<{ id: string; action: string; status: string; output: string }>; files: { entries: Array<{ name: string; path: string; kind: 'dir' | 'file'; size: number; modifiedAt: string }> } };
 type CapabilityState = 'live' | 'backend' | 'planned';
 type CapabilityItem = { name: string; state: CapabilityState; detail: string; action: string };
+type FilePreview = { path: string; size: number; truncated: boolean; binary: boolean; content: string };
 
 
 const TASKS: TaskItem[] = [
@@ -303,6 +304,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   const [cockpitStatus, setCockpitStatus] = useState<CockpitStatus | null>(null);
   const [cockpitError, setCockpitError] = useState<string | null>(null);
   const [lastBackendAction, setLastBackendAction] = useState<string>('status');
+  const [filePreview, setFilePreview] = useState<FilePreview | null>(null);
 
   const authHeaders = useMemo(() => authToken ? { Authorization: `Bearer ${authToken}` } : undefined, [authToken]);
 
@@ -319,6 +321,22 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   }, [authHeaders]);
 
   useEffect(() => { void refreshCockpitStatus(); }, [refreshCockpitStatus]);
+
+  useEffect(() => {
+    if (!authHeaders) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch(`/api/cockpit/file?path=${encodeURIComponent(activeFile)}&maxBytes=8000`, { headers: authHeaders });
+        if (!response.ok) throw new Error(`file ${response.status}`);
+        const preview = await response.json() as FilePreview;
+        if (!cancelled) setFilePreview(preview);
+      } catch {
+        if (!cancelled) setFilePreview(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [authHeaders, activeFile]);
 
   const runBackendAction = useCallback(async (action: string) => {
     setActiveCommand(action);
@@ -341,6 +359,9 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   const backendFiles: FileItem[] = useMemo(() => cockpitStatus?.files.entries.map((entry) => ({ path: entry.path, kind: entry.kind, status: entry.path === activeFile ? 'modified' : 'clean' })) ?? FILES, [activeFile, cockpitStatus]);
   const backendAgent = cockpitStatus?.agents.find((agent) => agent.id === activeAgentId);
   const effectiveAgent = backendAgent ? { ...activeAgent, state: backendAgent.state === 'ready' ? 'queued' as const : activeAgent.state, work: backendAgent.available ? 'backend connected' : 'backend unavailable' } : activeAgent;
+  const previewText = filePreview
+    ? `file: ${filePreview.path} · ${filePreview.size} bytes${filePreview.truncated ? ' · truncated' : ''}\n\n${filePreview.binary ? '(binary file — no text preview)' : filePreview.content}`
+    : `file: ${activeFile}\nstatus: ${FILES.find((f) => f.path === activeFile)?.status ?? 'clean'}\n\ncommand: ${activeTask.command}\nnext: ${activeTask.next}\n\nThis pane is the operational inspector: selecting tasks, agents or files changes what the operator sees without leaving the cockpit.`;
 
   return (
     <div className="tm-orca-stage">
@@ -355,13 +376,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
             <AgentQueue activeAgentId={activeAgentId} onAgentSelect={setActiveAgentId} />
             <CapabilityCoverage onAction={runBackendAction} />
             <TerminalPane title="selected file / run output" subtitle={activeFile} active>
-{`file: ${activeFile}
-status: ${FILES.find((f) => f.path === activeFile)?.status ?? 'clean'}
-
-command: ${activeTask.command}
-next: ${activeTask.next}
-
-This pane is the operational inspector: selecting tasks, agents or files changes what the operator sees without leaving the cockpit.`}
+{previewText}
             </TerminalPane>
           </div>
         </main>

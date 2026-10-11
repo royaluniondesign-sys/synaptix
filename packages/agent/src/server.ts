@@ -349,7 +349,10 @@ export async function startServer(
   const freePort = await findFreePort(port);
   return new Promise((resolve) => {
     httpServer.listen(freePort, () => {
-      resolve(freePort);
+      // Report the port actually bound. With port 0 the OS assigns an
+      // ephemeral port that is not known until after listen().
+      const address = httpServer.address();
+      resolve(typeof address === 'object' && address ? address.port : freePort);
     });
   });
 }

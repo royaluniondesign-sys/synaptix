@@ -6,6 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "echo \"desktop scaffold: add Electron dependency after agent start API is extracted\"",
-    "package": "echo \"desktop scaffold: electron-builder config present, packaging not enabled yet\""
+    "package": "echo \"desktop scaffold: electron-builder config present, packaging not enabled yet\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "check": "node ../../scripts/check-desktop-boundary.mjs"
   }
 }

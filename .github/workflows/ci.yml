@@ -50,5 +50,8 @@ jobs:
       - name: App scaffold contract
         run: npm run check:app-scaffold
 
+      - name: Desktop boundary contract
+        run: npm run check:desktop-boundary
+
       - name: Test
         run: npx turbo run test
