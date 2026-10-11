@@ -2,7 +2,7 @@
 
 This directory is the desktop packaging boundary.
 
-Current status: scaffold only. It is intentionally not part of root npm workspaces yet, so current CI remains stable while the desktop runtime API is extracted.
+Current status: scaffold plus a real, wired Electron launcher. It is intentionally not part of root npm workspaces, so root CI never installs Electron; the Electron dependency lives in `apps/desktop/package.json` only.
 
 ## Intended stack
 
@@ -10,6 +10,23 @@ Current status: scaffold only. It is intentionally not part of root npm workspac
 - Load `packages/web/dist` in production.
 - Start the local `packages/agent` through a programmatic `startAgent()` API.
 - Package the CLI from `packages/cli` as a real installer binary.
+
+## Real launcher (main + preload)
+
+The main process entry is `src/electron-main.ts` (built to `dist/electron-main.js`, which is the
+package `main`), and the preload bridge is `src/preload.ts`. Both resolve Electron through the
+computed-import loader in `src/electron-loader.ts` — nothing binds `electron` at build time, so the
+desktop boundary typechecks and the smoke contract stays honest without an installed runtime.
+
+```sh
+npm --prefix apps/desktop install       # pulls Electron into apps/desktop only
+npm --prefix apps/desktop run build     # tsc -> dist/electron-main.js + dist/preload.js
+npm --prefix apps/desktop run launch    # dry run: prints the exact launch command
+npm --prefix apps/desktop run launch:run # spawns Electron (real GUI, needs a display)
+```
+
+`scripts/launch-electron.mjs` is dry-run by default and exits `2` when Electron is not installed.
+This shim does not sign, notarize, or publish, and it makes no store-readiness claims.
 
 ## Unsigned local packaging
 
@@ -24,9 +41,9 @@ npm --prefix apps/desktop run package:unsigned:mac    # build on darwin
 
 See `docs/desktop-unsigned-packaging.md` and `docs/platform-readiness-checklist.md`.
 
-## First real implementation tasks
+## Remaining real implementation tasks
 
-1. Extract `startAgent(options)` from `packages/agent`.
-2. Add Electron main process that starts/stops the agent.
-3. Add `electron-builder` local config and unsigned macOS package.
+1. Extract `startAgent(options)` from `packages/agent` into a supported public API.
+2. Run and verify the real GUI launcher on each host (blocked: no display in CI).
+3. Add `electron-builder` local config and an unsigned macOS package that actually builds.
 4. Add smoke test: installed app starts agent and serves the web UI.

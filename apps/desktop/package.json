@@ -4,8 +4,12 @@
   "private": true,
   "description": "Desktop packaging scaffold for the Termora cockpit app.",
   "type": "module",
+  "main": "dist/electron-main.js",
   "scripts": {
     "dev": "npx --yes tsx src/dev.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "launch": "node scripts/launch-electron.mjs",
+    "launch:run": "node scripts/launch-electron.mjs --run",
     "package": "echo \"desktop scaffold: lifecycle wired via injected startAgent; electron-builder packaging not enabled yet\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
@@ -14,9 +18,11 @@
     "package:unsigned": "node ../../scripts/package-desktop-unsigned.mjs",
     "package:unsigned:mac": "node ../../scripts/package-desktop-unsigned.mjs --target mac",
     "package:unsigned:linux": "node ../../scripts/package-desktop-unsigned.mjs --target linux",
-    "package:unsigned:win": "node ../../scripts/package-desktop-unsigned.mjs --target win"
+    "package:unsigned:win": "node ../../scripts/package-desktop-unsigned.mjs --target win",
+    "smoke:launch": "node ../../scripts/smoke-desktop-launch.mjs"
   },
   "devDependencies": {
+    "electron": "^44.7.0",
     "tsx": "^4.19.0"
   }
 }

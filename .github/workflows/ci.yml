@@ -56,6 +56,9 @@ jobs:
       - name: Desktop smoke contract
         run: npm run check:desktop-smoke
 
+      - name: Desktop launch smoke
+        run: npm run check:desktop-launch
+
       - name: Platform readiness contract
         run: npm run check:platform-readiness
 

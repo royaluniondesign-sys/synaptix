@@ -1,9 +1,10 @@
-// Termora desktop entrypoint placeholder.
-// No Electron dependency is installed yet. This module exposes the desktop
-// shell bootstrap contract (runtime plan + agent launch descriptor + injected
-// agent lifecycle) so the Electron main process added in a later phase only
-// needs to consume it. The injected lifecycle calls a programmatic
-// startAgent() supplied by the shell instead of shelling out.
+// Termora desktop entrypoint surface.
+// This module exposes the desktop shell bootstrap contract (runtime plan +
+// agent launch descriptor + injected agent lifecycle) and re-exports the real
+// Electron launcher (`electron-main.ts`), preload bridge (`preload.ts`), and the
+// computed-import loader (`electron-loader.ts`). Electron is declared only in
+// apps/desktop/package.json and is always resolved at runtime, never bound at
+// build time.
 
 import { describeAgentLaunch, type AgentLaunchDescriptor } from './agent-host.js'
 import { desktopRuntimePlan, type DesktopRuntimePlan } from './runtime-plan.js'
@@ -54,11 +55,28 @@ import {
   type DesktopMain,
   type DesktopMainWindowOptions,
 } from './main-window.js'
+import {
+  resolvePreloadPath,
+  startDesktopApp,
+  type DesktopAppRuntime,
+  type StartDesktopAppOptions,
+} from './electron-main.js'
+import { bootstrapTermoraPreload } from './preload.js'
+import {
+  ELECTRON_MODULE,
+  loadElectronMain,
+  loadElectronPreload,
+  type ElectronImporter,
+  type ElectronMainRuntime,
+  type ElectronPreloadRuntime,
+} from './electron-loader.js'
 
 export { desktopRuntimePlan, describeAgentLaunch, createAgentLifecycle }
 export { buildAgentWebUrl, createDesktopShell, loadAgentStartFn, runHeadlessDevShell }
 export { DESKTOP_IPC_CHANNELS, TERMORA_PRELOAD_KEY, createTermoraPreloadApi, exposeTermoraPreload }
 export { createBrowserWindow, loadElectron, createDesktopMain, wireDesktopIpc }
+export { startDesktopApp, resolvePreloadPath, bootstrapTermoraPreload }
+export { ELECTRON_MODULE, loadElectronMain, loadElectronPreload }
 export {
   DEFAULT_WINDOW_HEIGHT,
   DEFAULT_WINDOW_WIDTH,
@@ -88,6 +106,11 @@ export type {
   BrowserWindowConstructorLike,
   DesktopMain,
   DesktopMainWindowOptions,
+  DesktopAppRuntime,
+  StartDesktopAppOptions,
+  ElectronImporter,
+  ElectronMainRuntime,
+  ElectronPreloadRuntime,
 }
 
 export type DesktopBootstrap = {

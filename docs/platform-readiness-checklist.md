@@ -21,7 +21,7 @@ dependencies, reads secrets, or contacts a network.
 
 | Surface                             | Status      | Evidence                                                                         | Blocker                                                     |
 | ----------------------------------- | ----------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Desktop shell (Electron)            | Gated       | `apps/desktop/**`, desktop boundary checker                                      | Electron deps intentionally absent; not in root workspaces  |
+| Desktop shell (Electron)            | Gated       | `apps/desktop/**`, desktop boundary + smoke checkers                             | Real launcher wired; Electron dep scoped to `apps/desktop` only; not in root workspaces; no GUI smoke run |
 | macOS artifact (`.dmg`, `.zip`)     | Gated       | `apps/desktop/electron-builder.config.cjs`, `docs/desktop-unsigned-packaging.md` | Unsigned; no notarization; unsigned helper never run in CI  |
 | Windows artifact (`NSIS`)           | Gated       | `apps/desktop/electron-builder.config.cjs`, `docs/desktop-unsigned-packaging.md` | Native module rebuild unverified; unsigned                  |
 | Linux artifact (`AppImage`, `.deb`) | Gated       | `apps/desktop/electron-builder.config.cjs`, `docs/desktop-unsigned-packaging.md` | Native module smoke test missing                            |
@@ -35,8 +35,14 @@ dependencies, reads secrets, or contacts a network.
 
 ## Desktop (Electron) readiness
 
-- **Implemented:** packaging config placeholders for macOS, Windows, and Linux targets.
-- **Gated:** Electron runtime, real installer build, and installed-app smoke test.
+- **Implemented:** a real main-process launcher (`src/electron-main.ts`) and preload bridge
+  (`src/preload.ts`), plus packaging config placeholders for macOS, Windows, and Linux targets.
+  The launcher resolves Electron through a computed-import loader, so no source binds `electron`
+  at build time. The `electron` dependency is declared in `apps/desktop/package.json` only;
+  `apps/desktop` stays outside root workspaces, so root CI never installs it.
+- **Gated:** running the real GUI on each host (no display in CI), the real installer build, and
+  the installed-app smoke test. `scripts/launch-electron.mjs` is dry-run by default and exits `2`
+  without an installed Electron, so it never fakes a successful launch.
 - **Missing:** code signing, notarization, entitlements review, and auto-update.
 - Native executables and the bundled CLI must stay outside `app.asar`/equivalent archives.
 - Source, docs, and tests must not be bundled into desktop runtime artifacts unless required.
@@ -54,8 +60,8 @@ testing. None of them sign, notarize, publish, or upload. See
 - **Implemented:** `scripts/package-desktop-unsigned.mjs` and the `package:unsigned*` scripts.
   The helper is dry-run by default, refuses signing/publish credentials, and always passes
   `--publish never`.
-- **Gated:** a real unsigned build on each host, because Electron and electron-builder are
-  intentionally absent from the scaffold today.
+- **Gated:** a real unsigned build on each host. `electron` is now declared for the launcher, but
+  `electron-builder` is intentionally absent from the scaffold today.
 - **Missing:** signed/notarized artifacts and any release upload.
 - Commands: `npm run package:desktop:unsigned` (dry run) and
   `npm --prefix apps/desktop run package:unsigned:{mac,linux,win}` (build on the matching host).
@@ -125,9 +131,9 @@ its row below is satisfied and the artifact is recorded in a GitHub Release.
 ## Known blockers
 
 1. No signing/notarization credentials or CI release job.
-2. Desktop build is a scaffold; Electron runtime and installer builds are disabled. The unsigned
-   helper `scripts/package-desktop-unsigned.mjs` can produce local artifacts once Electron and
-   electron-builder are installed on the matching host.
+2. Desktop has a real, wired Electron launcher, but the GUI has never been run in CI (no display)
+   and installer builds are disabled. The unsigned helper `scripts/package-desktop-unsigned.mjs`
+   can produce local artifacts once `electron-builder` is installed on the matching host.
 3. Native mobile builds and APNs entitlement flow are not automated.
 4. No GitHub Releases artifact publication or checksum verification.
 5. Relay/push cloud is deferred until local pairing and the mobile shell are stable.

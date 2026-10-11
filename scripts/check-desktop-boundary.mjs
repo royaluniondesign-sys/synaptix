@@ -3,7 +3,9 @@ import { existsSync, readFileSync } from 'node:fs'
 const REQUIRED_FILES = [
   'apps/desktop/package.json',
   'apps/desktop/electron-builder.config.cjs',
+  'apps/desktop/tsconfig.build.json',
   'apps/desktop/vitest.config.ts',
+  'apps/desktop/scripts/launch-electron.mjs',
   'apps/desktop/src/main.ts',
   'apps/desktop/src/runtime-plan.ts',
   'apps/desktop/src/agent-host.ts',
@@ -13,13 +15,26 @@ const REQUIRED_FILES = [
   'apps/desktop/src/dev.ts',
   'apps/desktop/src/window.ts',
   'apps/desktop/src/main-window.ts',
+  'apps/desktop/src/electron-loader.ts',
+  'apps/desktop/src/electron-main.ts',
+  'apps/desktop/src/preload.ts',
   'apps/desktop/src/__tests__/desktop-shell.test.ts',
   'apps/desktop/src/__tests__/desktop-dev-shell.test.ts',
   'apps/desktop/src/__tests__/desktop-window.test.ts',
   'apps/desktop/src/__tests__/desktop-main-window.test.ts',
+  'apps/desktop/src/__tests__/desktop-electron-main.test.ts',
+  'apps/desktop/src/__tests__/desktop-preload.test.ts',
 ]
 
-const ELECTRON_KEYS = ['electron', 'electron-builder', 'electron-builder-squirrel-windows']
+// The real Electron launcher depends on the `electron` package, which is now
+// declared in apps/desktop/package.json only. Packaging tooling (electron-builder
+// and friends) stays forbidden so the scaffold never claims installed installers.
+const PACKAGING_KEYS = ['electron-builder', 'electron-builder-squirrel-windows']
+const LAUNCHER_SOURCES = [
+  'apps/desktop/src/electron-loader.ts',
+  'apps/desktop/src/electron-main.ts',
+  'apps/desktop/src/preload.ts',
+]
 const problems = []
 const fail = (message) => problems.push(message)
 const read = (path) => readFileSync(path, 'utf8')
@@ -51,9 +66,16 @@ if (desktopPkg) {
   if (desktopPkg.private !== true) fail('desktop package must remain private')
   for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
     const deps = desktopPkg[section] ?? {}
-    for (const key of ELECTRON_KEYS) {
+    for (const key of PACKAGING_KEYS) {
       if (key in deps) fail(`desktop ${section} declares ${key}; scaffold must not claim packaging`)
     }
+  }
+  // The real launcher entry needs a scoped Electron dependency, declared only
+  // here (apps/desktop is intentionally outside root workspaces).
+  const devDeps = desktopPkg.devDependencies ?? {}
+  const runtimeDeps = desktopPkg.dependencies ?? {}
+  if (!('electron' in devDeps) && !('electron' in runtimeDeps)) {
+    fail('desktop must declare an Electron dependency for the real launcher entry')
   }
 }
 
@@ -64,6 +86,10 @@ try {
   const workspaces = rootPkg.workspaces ?? []
   if (workspaces.some((pattern) => String(pattern).includes('apps/')))
     fail('root workspaces must not include apps/**; desktop boundary stays isolated')
+  for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+    if ('electron' in (rootPkg[section] ?? {}))
+      fail(`root ${section} must not declare electron; keep it scoped to apps/desktop`)
+  }
 } catch (error) {
   fail(`could not read root package.json: ${error.message}`)
 }
@@ -200,6 +226,68 @@ if (existsSync('apps/desktop/src/main-window.ts')) {
     ],
     'main-window.ts',
   )
+}
+
+if (existsSync('apps/desktop/src/electron-loader.ts')) {
+  const loader = read('apps/desktop/src/electron-loader.ts')
+  checkSnippets(
+    loader,
+    [
+      'export async function loadElectronMain',
+      'export async function loadElectronPreload',
+      "ELECTRON_MODULE = 'electron'",
+      'import(specifier)',
+      'export type ElectronImporter',
+    ],
+    'electron-loader.ts',
+  )
+}
+
+if (existsSync('apps/desktop/src/electron-main.ts')) {
+  const main = read('apps/desktop/src/electron-main.ts')
+  checkSnippets(
+    main,
+    [
+      'export async function startDesktopApp',
+      'createDesktopMain(',
+      'loadAgentStartFn',
+      'loadElectron(',
+      'whenReady()',
+      "app.on('window-all-closed'",
+      'export function resolvePreloadPath',
+    ],
+    'electron-main.ts',
+  )
+}
+
+if (existsSync('apps/desktop/src/preload.ts')) {
+  const preload = read('apps/desktop/src/preload.ts')
+  checkSnippets(
+    preload,
+    [
+      'export async function bootstrapTermoraPreload',
+      'exposeTermoraPreload(',
+      'loadElectronPreload',
+    ],
+    'preload.ts',
+  )
+}
+
+// The launcher sources must stay free of static Electron bindings: resolve the
+// runtime through the computed loader only (the smoke contract scans all of src;
+// this keeps the boundary check self-contained as well).
+const STATIC_ELECTRON_BINDINGS = [
+  /\bfrom\s*['"]electron['"]/,
+  /\brequire\s*\(\s*['"]electron['"]\s*\)/,
+  /\bimport\s*\(\s*['"]electron['"]\s*\)/,
+]
+for (const file of LAUNCHER_SOURCES) {
+  if (!existsSync(file)) continue
+  const code = read(file)
+  for (const pattern of STATIC_ELECTRON_BINDINGS) {
+    if (pattern.test(code))
+      fail(`${file} binds electron statically; resolve it through loadElectronMain/loadElectron`)
+  }
 }
 
 if (problems.length > 0) {

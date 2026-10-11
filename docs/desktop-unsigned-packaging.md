@@ -56,7 +56,8 @@ with `CSC_IDENTITY_AUTO_DISCOVERY=false`.
 
 ## Why these stay pending/manual
 
-- Electron runtime and electron-builder are intentionally absent from the desktop scaffold.
+- The `electron` dependency is scoped to `apps/desktop` for the real launcher, but `electron-builder`
+  is intentionally absent from the desktop scaffold.
 - No per-platform native module rebuild (`node-pty`, `better-sqlite3`) has been verified.
 - No installed-app smoke test has run on any platform.
 

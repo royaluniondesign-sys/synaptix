@@ -20,8 +20,13 @@ const DESKTOP_SRC = 'apps/desktop/src'
 
 const ENTRY_FILES = [
   'apps/desktop/package.json',
+  'apps/desktop/tsconfig.build.json',
+  'apps/desktop/scripts/launch-electron.mjs',
   'apps/desktop/src/main.ts',
   'apps/desktop/src/dev.ts',
+  'apps/desktop/src/electron-main.ts',
+  'apps/desktop/src/electron-loader.ts',
+  'apps/desktop/src/preload.ts',
   'apps/desktop/src/main-window.ts',
   'apps/desktop/src/window.ts',
   'apps/desktop/src/shell.ts',
@@ -67,8 +72,33 @@ if (existsSync('apps/desktop/package.json')) {
       fail(`unexpected desktop package name: ${desktopPkg.name}`)
     if (desktopPkg.type !== 'module') fail('desktop package must stay an ES module')
     if (desktopPkg.private !== true) fail('desktop package must remain private')
+    if (desktopPkg.main !== 'dist/electron-main.js')
+      fail('apps/desktop package.json main must point at the built launcher entry')
+    const deps = { ...desktopPkg.dependencies, ...desktopPkg.devDependencies }
+    if (!deps.electron)
+      fail('apps/desktop must declare a scoped Electron dependency for the real launcher')
     if (desktopPkg.scripts?.smoke !== 'node ../../scripts/check-desktop-smoke.mjs')
       fail('apps/desktop package.json must expose a smoke script wired to this checker')
+    if (desktopPkg.scripts?.launch !== 'node scripts/launch-electron.mjs')
+      fail('apps/desktop package.json must expose a deterministic launch script')
+    if (desktopPkg.scripts?.['launch:run'] !== 'node scripts/launch-electron.mjs --run')
+      fail('apps/desktop package.json must expose a real launch:run script')
+  }
+}
+
+// Electron must stay scoped to apps/desktop: the root manifest never declares it
+// and never adds apps/** to workspaces.
+if (existsSync('package.json')) {
+  try {
+    const rootPkg = JSON.parse(read('package.json'))
+    for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+      if ('electron' in (rootPkg[section] ?? {}))
+        fail(`root ${section} must not declare electron; keep it scoped to apps/desktop`)
+    }
+    if ((rootPkg.workspaces ?? []).some((pattern) => String(pattern).includes('apps/')))
+      fail('root workspaces must not include apps/**')
+  } catch (error) {
+    fail(`could not read root package.json: ${error.message}`)
   }
 }
 
@@ -242,6 +272,54 @@ if (existsSync('apps/desktop/src/shell.ts')) {
     shell,
     ['export async function loadAgentStartFn', 'import(specifier)', 'buildAgentWebUrl('],
     'shell.ts',
+  )
+}
+
+// 3b. Real Electron launcher surface (main + preload + deterministic launcher).
+if (existsSync('apps/desktop/src/electron-loader.ts')) {
+  const loader = read('apps/desktop/src/electron-loader.ts')
+  checkSnippets(
+    loader,
+    [
+      'export async function loadElectronMain',
+      'export async function loadElectronPreload',
+      "ELECTRON_MODULE = 'electron'",
+      'import(specifier)',
+    ],
+    'electron-loader.ts',
+  )
+}
+
+if (existsSync('apps/desktop/src/electron-main.ts')) {
+  const main = read('apps/desktop/src/electron-main.ts')
+  checkSnippets(
+    main,
+    [
+      'export async function startDesktopApp',
+      'createDesktopMain(',
+      'loadElectron(',
+      'whenReady()',
+      'export function resolvePreloadPath',
+    ],
+    'electron-main.ts',
+  )
+}
+
+if (existsSync('apps/desktop/src/preload.ts')) {
+  const preload = read('apps/desktop/src/preload.ts')
+  checkSnippets(
+    preload,
+    ['export async function bootstrapTermoraPreload', 'exposeTermoraPreload(', 'loadElectronPreload'],
+    'preload.ts',
+  )
+}
+
+if (existsSync('apps/desktop/scripts/launch-electron.mjs')) {
+  const launcher = read('apps/desktop/scripts/launch-electron.mjs')
+  checkSnippets(
+    launcher,
+    ['--run', 'dist/electron-main.js', '--help'],
+    'scripts/launch-electron.mjs',
   )
 }
 
