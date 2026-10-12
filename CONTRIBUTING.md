@@ -127,3 +127,7 @@ Sponsors are recognized in [SPONSORS.md](./SPONSORS.md). Every contribution help
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
+
+## For AI agents
+
+See [AGENTS.md](AGENTS.md) for the rules and checks that apply to automated contributors.
