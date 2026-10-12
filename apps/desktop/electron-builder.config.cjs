@@ -14,9 +14,9 @@ module.exports = {
     output: 'release/desktop',
     buildResources: 'resources'
   },
-  // asar is off for the first artifacts: the agent resolves the web UI relative
-  // to its own files and node-pty ships a helper binary that must be executable.
-  asar: false,
+  // Native modules must live outside the archive so they can be loaded.
+  asar: true,
+  asarUnpack: ['**/*.node', '**/node_modules/node-pty/**', '**/node_modules/better-sqlite3/**'],
   npmRebuild: true,
   files: ['**/*', '!**/*.map', '!**/*.md', '!**/test/**', '!**/tests/**'],
   extraResources: [

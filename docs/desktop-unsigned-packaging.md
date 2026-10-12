@@ -105,10 +105,12 @@ node scripts/smoke-appimage.mjs                           # runs under xvfb-run 
 - electron-builder only packages dependencies declared in the app manifest, so `stage` declares the
   agent and the web UI as `file:` dependencies (installed with `--install-links`) instead of copying them
   into `node_modules` by hand, which it silently drops.
-- Known gap: the agent reads its version from `node_modules/package.json` and falls back to `0.0.0`
-  in the packaged app, so `/api/info` reports `0.0.0` until that lookup is fixed.
-- `asar` is disabled for now: the agent reads the web UI relative to its own files and `node-pty`
-  ships a helper that must stay executable. Enabling asar with `asarUnpack` is a follow-up.
+- The agent reads its version from the workspace `package.json` and, when packaged, from its own
+  `package.json`; the smoke test fails if `/api/info` reports `0.0.0`.
+- `asar` is enabled. Native modules (`.node` files, `node-pty`, `better-sqlite3`) are unpacked with
+  `asarUnpack` so they can be loaded. If a future dependency ships a helper binary, add it there.
+- The app icon is `apps/desktop/resources/icon.png`, the same plain `$_` prompt used by the PWA. It is a
+  placeholder, not a designed brand icon.
 - The smoke test launches the packaged app with a throwaway `HOME`, waits for `/api/health`, checks
   that `/` serves HTML, then stops it. It prints a JSON evidence record and fails with the app's log tail.
 - The workflow fails when the smoke test fails (the evidence is written to a file first so the exit code

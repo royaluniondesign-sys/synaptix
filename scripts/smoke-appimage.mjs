@@ -3,7 +3,8 @@
 //
 // Launches the packaged app (an .AppImage, or an unpacked `termora` binary)
 // under a virtual display with a throwaway HOME, waits for the embedded agent
-// to answer /api/health, checks that the web cockpit is served, then stops the
+// to answer /api/health, checks that the web cockpit is served and that
+// /api/info reports a real version (not 0.0.0), then stops the
 // app. Prints a JSON evidence record and exits non-zero on any failure.
 //
 // It runs the app only; it never signs, uploads, or publishes anything.
@@ -80,7 +81,7 @@ child.on('exit', (code, signal) => { exited = { code, signal } })
 
 const base = `http://127.0.0.1:${port}`
 const startedAt = Date.now()
-const checks = { health: null, webUi: null }
+const checks = { health: null, webUi: null, version: null }
 let failure = null
 
 while (Date.now() - startedAt < timeoutMs) {
@@ -90,6 +91,8 @@ while (Date.now() - startedAt < timeoutMs) {
     checks.health = { status: 200, body: health.body.slice(0, 200) }
     const root = await probe(`${base}/`)
     checks.webUi = root ? { status: root.status, html: /<html|<!doctype html/i.test(root.body) } : null
+    const info = await probe(`${base}/api/info`)
+    try { checks.version = JSON.parse(info?.body ?? '{}').version ?? null } catch { checks.version = null }
     break
   }
   await sleep(1_000)
@@ -97,6 +100,7 @@ while (Date.now() - startedAt < timeoutMs) {
 
 if (!failure && !checks.health) failure = `agent did not answer /api/health within ${timeoutMs} ms`
 if (!failure && !(checks.webUi?.status === 200 && checks.webUi.html)) failure = 'web cockpit was not served at /'
+if (!failure && (!checks.version || checks.version === '0.0.0')) failure = `/api/info reports version ${JSON.stringify(checks.version)}; expected the app version`
 
 try { process.kill(-child.pid, 'SIGTERM') } catch { /* already gone */ }
 await sleep(1_500)
