@@ -43,3 +43,10 @@ test('capabilities named on the page exist in the registry', () => {
     assert.match(registry, new RegExp(`id: '${id}'`))
   }
 })
+
+test('every font the page references is copied by the build script', () => {
+  const build = readFileSync(new URL('../build-site.mjs', import.meta.url), 'utf8')
+  const used = [...html.matchAll(/url\("fonts\/([^"]+\.woff2)"\)/g)].map((match) => match[1])
+  assert.ok(used.length >= 4, 'expected the page to reference its font files')
+  for (const file of used) assert.ok(build.includes(`'${file}'`), `${file} is not in build-site.mjs`)
+})

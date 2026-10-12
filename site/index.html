@@ -5,143 +5,317 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Termora</title>
 <meta name="description" content="Open-source cockpit for real terminals and CLI coding agents on your own machine, from a browser or phone. Early alpha.">
+<meta name="color-scheme" content="dark light">
 <style>
+  @font-face { font-family: "Geist"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/geist-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Geist"; font-weight: 500; font-style: normal; font-display: swap; src: url("fonts/geist-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Geist"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/geist-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Geist"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/geist-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Geist Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/geist-mono-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Geist Mono"; font-weight: 500; font-style: normal; font-display: swap; src: url("fonts/geist-mono-latin-500-normal.woff2") format("woff2"); }
+
   :root {
-    --bg: #08090a; --panel: #101214; --line: #23272c; --text: #d0d6e0; --muted: #8a919b;
-    --head: #f7f8f8; --accent: #10b981; --warn: #e5b567;
+    --bg: #07080a; --bg-2: #0c0e11; --card: #0f1215; --line: #1e2328; --line-2: #2a3037;
+    --text: #c9d0d9; --muted: #8b939e; --head: #f4f6f8;
+    --accent: #34d399; --accent-ink: #04120c; --accent-soft: rgba(52, 211, 153, 0.12);
+    --warn: #e6b566; --warn-soft: rgba(230, 181, 102, 0.1);
+    --glow: rgba(52, 211, 153, 0.16);
+    --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     color-scheme: dark;
   }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fbfbfa; --bg-2: #f3f4f2; --card: #ffffff; --line: #e4e6e3; --line-2: #d3d6d2;
+      --text: #3b4350; --muted: #667080; --head: #0c1116;
+      --accent: #0b8a5f; --accent-ink: #ffffff; --accent-soft: rgba(11, 138, 95, 0.09);
+      --warn: #8a5a0a; --warn-soft: rgba(138, 90, 10, 0.08);
+      --glow: rgba(11, 138, 95, 0.12);
+      color-scheme: light;
+    }
   }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased; }
   a { color: var(--accent); text-underline-offset: 3px; }
-  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
-  code { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
-  pre { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 12px 0; }
-  pre code { background: none; border: 0; padding: 0; }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
-  header.top { border-bottom: 1px solid var(--line); }
-  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
-  .brand { font-weight: 700; color: var(--head); letter-spacing: 0.01em; text-decoration: none; }
-  .brand span { color: var(--accent); }
-  nav a { margin-left: 18px; color: var(--muted); text-decoration: none; font-size: 0.95rem; }
-  nav a:hover { color: var(--head); }
-  .hero { padding: 72px 0 40px; }
-  .tag { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 0.82rem; color: var(--warn); }
-  h1 { color: var(--head); font-size: clamp(2rem, 6vw, 3.1rem); line-height: 1.12; margin: 16px 0 14px; letter-spacing: -0.02em; }
-  .lead { font-size: 1.15rem; max-width: 640px; color: var(--text); margin: 0 0 24px; }
-  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
-  .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--line); color: var(--head); text-decoration: none; font-weight: 600; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #04130d; }
-  section { padding: 36px 0; border-top: 1px solid var(--line); }
-  h2 { color: var(--head); font-size: 1.45rem; margin: 0 0 12px; letter-spacing: -0.01em; }
-  ul { padding-left: 20px; } li { margin: 6px 0; }
-  .note { color: var(--muted); font-size: 0.92rem; }
-  .demo { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
-  .demo iframe { display: block; width: 100%; height: 640px; border: 0; background: #000; }
-  .demo .bar { padding: 8px 14px; font-size: 0.85rem; color: var(--warn); border-bottom: 1px solid var(--line); }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
-  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } .demo iframe { height: 560px; } nav a { margin-left: 12px; } }
-  footer { padding: 28px 0 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+  code, pre, kbd { font-family: var(--mono); font-size: 0.88em; }
+  code { background: var(--bg-2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; color: var(--head); }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-x: auto; margin: 0; line-height: 1.7; }
+  pre code { background: none; border: 0; padding: 0; color: var(--text); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  .narrow { max-width: 760px; }
+
+  /* nav */
+  .nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .brand { font: 700 1.1rem/1 var(--mono); color: var(--head); text-decoration: none; letter-spacing: -0.02em; }
+  .brand i { color: var(--accent); font-style: normal; }
+  .links { display: flex; align-items: center; gap: 26px; }
+  .links a { color: var(--muted); text-decoration: none; font-size: 0.93rem; font-weight: 500; }
+  .links a:hover { color: var(--head); }
+  .links .gh { color: var(--head); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 13px; }
+  .links .gh:hover { border-color: var(--accent); }
+
+  /* hero */
+  .hero { position: relative; padding: 84px 0 56px; text-align: center; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: -20% -10% auto; height: 640px; background: radial-gradient(ellipse 60% 55% at 50% 0%, var(--glow), transparent 70%); pointer-events: none; }
+  .hero::after { content: ""; position: absolute; inset: 0 0 auto; height: 560px; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 56px 56px; opacity: 0.35; mask-image: linear-gradient(to bottom, #000, transparent 85%); -webkit-mask-image: linear-gradient(to bottom, #000, transparent 85%); pointer-events: none; }
+  .hero > .wrap { position: relative; z-index: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line-2); background: var(--card); border-radius: 999px; padding: 5px 14px; font: 500 0.8rem/1.4 var(--mono); color: var(--muted); }
+  .pill b { color: var(--warn); font-weight: 500; }
+  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
+  h1 { color: var(--head); font-weight: 700; font-size: clamp(2.5rem, 7.2vw, 4.6rem); line-height: 1.04; letter-spacing: -0.045em; margin: 22px auto 18px; max-width: 14ch; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { font-size: clamp(1.05rem, 2.2vw, 1.25rem); color: var(--text); max-width: 600px; margin: 0 auto 30px; line-height: 1.6; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 10px; border: 1px solid var(--line-2); color: var(--head); text-decoration: none; font-weight: 600; font-size: 0.95rem; background: var(--card); transition: border-color .15s, transform .15s; }
+  .btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .micro { margin: 18px 0 0; font-size: 0.85rem; color: var(--muted); }
+
+  /* product frame */
+  .stage { margin: 52px auto 0; max-width: 1040px; }
+  .frame { border: 1px solid var(--line-2); border-radius: 14px; background: var(--card); overflow: hidden; box-shadow: 0 40px 90px -30px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02); text-align: left; }
+  .chrome { display: flex; align-items: center; gap: 14px; padding: 11px 16px; border-bottom: 1px solid var(--line); background: var(--bg-2); }
+  .dots { display: flex; gap: 7px; } .dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--line-2); }
+  .addr { flex: 1; text-align: center; font: 400 0.78rem/1 var(--mono); color: var(--muted); }
+  .badge { font: 500 0.72rem/1 var(--mono); color: var(--warn); background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); border-radius: 6px; padding: 5px 9px; white-space: nowrap; }
+  .frame iframe { display: block; width: 100%; height: 640px; border: 0; background: #000; }
+  .caption { font-size: 0.85rem; color: var(--muted); text-align: center; margin: 14px 0 0; }
+
+  /* facts */
+  .facts { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg-2); margin-top: 64px; }
+  .facts .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .fact { padding: 26px 20px; border-left: 1px solid var(--line); }
+  .fact:first-child { border-left: 0; padding-left: 0; }
+  .fact strong { display: block; color: var(--head); font: 600 1.05rem/1.3 var(--sans); letter-spacing: -0.01em; }
+  .fact span { color: var(--muted); font-size: 0.88rem; }
+
+  /* sections */
+  section { padding: 88px 0; }
+  .eyebrow { font: 500 0.78rem/1 var(--mono); color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+  h2 { color: var(--head); font-weight: 700; font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; letter-spacing: -0.035em; margin: 14px 0 14px; max-width: 20ch; }
+  .lede { color: var(--text); font-size: 1.08rem; max-width: 62ch; margin: 0 0 40px; }
+  h3 { color: var(--head); font-size: 1.08rem; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .grid { display: grid; gap: 16px; }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .card .ico { width: 36px; height: 36px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin-bottom: 16px; font: 600 0.95rem/1 var(--mono); }
+  .steps { counter-reset: s; }
+  .steps .card { position: relative; }
+  .steps .card::before { counter-increment: s; content: "0" counter(s); font: 500 0.8rem/1 var(--mono); color: var(--accent); display: block; margin-bottom: 14px; }
+  .diagram { margin-top: 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 28px 20px; }
+  .diagram svg { display: block; width: 100%; height: auto; max-width: 880px; margin: 0 auto; }
+  .diagram text { font-family: var(--mono); font-size: 13px; fill: var(--text); }
+  .diagram .sm { font-size: 11px; fill: var(--muted); }
+  .diagram rect.n { fill: var(--bg-2); stroke: var(--line-2); }
+  .diagram rect.hot { fill: var(--accent-soft); stroke: var(--accent); }
+  .diagram path { stroke: var(--line-2); fill: none; stroke-width: 1.5; }
+
+  /* status table */
+  .table { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--card); }
+  .row { display: grid; grid-template-columns: 1.2fr 1.6fr 2fr; gap: 16px; padding: 16px 22px; border-top: 1px solid var(--line); align-items: start; font-size: 0.95rem; }
+  .row:first-child { border-top: 0; }
+  .row.head { background: var(--bg-2); font: 500 0.75rem/1 var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 13px 22px; }
+  .row b { color: var(--head); font-weight: 600; }
+  .row span.d { color: var(--muted); }
+  .chip { display: inline-block; font: 500 0.75rem/1 var(--mono); padding: 5px 9px; border-radius: 6px; border: 1px solid var(--line-2); color: var(--text); }
+  .chip.ok { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+  .chip.wip { color: var(--warn); background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+  .foot-note { color: var(--muted); font-size: 0.9rem; margin-top: 18px; }
+
+  /* install */
+  .two { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: start; }
+  .two > *, .grid > * { min-width: 0; }
+  .callout { border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-soft); border-radius: 12px; padding: 18px 20px; color: var(--text); font-size: 0.95rem; }
+  .callout strong { color: var(--head); }
+  .callout p { margin: 0 0 8px; } .callout p:last-child { margin: 0; }
+  .install-notes { margin: 16px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 0.93rem; }
+  .install-notes li { margin: 8px 0; padding-left: 20px; position: relative; }
+  .install-notes li::before { content: "›"; position: absolute; left: 4px; color: var(--accent); font-family: var(--mono); }
+
+  /* faq */
+  details { border-top: 1px solid var(--line); padding: 20px 0; }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; list-style: none; color: var(--head); font-weight: 600; font-size: 1.05rem; display: flex; justify-content: space-between; gap: 16px; letter-spacing: -0.01em; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font: 400 1.4rem/1 var(--mono); color: var(--accent); }
+  details[open] summary::after { content: "−"; }
+  details p { margin: 12px 0 0; color: var(--muted); max-width: 66ch; }
+
+  .final { text-align: center; background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .final h2 { margin-left: auto; margin-right: auto; max-width: 18ch; }
+  .final .lede { margin-left: auto; margin-right: auto; }
+
+  footer { padding: 36px 0 56px; color: var(--muted); font-size: 0.88rem; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px; }
+  footer a { color: var(--muted); } footer a:hover { color: var(--head); }
+
+  @media (max-width: 900px) {
+    .g3 { grid-template-columns: 1fr 1fr; } .two { grid-template-columns: 1fr; }
+    .facts .wrap { grid-template-columns: 1fr 1fr; } .fact:nth-child(3) { border-left: 0; padding-left: 0; }
+    .fact { border-top: 1px solid var(--line); } .fact:nth-child(-n+2) { border-top: 0; }
+  }
+  @media (max-width: 640px) {
+    .links a:not(.gh) { display: none; }
+    .hero { padding-top: 56px; } section { padding: 64px 0; }
+    .g3 { grid-template-columns: 1fr; }
+    .frame iframe { height: 560px; } .addr { display: none; }
+    .chrome { justify-content: space-between; }
+    .row, .row.head { grid-template-columns: 1fr; gap: 6px; } .row.head { display: none; }
+    .facts .wrap { grid-template-columns: 1fr; } .fact { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); } .fact:first-child { border-top: 0; }
+  }
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap">
-  <a class="brand" href="#">termora<span>_</span></a>
-  <nav><a href="#demo">Demo</a><a href="#status">Status</a><a href="#install">Install</a><a href="#privacy">Privacy</a></nav>
-</div></header>
 
-<main>
-<div class="wrap">
-  <div class="hero">
-    <span class="tag">Early alpha · open source · no hosted service</span>
-    <h1>Your machine, in your hands.</h1>
-    <p class="lead">Termora streams the real terminals and coding agents running on your own computer to a browser or your phone. Nothing runs in a cloud workspace; the shell is yours.</p>
-    <div class="cta">
-      <a class="btn primary" href="#demo">Try the demo</a>
-      <a class="btn" href="#install">Install from source</a>
-      <a class="btn" href="https://github.com/royaluniondesign-sys/termora">GitHub</a>
-    </div>
+<nav class="nav"><div class="wrap">
+  <a class="brand" href="#top">termora<i>_</i></a>
+  <div class="links">
+    <a href="#how">How it works</a><a href="#features">Features</a><a href="#status">Status</a><a href="#install">Install</a><a href="#faq">FAQ</a>
+    <a class="gh" href="https://github.com/royaluniondesign-sys/termora">GitHub</a>
   </div>
+</div></nav>
 
-  <section id="demo">
-    <h2>Try it in your browser</h2>
-    <p>This is the real cockpit interface. It runs against a simulated backend inside this page, so you can open terminals and click around without installing anything.</p>
-    <div class="demo">
-      <div class="bar">Demo · simulated backend: no real machine is connected and nothing you type leaves this page.</div>
+<header class="hero" id="top"><div class="wrap">
+  <span class="pill"><b>Early alpha</b> · MIT · local-first</span>
+  <h1>Your machine, <em>in your hands.</em></h1>
+  <p class="sub">Termora streams the real terminals and coding agents running on your own computer to a browser or your phone. Nothing runs in a cloud workspace. The shell is yours.</p>
+  <div class="cta">
+    <a class="btn primary" href="#demo">Try the live demo</a>
+    <a class="btn" href="#install">Install from source</a>
+  </div>
+  <p class="micro">Open source. No account. No hosted service.</p>
+
+  <div class="stage" id="demo">
+    <div class="frame">
+      <div class="chrome">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="addr">termora · cockpit</div>
+        <div class="badge">simulated backend</div>
+      </div>
       <iframe src="demo/" title="Termora cockpit demo (simulated backend)" loading="lazy"></iframe>
     </div>
-    <p class="note"><a href="demo/">Open the demo full screen</a>.</p>
-  </section>
+    <p class="caption">The real interface, running against a simulated backend inside this page. No machine is connected and nothing you type leaves it. <a href="demo/">Open full screen</a>.</p>
+  </div>
+</div></header>
 
-  <section id="what">
-    <h2>What it does today</h2>
-    <ul>
-      <li><strong>Real terminals.</strong> Sessions are real PTYs streamed over WebSocket, with tmux persistence when tmux is available. Pair a phone or browser by scanning a QR code.</li>
-      <li><strong>An agent registry.</strong> Built-in profiles for Claude Code, Codex, OpenCode, Hermes, Aider, Gemini CLI and Goose, plus custom ones. Agents start as argument lists, never through a shell, and launching them is off unless you set <code>TERMORA_ENABLE_AGENT_SPAWN=1</code>.</li>
-      <li><strong>Status from output.</strong> A heuristic reads an agent's terminal output and labels it idle, running, editing, testing, waiting, failed or done. It is a guess from text, not a protocol the agents speak.</li>
-      <li><strong>Git worktree fan-out.</strong> Start the same task in several isolated worktrees.</li>
-      <li><strong>A desktop shell.</strong> An Electron app that bundles the agent and the interface.</li>
-    </ul>
-  </section>
+<div class="facts"><div class="wrap">
+  <div class="fact"><strong>MIT licensed</strong><span>Read it, run it, change it</span></div>
+  <div class="fact"><strong>No telemetry</strong><span>The app code sends no analytics</span></div>
+  <div class="fact"><strong>7 agent profiles</strong><span>Plus your own custom ones</span></div>
+  <div class="fact"><strong>3 desktop builds</strong><span>Built in CI, unsigned</span></div>
+</div></div>
 
-  <section id="status">
-    <h2>What is not done</h2>
-    <div class="cols">
-      <div>
-        <p><strong>Desktop builds</strong></p>
-        <ul>
-          <li>Linux (AppImage), macOS (Apple Silicon) and Windows (x64) packages build in CI and start correctly in an automated test.</li>
-          <li>They are unsigned, not notarized, and not published as a release. There is no download button because there is nothing to download yet.</li>
-          <li>No macOS Intel build.</li>
-          <li>A person has not yet installed and used them on a Mac or a Windows PC.</li>
-        </ul>
-      </div>
-      <div>
-        <p><strong>Product</strong></p>
-        <ul>
-          <li>SSH and SFTP to other machines are not finished.</li>
-          <li>The native mobile app is a scaffold; use the browser or the installable web app.</li>
-          <li>No accounts, no relay service, no paid plan.</li>
-          <li>Few people have used it. Expect rough edges.</li>
-        </ul>
-      </div>
-    </div>
-    <p class="note">The full list, kept in step with the code, is in the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/docs/current-status.md">status document</a> and the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/ROADMAP.md">roadmap</a>.</p>
-  </section>
+<main>
+<section id="how"><div class="wrap">
+  <div class="eyebrow">How it works</div>
+  <h2>A small agent on your machine. A cockpit wherever you are.</h2>
+  <p class="lede">Termora is a local agent plus a web interface. Your phone never talks to a fake shell: it streams authenticated input and output to real terminal sessions on your computer.</p>
+  <div class="grid g3 steps">
+    <div class="card"><h3>Run the agent</h3><p>Start Termora on a Mac or Linux machine. It opens real PTY sessions and keeps them alive with tmux when tmux is installed.</p></div>
+    <div class="card"><h3>Pair a device</h3><p>Scan the QR code from your phone or open the address in a browser. A pairing token is exchanged for a session token.</p></div>
+    <div class="card"><h3>Run your agents</h3><p>Open terminals, start CLI coding agents, and watch what each one is doing from a single screen.</p></div>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 880 150" role="img" aria-label="A phone or browser connects over HTTPS and WebSocket to the Termora agent on your machine, which runs terminal sessions and coding agents.">
+      <rect class="n" x="10" y="35" width="200" height="80" rx="12"/>
+      <text x="110" y="70" text-anchor="middle">Phone or browser</text>
+      <text class="sm" x="110" y="92" text-anchor="middle">cockpit interface</text>
+      <path d="M210 75 H330"/><path d="M322 69 l8 6 -8 6" />
+      <text class="sm" x="270" y="60" text-anchor="middle">HTTPS · WebSocket</text>
+      <rect class="hot" x="330" y="35" width="220" height="80" rx="12"/>
+      <text x="440" y="70" text-anchor="middle">Termora agent</text>
+      <text class="sm" x="440" y="92" text-anchor="middle">on your machine</text>
+      <path d="M550 75 H670"/><path d="M662 69 l8 6 -8 6" />
+      <rect class="n" x="670" y="35" width="200" height="80" rx="12"/>
+      <text x="770" y="70" text-anchor="middle">Real terminals</text>
+      <text class="sm" x="770" y="92" text-anchor="middle">PTY · tmux · agents</text>
+    </svg>
+  </div>
+</div></section>
 
-  <section id="install">
-    <h2>Install from source</h2>
-    <p>Needs Node.js 20 or newer on macOS or Linux.</p>
+<section id="features" style="background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);"><div class="wrap">
+  <div class="eyebrow">Features</div>
+  <h2>What it does today.</h2>
+  <p class="lede">Everything here exists in the code and is covered by tests. What does not exist yet is listed further down.</p>
+  <div class="grid g3">
+    <div class="card"><div class="ico">&gt;_</div><h3>Real terminals</h3><p>Sessions are real PTYs streamed over WebSocket. Create, rename, close, reconnect and resume them.</p></div>
+    <div class="card"><div class="ico">QR</div><h3>Secure pairing</h3><p>QR or token pairing, JWT session tokens, and rate-limited authentication endpoints.</p></div>
+    <div class="card"><div class="ico">AI</div><h3>Agent registry</h3><p>Built-in profiles for Claude Code, Codex, OpenCode, Hermes, Aider, Gemini CLI and Goose. Agents start as argument lists, never through a shell. Launching them is off unless you set <code>TERMORA_ENABLE_AGENT_SPAWN=1</code>.</p></div>
+    <div class="card"><div class="ico">~</div><h3>Status from output</h3><p>A heuristic reads an agent's terminal output and labels it idle, running, editing, testing, waiting, failed or done. It is a guess from text, not a protocol the agents speak.</p></div>
+    <div class="card"><div class="ico">Y</div><h3>Worktree fan-out</h3><p>Start the same task in several isolated git worktrees, one session per worktree.</p></div>
+    <div class="card"><div class="ico">[ ]</div><h3>Desktop shell</h3><p>An Electron app that bundles the agent and the interface into one installable package.</p></div>
+  </div>
+</div></section>
+
+<section id="status"><div class="wrap">
+  <div class="eyebrow">Status</div>
+  <h2>What works, and what does not yet.</h2>
+  <p class="lede">The desktop packages are built and started automatically on every change. They are unsigned, not notarized, and not published as a release, so there is nothing to download yet. A person has not yet installed and used them on a Mac or a Windows PC.</p>
+  <div class="table">
+    <div class="row head"><div>Target</div><div>State</div><div>Notes</div></div>
+    <div class="row"><div><b>From source</b><br><span class="d">macOS, Linux</span></div><div><span class="chip ok">Works</span></div><div><span class="d">Node.js 20 or newer. This is the supported way to try Termora today.</span></div></div>
+    <div class="row"><div><b>Linux</b><br><span class="d">AppImage</span></div><div><span class="chip wip">Built in CI · unsigned</span></div><div><span class="d">Starts and serves the interface in an automated test.</span></div></div>
+    <div class="row"><div><b>macOS</b><br><span class="d">Apple Silicon, dmg and zip</span></div><div><span class="chip wip">Built in CI · unsigned</span></div><div><span class="d">Starts in an automated test. Not notarized, so macOS will warn you. No Intel build.</span></div></div>
+    <div class="row"><div><b>Windows</b><br><span class="d">x64 installer</span></div><div><span class="chip wip">Built in CI · unsigned</span></div><div><span class="d">Starts in an automated test. WSL support is not documented yet.</span></div></div>
+    <div class="row"><div><b>SSH and SFTP</b></div><div><span class="chip">Not finished</span></div><div><span class="d">Connecting to other machines is on the roadmap.</span></div></div>
+    <div class="row"><div><b>Native mobile app</b></div><div><span class="chip">Scaffold</span></div><div><span class="d">Use the browser or the installable web app instead.</span></div></div>
+  </div>
+  <p class="foot-note">The full list, kept in step with the code, is in the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/docs/current-status.md">status document</a> and the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/ROADMAP.md">roadmap</a>.</p>
+</div></section>
+
+<section id="install" style="background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);"><div class="wrap">
+  <div class="eyebrow">Install</div>
+  <h2>Run it from source.</h2>
+  <p class="lede">Needs Node.js 20 or newer on macOS or Linux.</p>
+  <div class="two">
+    <div>
 <pre><code>git clone https://github.com/royaluniondesign-sys/termora.git
 cd termora
 npm install
 TUNNEL=local npm run dev</code></pre>
-    <p>The terminal prints a QR code and an address. Open it from your phone or another browser on the same network.</p>
-    <p class="note">Windows: only the CI-built desktop package exists, and WSL support is not documented yet.</p>
-  </section>
+      <ul class="install-notes">
+        <li>The terminal prints a QR code and an address. Open it from your phone or another browser on the same network.</li>
+        <li>Stop it with <code>Ctrl+C</code>.</li>
+        <li>Windows: only the CI-built package exists for now.</li>
+      </ul>
+    </div>
+    <div class="callout" id="privacy">
+      <p><strong>Read this before you run it without TUNNEL=local.</strong></p>
+      <p>By default Termora tries to open a public tunnel (ngrok, then SSH through localhost.run) so your phone can reach it from outside your network. Traffic then passes through that provider. Access is protected by a pairing token, but the address is public.</p>
+      <p><code>TUNNEL=local</code> keeps it on your own network.</p>
+    </div>
+  </div>
+</div></section>
 
-  <section id="privacy">
-    <h2>Privacy</h2>
-    <ul>
-      <li>Termora runs on your machine. There is no Termora server, account or sign-up.</li>
-      <li>The application code contains no analytics or telemetry. This page loads no scripts, fonts or trackers from other sites.</li>
-      <li><strong>Without <code>TUNNEL=local</code>, Termora tries to open a public tunnel</strong> (ngrok, then SSH through localhost.run) so your phone can reach it from outside your network. Traffic then passes through that provider. Access is protected by a pairing token, but the address is public. Set <code>TUNNEL=local</code> to stay on your own network.</li>
-    </ul>
-  </section>
+<section id="faq"><div class="wrap narrow">
+  <div class="eyebrow">FAQ</div>
+  <h2>Questions.</h2>
+  <details><summary>Is it free?</summary><p>Termora is open source under the MIT license. There is no paid plan today.</p></details>
+  <details><summary>Where does my data go?</summary><p>Termora runs on your machine. There is no Termora server, account or sign-up, and the application code contains no analytics or telemetry. This page loads no scripts, fonts or trackers from other sites. The one exception to "stays on your machine" is the optional public tunnel described under Install.</p></details>
+  <details><summary>Why is there no download button?</summary><p>The desktop packages are unsigned, not notarized, and have not been published as a release. Until they are, running from source is the honest way to try it.</p></details>
+  <details><summary>Which agents does it work with?</summary><p>It launches CLI agents that you have installed yourself: Claude Code, Codex, OpenCode, Hermes, Aider, Gemini CLI and Goose, or any command you add. Termora checks that the command exists on your PATH. It does not bundle or install them.</p></details>
+  <details><summary>Does it work on Windows?</summary><p>A Windows x64 installer is built and started automatically, but nobody has used it on a real Windows machine yet. From-source support covers macOS and Linux.</p></details>
+  <details><summary>How do I report a problem?</summary><p>Open an issue on GitHub with your operating system, Node.js version and what you did.</p></details>
+</div></section>
 
-  <section id="help">
-    <h2>Help us test it</h2>
-    <p>The most useful thing right now is someone running it on their own machine and telling us what broke. Open an issue on <a href="https://github.com/royaluniondesign-sys/termora/issues">GitHub</a> with your OS, Node version and what you did.</p>
-  </section>
-</div>
+<section class="final"><div class="wrap">
+  <div class="eyebrow">Help us test it</div>
+  <h2>Run it on your machine. Tell us what broke.</h2>
+  <p class="lede">The most useful thing right now is someone using Termora for real work and reporting what gets in the way.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/royaluniondesign-sys/termora/issues">Open an issue</a>
+    <a class="btn" href="https://github.com/royaluniondesign-sys/termora">View the source</a>
+  </div>
+</div></section>
 </main>
 
 <footer><div class="wrap">
-  Termora is open source under the MIT license. <a href="https://github.com/royaluniondesign-sys/termora">Source</a> · <a href="https://github.com/royaluniondesign-sys/termora/blob/main/LICENSE">License</a>
+  <span>Termora is open source under the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/LICENSE">MIT license</a>.</span>
+  <span><a href="https://github.com/royaluniondesign-sys/termora">GitHub</a> · <a href="https://github.com/royaluniondesign-sys/termora/blob/main/ROADMAP.md">Roadmap</a> · <a href="https://github.com/royaluniondesign-sys/termora/blob/main/SECURITY.md">Security</a></span>
 </div></footer>
+
 </body>
 </html>
