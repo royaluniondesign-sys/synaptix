@@ -1,12 +1,6 @@
 @import 'tailwindcss';
 
-/* Anthropic official font families (woff2 from anthropic.com CDN) */
-@font-face { font-family: 'Anthropic Sans'; src: url('/fonts/AnthropicSans-Roman.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Anthropic Sans'; src: url('/fonts/AnthropicSans-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
-@font-face { font-family: 'Anthropic Mono'; src: url('/fonts/AnthropicMono-Roman.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Styrene A'; src: url('/fonts/StyreneA-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Styrene A'; src: url('/fonts/StyreneA-Medium.otf') format('opentype'); font-weight: 500; font-style: normal; font-display: swap; }
-@font-face { font-family: 'Styrene A'; src: url('/fonts/StyreneA-Bold.otf') format('opentype'); font-weight: 700; font-style: normal; font-display: swap; }
+/* Fonts: Geist and Geist Mono (SIL OFL 1.1) are bundled via @fontsource in main.tsx. */
 
 @theme {
   /* ── Obsidian Design System ───────────────────────────────────────────────── */
@@ -73,7 +67,6 @@ body {
   background: var(--color-obsidian-bg);
   font-family:
     'Geist',
-    'Anthropic Sans',
     -apple-system,
     BlinkMacSystemFont,
     'Helvetica Neue',
@@ -373,7 +366,7 @@ body { background: var(--tm-bg); }
   overflow: hidden;
   color: var(--oct-text);
   background: linear-gradient(180deg, #151515, #070707);
-  font-family: 'Geist', 'Anthropic Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 .tm-oct-windowbar {
   height: 34px;
@@ -443,13 +436,13 @@ body { background: var(--tm-bg); }
 .tm-oct-pane-head > div { display:flex; align-items:center; gap:7px; min-width:0; }
 .tm-oct-pane-head strong { color:#d8d8d8; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .tm-oct-pane-head span { color:#777; font-size:10px; white-space:nowrap; }
-.tm-oct-terminal { flex:1; margin:0; padding:12px; overflow:hidden; background:#000; color:#d5d5d5; font:11px/1.38 'Anthropic Mono','Geist Mono','SFMono-Regular',monospace; white-space:pre-wrap; }
+.tm-oct-terminal { flex:1; margin:0; padding:12px; overflow:hidden; background:#000; color:#d5d5d5; font:11px/1.38 'Geist Mono','SFMono-Regular',monospace; white-space:pre-wrap; }
 .tm-oct-terminal.main { font-size:12px; line-height:1.42; }
 .tm-oct-live-tabs { flex:0 0 auto; display:flex; height:30px; border-bottom:1px solid #202020; background:#050505; overflow:hidden; }
 .tm-oct-live-tabs button { display:flex; align-items:center; gap:6px; min-width:0; border:0; border-right:1px solid #1f1f1f; background:#080808; color:#ababab; padding:0 10px; font-size:11px; cursor:pointer; }
 .tm-oct-live-tabs button.active { color:#eaeaea; background:#111; }
 .tm-oct-live-tabs i { font-style:normal; color:#777; margin-left:4px; }
-.tm-oct-inputbar { height:31px; display:flex; align-items:center; gap:8px; padding:0 12px; border-top:1px solid #222; background:#050505; color:#bdbdbd; font:11px 'Anthropic Mono','Geist Mono',monospace; }
+.tm-oct-inputbar { height:31px; display:flex; align-items:center; gap:8px; padding:0 12px; border-top:1px solid #222; background:#050505; color:#bdbdbd; font:11px 'Geist Mono',monospace; }
 .tm-oct-inputbar span { color:#f7f7f7; font-size:16px; }
 .tm-oct-inputbar em { color:#777; font-style:normal; }
 .tm-oct-split-stack { min-width:0; min-height:0; display:grid; grid-template-rows: 170px minmax(210px, 1fr) 150px; background:#000; }
@@ -701,7 +694,7 @@ body { background: var(--tm-bg); }
 .tm-oct-github-grid span { display:block; color:#727272; font-size:8px; text-transform:uppercase; letter-spacing:.08em; }
 .tm-oct-github-grid strong { display:block; margin-top:3px; color:#e9e9e9; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .tm-oct-github-hints { display:flex; flex-wrap:wrap; gap:4px; padding:7px 9px 0; overflow:hidden; }
-.tm-oct-github-hints em { font-style:normal; font:9px 'Anthropic Mono',monospace; color:#828fff; border:1px solid rgba(113,112,255,.3); border-radius:999px; padding:1px 7px; }
+.tm-oct-github-hints em { font-style:normal; font:9px 'Geist Mono',monospace; color:#828fff; border:1px solid rgba(113,112,255,.3); border-radius:999px; padding:1px 7px; }
 .tm-oct-github-prs { display:flex; flex-direction:column; gap:3px; padding:7px 9px 0; overflow:hidden; }
 .tm-oct-github-prs div { display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:6px; align-items:center; min-width:0; }
 .tm-oct-github-prs strong { color:#828fff; font-size:9px; }
