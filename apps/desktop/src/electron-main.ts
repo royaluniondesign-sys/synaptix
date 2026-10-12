@@ -94,6 +94,7 @@ if (electronRuntime) {
   void startDesktopApp().catch((cause: unknown) => {
     const detail = cause instanceof Error ? cause.message : String(cause)
     console.error(`[termora-desktop] electron main failed: ${detail}`)
-    process.exitCode = 1
+    // exitCode alone would leave Electron running windowless; fail fast instead.
+    process.exit(1)
   })
 }

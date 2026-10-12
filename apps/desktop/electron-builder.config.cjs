@@ -1,24 +1,28 @@
-// Termora desktop packaging scaffold.
-// This is not wired into CI release yet. It documents the intended artifact contract.
+// Termora desktop packaging config (unsigned).
+//
+// Packages the directory produced by scripts/stage-app.mjs. No signing,
+// notarization or publishing is configured here; scripts/package-desktop-unsigned.mjs
+// refuses signing credentials and always passes `--publish never`.
 
 /** @type {import('electron-builder').Configuration} */
 module.exports = {
   appId: 'com.termora.app',
   productName: 'Termora',
+  artifactName: 'Termora-${version}-${os}-${arch}.${ext}',
   directories: {
+    app: 'stage',
     output: 'release/desktop',
     buildResources: 'resources'
   },
-  files: [
-    'dist/**',
-    '../../packages/web/dist/**',
-    '../../packages/agent/dist/**',
-    '../../packages/cli/dist/**',
-    '!**/*.map'
-  ],
+  // asar is off for the first artifacts: the agent resolves the web UI relative
+  // to its own files and node-pty ships a helper binary that must be executable.
+  asar: false,
+  npmRebuild: true,
+  files: ['**/*', '!**/*.map', '!**/*.md', '!**/test/**', '!**/tests/**'],
   extraResources: [
-    { from: '../../packages/cli/dist', to: 'cli' }
+    { from: 'stage/cli', to: 'cli' }
   ],
+  publish: null,
   mac: {
     target: ['dmg', 'zip'],
     category: 'public.app-category.developer-tools'
@@ -27,7 +31,9 @@ module.exports = {
     target: ['nsis']
   },
   linux: {
-    target: ['AppImage', 'deb'],
-    category: 'Development'
+    target: ['AppImage'],
+    category: 'Development',
+    maintainer: 'Termora contributors <noreply@termora.dev>',
+    synopsis: 'Terminal and agent cockpit'
   }
 };

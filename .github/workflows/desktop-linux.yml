@@ -1,0 +1,104 @@
+name: Desktop Linux (unsigned AppImage)
+
+# Builds an unsigned Linux AppImage from the Electron shell, launches it under a
+# virtual display and checks that the embedded agent serves the web cockpit.
+# Nothing here signs, publishes, or uploads to a release: the artifact is a
+# workflow artifact kept for 7 days. See docs/desktop-unsigned-packaging.md.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - 'packages/agent/**'
+      - 'packages/web/**'
+      - 'packages/cli/**'
+      - 'scripts/package-desktop-unsigned.mjs'
+      - 'scripts/smoke-appimage.mjs'
+      - '.github/workflows/desktop-linux.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - 'packages/agent/**'
+      - 'packages/web/**'
+      - 'packages/cli/**'
+      - 'scripts/package-desktop-unsigned.mjs'
+      - 'scripts/smoke-appimage.mjs'
+      - '.github/workflows/desktop-linux.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  appimage:
+    name: Build and smoke-test AppImage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # xvfb provides the virtual display; the rest are Electron's runtime
+      # libraries. zsh and lsof are what the agent's PTY sessions need.
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb zsh lsof libgtk-3-0t64 libnss3 libasound2t64 libgbm1 libxss1 libxtst6
+
+      - name: Install workspace dependencies
+        run: npm ci
+
+      - name: Build workspace
+        run: npx turbo run build
+
+      - name: Install desktop dependencies
+        run: npm --prefix apps/desktop ci
+
+      - name: Build desktop shell
+        run: npm --prefix apps/desktop run build
+
+      - name: Stage self-contained app directory
+        run: npm --prefix apps/desktop run stage
+
+      - name: Package unsigned AppImage
+        run: node scripts/package-desktop-unsigned.mjs --target linux --run
+
+      # Write the evidence first, then fail on its exit code: piping into tee
+      # would hide a failing smoke test behind tee's own success.
+      - name: Smoke test packaged app
+        run: |
+          set +e
+          node scripts/smoke-appimage.mjs --timeout-ms 150000 > apps/desktop/release/desktop/smoke-evidence.json
+          status=$?
+          cat apps/desktop/release/desktop/smoke-evidence.json
+          exit $status
+
+      - name: Record checksum
+        if: always()
+        working-directory: apps/desktop/release/desktop
+        run: sha256sum *.AppImage | tee SHA256SUMS
+
+      - name: Upload workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: termora-linux-appimage-unsigned
+          path: |
+            apps/desktop/release/desktop/*.AppImage
+            apps/desktop/release/desktop/SHA256SUMS
+            apps/desktop/release/desktop/smoke-evidence.json
+          retention-days: 7
+          if-no-files-found: error

@@ -8,6 +8,10 @@
 // unsigned local builds named pending/manual, never store-ready releases.
 
 import { spawnSync } from 'node:child_process'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const desktopDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'apps', 'desktop')
 
 const SIGNING_ENV_KEYS = [
   'CSC_LINK',
@@ -109,6 +113,8 @@ const commandFor = (target) => [
   '--no-install',
   'electron-builder',
   target.flag,
+  '--config',
+  'electron-builder.config.cjs',
   '--publish',
   'never',
 ]
@@ -141,6 +147,7 @@ if (hostTargets.length === 0) {
 
 const probe = spawnSync('npx', ['--no-install', 'electron-builder', '--version'], {
   env: childEnv,
+  cwd: desktopDir,
   stdio: 'pipe',
   encoding: 'utf8',
 })
@@ -160,7 +167,7 @@ let failed = false
 for (const target of hostTargets) {
   const command = commandFor(target)
   console.log(`\nRunning unsigned ${target.id} build: ${command.join(' ')}`)
-  const result = spawnSync(command[0], command.slice(1), { env: childEnv, stdio: 'inherit' })
+  const result = spawnSync(command[0], command.slice(1), { env: childEnv, stdio: 'inherit', cwd: desktopDir })
   if (result.status !== 0) failed = true
 }
 
