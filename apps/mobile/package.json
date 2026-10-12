@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "echo \"mobile scaffold: keep PWA first, add Expo when push/deeplinks are implemented\"",
     "android": "echo \"mobile scaffold: Android APK build not enabled yet\"",
-    "ios": "echo \"mobile scaffold: iOS build not enabled yet\""
+    "ios": "echo \"mobile scaffold: iOS build not enabled yet\"",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   }
 }

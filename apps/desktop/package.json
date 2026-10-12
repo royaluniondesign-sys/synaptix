@@ -19,7 +19,9 @@
     "package:unsigned:mac": "node ../../scripts/package-desktop-unsigned.mjs --target mac",
     "package:unsigned:linux": "node ../../scripts/package-desktop-unsigned.mjs --target linux",
     "package:unsigned:win": "node ../../scripts/package-desktop-unsigned.mjs --target win",
-    "smoke:launch": "node ../../scripts/smoke-desktop-launch.mjs"
+    "smoke:launch": "node ../../scripts/smoke-desktop-launch.mjs",
+    "preflight:artifact": "node ../../scripts/check-desktop-artifact-preflight.mjs",
+    "preflight:artifact:strict": "node ../../scripts/check-desktop-artifact-preflight.mjs --strict"
   },
   "devDependencies": {
     "electron": "^44.7.0",

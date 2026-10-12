@@ -39,6 +39,15 @@ npm --prefix apps/desktop run package:unsigned        # dry run
 npm --prefix apps/desktop run package:unsigned:mac    # build on darwin
 ```
 
+Before a real build, run the deterministic preflight (advisory by default; `:strict` fails on
+missing prerequisites):
+
+```sh
+npm run check:desktop-artifact-preflight
+npm --prefix apps/desktop run preflight:artifact
+npm --prefix apps/desktop run preflight:artifact:strict
+```
+
 See `docs/desktop-unsigned-packaging.md` and `docs/platform-readiness-checklist.md`.
 
 ## Remaining real implementation tasks

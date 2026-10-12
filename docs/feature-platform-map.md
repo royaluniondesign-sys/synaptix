@@ -49,3 +49,7 @@ This maps the required agent-cockpit features to desktop, mobile, backend, and o
 | `npm run check:desktop-launch` | Implemented / advisory | Verifies launch prerequisites and degrades honestly when Electron runtime is absent. |
 | `npm run check:platform-readiness` | Implemented | Blocks false store/signing/platform claims and required scaffold drift. |
 | `npm run check:security-audit` | Implemented | Enforces production dependency audit hygiene. |
+
+## Mobile companion contracts
+
+The native mobile scaffold now includes pure TypeScript contracts for pairing-token handling, secure-storage adapters, and push-permission state. These contracts are tested without claiming that an APK/TestFlight/App Store build exists.

@@ -59,8 +59,16 @@ jobs:
       - name: Desktop launch smoke
         run: npm run check:desktop-launch
 
+      # Advisory: without the desktop toolchain installed this reports blockers
+      # and exits 0, proving the preflight imports and degrades cleanly.
+      - name: Desktop artifact preflight
+        run: npm run check:desktop-artifact-preflight
+
       - name: Platform readiness contract
         run: npm run check:platform-readiness
+
+      - name: Mobile scaffold contract
+        run: npm run check:mobile-scaffold
 
       - name: Security audit
         run: npm run check:security-audit

@@ -51,6 +51,11 @@ dependencies, reads secrets, or contacts a network.
 - Data handling: the desktop app must not persist terminal output or repo contents outside
   the local agent data directory, and must never log tokens or pairing secrets.
 
+
+## Desktop artifact preflight
+
+`npm run check:desktop-artifact-preflight` verifies release-dir hygiene, apps/desktop lockfile presence, Electron dependency scope, signing/publish env absence, and whether Electron/electron-builder prerequisites are available. It is advisory by default for CI and strict only when explicitly invoked with `-- --strict`; it never claims artifacts exist.
+
 ## Unsigned local artifact builds
 
 Packaging helpers exist so contributors can produce **unsigned** local artifacts for smoke
@@ -60,10 +65,16 @@ testing. None of them sign, notarize, publish, or upload. See
 - **Implemented:** `scripts/package-desktop-unsigned.mjs` and the `package:unsigned*` scripts.
   The helper is dry-run by default, refuses signing/publish credentials, and always passes
   `--publish never`.
+- **Implemented:** `scripts/check-desktop-artifact-preflight.mjs` (exposed as
+  `npm run check:desktop-artifact-preflight` and `npm --prefix apps/desktop run preflight:artifact`).
+  It checks the host/target, the desktop lockfile, `electron`/`electron-builder` under `apps/desktop`,
+  that `release/` is git-ignored, and that signing credentials are absent. It is advisory by default
+  and exits `0` with blockers; `--strict` makes missing prerequisites fatal.
 - **Gated:** a real unsigned build on each host. `electron` is now declared for the launcher, but
   `electron-builder` is intentionally absent from the scaffold today.
 - **Missing:** signed/notarized artifacts and any release upload.
-- Commands: `npm run package:desktop:unsigned` (dry run) and
+- Commands: `npm run check:desktop-artifact-preflight` (preflight, advisory),
+  `npm run package:desktop:unsigned` (dry run), and
   `npm --prefix apps/desktop run package:unsigned:{mac,linux,win}` (build on the matching host).
 - Every target is marked **pending/manual** until its artifact evidence row is satisfied.
 
@@ -102,19 +113,21 @@ testing. None of them sign, notarize, publish, or upload. See
 
 ## Artifact evidence checklist
 
-No artifact may be described as supported, released, signed, notarized, or store-ready until
-its row below is satisfied and the artifact is recorded in a GitHub Release.
+No artifact is supported until its evidence row is satisfied. No artifact may be described as supported, released, signed, notarized, or store-ready until its row below is satisfied, `docs/release-evidence-manifest.json` is updated, and the artifact is recorded in a GitHub Release.
 
-| Artifact                 | Status  | Evidence required before claiming support                    | Exact next evidence (command → observation)                                                                 |
-| ------------------------ | ------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| macOS `.dmg`             | Missing | Signed + notarized build installed and smoke-tested on macOS | `npm --prefix apps/desktop run package:unsigned:mac` → `release/desktop/*.dmg` installs, agent + web UI run |
-| macOS `.zip`             | Missing | Zipped app launches agent and serves the web UI              | Same unsigned build → unzip `release/desktop/*.zip`, app serves the web UI                                  |
-| Windows `NSIS` installer | Missing | Native modules rebuilt; installed app starts agent           | `npm --prefix apps/desktop run package:unsigned:win` → installer runs, agent starts on win32                |
-| Linux `AppImage`         | Missing | `node-pty`/`better-sqlite3` runtime verified on Linux        | `npm --prefix apps/desktop run package:unsigned:linux` → AppImage opens a real terminal on linux            |
-| Linux `.deb`             | Missing | Package installs and starts after AppImage is stable         | `npm --prefix apps/desktop run package:unsigned:linux` → `.deb` installs and starts the agent               |
-| Android `.apk`           | Missing | Expo build on GitHub Releases with device smoke test         | `npx expo build` (mobile, gated) → APK installs on a physical device                                        |
-| iOS App Store build      | Missing | APNs entitlement flow automated; TestFlight build verified   | Mobile gated: automate `aps-environment` flow → TestFlight build launches                                   |
-| CLI binary               | Missing | Bundled by installers and runnable as `termora`              | After an installer build → run `termora --help` from the installed app                                      |
+This table is intentionally mirrored from `docs/release-evidence-manifest.json`; `npm run check:platform-readiness` compares every column against the manifest.
+
+| Artifact | Status | Evidence required before claiming support | Next evidence command | Expected observation | Evidence satisfied | Supported |
+| --- | --- | --- | --- | --- | --- | --- |
+| macOS `.dmg` | missing | Signed + notarized build installed and smoke-tested on macOS | manual: run signed/notarized macOS release workflow (pending) | GitHub Release contains signed/notarized .dmg plus macOS install smoke log | false | false |
+| macOS `.zip` | missing | Zipped app launches agent and serves the web UI | manual: run signed/notarized macOS release workflow (pending) | GitHub Release contains signed/notarized .zip plus unzip/launch smoke log | false | false |
+| Windows `NSIS` installer | missing | Native modules rebuilt; installed app starts agent | manual: run signed Windows release workflow (pending) | GitHub Release contains signed NSIS installer plus Windows install smoke log | false | false |
+| Linux `AppImage` | missing | node-pty/better-sqlite3 runtime verified on Linux | manual: run Linux unsigned artifact workflow after electron-builder is installed | GitHub Release contains AppImage plus Linux terminal smoke log | false | false |
+| Linux `.deb` | missing | Package installs and starts after AppImage is stable | manual: run Linux unsigned artifact workflow after AppImage smoke passes | GitHub Release contains .deb plus install/start smoke log | false | false |
+| Android `.apk` | missing | Expo build on GitHub Releases with device smoke test | manual: add Expo/EAS toolchain, then build APK and physical-device smoke (pending) | GitHub Release contains APK plus physical-device install smoke log | false | false |
+| iOS App Store build | missing | APNs entitlement flow automated; TestFlight build verified | manual: add Expo/EAS + APNs entitlement flow, then run TestFlight device smoke (pending) | TestFlight build launches on a physical device with pairing flow smoke log | false | false |
+| CLI binary | missing | Bundled by installers and runnable as termora | manual: build installer artifact, then run bundled termora --help (pending) | Installed app exposes bundled termora --help output | false | false |
+
 
 ## What `npm run check:platform-readiness` enforces
 

@@ -6,9 +6,11 @@ import { join } from 'node:path'
 // public docs do not make unqualified app-store/platform claims.
 
 const READINESS_DOC = 'docs/platform-readiness-checklist.md'
+const EVIDENCE_MANIFEST = 'docs/release-evidence-manifest.json'
 
 const REQUIRED_FILES = [
   READINESS_DOC,
+  EVIDENCE_MANIFEST,
   'docs/app-packaging-blueprint.md',
   'docs/feature-platform-map.md',
   'docs/desktop-unsigned-packaging.md',
@@ -41,7 +43,24 @@ const REQUIRED_DOC_SNIPPETS = [
   'Unsigned local artifact',
   '--publish never',
   'pending/manual',
+  'No artifact is supported until its evidence row is satisfied',
 ]
+
+// Fields every release-evidence manifest row must carry. The manifest is the
+// machine-readable source of truth for desktop/mobile artifact evidence; the
+// readiness doc must stay in sync with it and may not claim support early.
+const REQUIRED_EVIDENCE_FIELDS = [
+  'id',
+  'artifact',
+  'surface',
+  'statusCategory',
+  'evidenceRequired',
+  'nextEvidenceCommand',
+  'expectedObservation',
+  'evidenceSatisfied',
+  'supported',
+]
+const ALLOWED_SURFACES = ['desktop', 'mobile', 'cli']
 
 // Unqualified positive claims that may only be discussed (as disallowed) inside
 // the readiness doc. Anywhere else in public docs is a false-claim failure.
@@ -175,6 +194,166 @@ checkConfig(
   },
   'mobile app config',
 )
+
+// --- Release evidence manifest -------------------------------------------
+// Desktop/mobile artifacts each need a structured evidence row. The manifest
+// holds that data (fields, status category, command); the readiness doc must
+// list every row and keep the "no support until evidence" policy. This keeps
+// future docs from overclaiming artifacts before evidence exists.
+const splitMarkdownRow = (line) => {
+  const cells = []
+  let current = ''
+  let escaped = false
+  for (const char of line.trim().replace(/^\|/, '').replace(/\|$/, '')) {
+    if (escaped) {
+      current += char
+      escaped = false
+    } else if (char === '\\') {
+      escaped = true
+    } else if (char === '|') {
+      cells.push(current.trim())
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  cells.push(current.trim())
+  return cells
+}
+
+const evidenceRows = (doc) => {
+  const lines = doc.split('\n')
+  const start = lines.findIndex((line) => /^##\s+Artifact evidence checklist/i.test(line))
+  if (start === -1) return null
+  const rows = []
+  let headers = null
+  for (let i = start + 1; i < lines.length; i += 1) {
+    const line = lines[i]
+    if (/^##\s+/.test(line)) break
+    if (!line.trim().startsWith('|')) continue
+    const cells = splitMarkdownRow(line)
+    const first = cells[0]?.trim()
+    if (!first) continue
+    if (/^:?-+:?$/.test(first.replace(/ /g, ''))) continue
+    if (/^artifact$/i.test(first)) {
+      headers = cells.map((cell) => norm(cell))
+      continue
+    }
+    if (!headers) continue
+    const row = Object.fromEntries(headers.map((header, index) => [header, cells[index] ?? '']))
+    rows.push(row)
+  }
+  return rows
+}
+
+const normArtifact = (value) => norm(value).replace(/`/g, '')
+const boolString = (value) => String(value).toLowerCase()
+
+if (existsSync(EVIDENCE_MANIFEST)) {
+  let manifest
+  try {
+    manifest = JSON.parse(read(EVIDENCE_MANIFEST))
+  } catch (error) {
+    fail(`${EVIDENCE_MANIFEST} is not valid JSON: ${error.message}`)
+  }
+
+  if (manifest) {
+    const doc = existsSync(READINESS_DOC) ? read(READINESS_DOC) : ''
+    if (!has(manifest.policy ?? '', 'No artifact is supported until its evidence row is satisfied')) {
+      fail(`${EVIDENCE_MANIFEST} policy must state no artifact is supported before evidence`)
+    }
+    for (const category of REQUIRED_STATUS_TOKENS) {
+      if (!(manifest.statusCategories ?? []).includes(category)) {
+        fail(`${EVIDENCE_MANIFEST} statusCategories missing: ${category}`)
+      }
+    }
+
+    const artifacts = Array.isArray(manifest.artifacts) ? manifest.artifacts : []
+    if (artifacts.length === 0) {
+      fail(`${EVIDENCE_MANIFEST} must declare a non-empty "artifacts" array`)
+    }
+
+    const manifestArtifacts = new Set()
+    for (const entry of artifacts) {
+      const label = entry?.id || '(missing id)'
+      for (const field of REQUIRED_EVIDENCE_FIELDS) {
+        if (entry?.[field] === undefined || entry[field] === '') {
+          fail(`evidence "${label}" missing field: ${field}`)
+        }
+      }
+      if (!ALLOWED_SURFACES.includes(entry?.surface)) {
+        fail(`evidence "${label}" has unknown surface: ${entry?.surface}`)
+      }
+      if (!REQUIRED_STATUS_TOKENS.includes(entry?.statusCategory)) {
+        fail(`evidence "${label}" has unknown status category: ${entry?.statusCategory}`)
+      }
+      if (entry?.evidenceSatisfied === false && entry?.supported === true) {
+        fail(`evidence "${label}" claims support without satisfied evidence`)
+      }
+      if (entry?.supported === true && !entry?.evidenceUri) {
+        fail(`evidence "${label}" marked supported without an evidenceUri`)
+      }
+      if (entry?.artifact) manifestArtifacts.add(normArtifact(entry.artifact))
+      if (doc && entry?.artifact && !has(doc, entry.artifact)) {
+        fail(`readiness doc does not mention artifact row: ${entry?.artifact}`)
+      }
+      if (doc && entry?.nextEvidenceCommand && !has(doc, entry.nextEvidenceCommand)) {
+        fail(`readiness doc does not mention evidence command for "${label}": ${entry?.nextEvidenceCommand}`)
+      }
+    }
+
+    if (doc) {
+      const rows = evidenceRows(doc)
+      if (rows === null) {
+        fail('readiness doc is missing the "Artifact evidence checklist" table')
+      } else {
+        const byArtifact = new Map(artifacts.map((entry) => [normArtifact(entry.artifact), entry]))
+        const seen = new Set()
+        const requiredColumns = [
+          'artifact',
+          'status',
+          'evidencerequiredbeforeclaimingsupport',
+          'nextevidencecommand',
+          'expectedobservation',
+          'evidencesatisfied',
+          'supported',
+        ]
+        for (const row of rows) {
+          for (const column of requiredColumns) {
+            if (!(column in row)) fail(`artifact evidence table missing column: ${column}`)
+          }
+          const artifactKey = normArtifact(row.artifact)
+          const entry = byArtifact.get(artifactKey)
+          if (!entry) {
+            fail(`artifact evidence row "${row.artifact}" is not tracked in ${EVIDENCE_MANIFEST}`)
+            continue
+          }
+          seen.add(artifactKey)
+          const comparisons = [
+            ['status', entry.statusCategory],
+            ['evidencerequiredbeforeclaimingsupport', entry.evidenceRequired],
+            ['nextevidencecommand', entry.nextEvidenceCommand],
+            ['expectedobservation', entry.expectedObservation],
+            ['evidencesatisfied', boolString(entry.evidenceSatisfied)],
+            ['supported', boolString(entry.supported)],
+          ]
+          for (const [column, expected] of comparisons) {
+            if (norm(row[column]) !== norm(expected)) {
+              fail(
+                `artifact evidence row "${entry.id}" column "${column}" differs from ${EVIDENCE_MANIFEST}`,
+              )
+            }
+          }
+        }
+        for (const artifact of manifestArtifacts) {
+          if (!seen.has(artifact)) {
+            fail(`${EVIDENCE_MANIFEST} artifact "${artifact}" missing from readiness table`)
+          }
+        }
+      }
+    }
+  }
+}
 
 // The unsigned packaging helper must stay dry-run by default and must never
 // sign, notarize, or publish. If it stops passing --publish never or starts

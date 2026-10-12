@@ -18,6 +18,24 @@ These are local, pending/manual builds. They require artifact evidence in
 - Builds only for the current host platform, so cross-platform output is never implied.
 - Performs no signing, no notarization, no store submission, and no upload.
 
+## Preflight before building
+
+`scripts/check-desktop-artifact-preflight.mjs` is the deterministic preflight for a real unsigned
+build. It never builds, signs, notarizes, publishes, or touches the network; it only inspects the
+local host and repo state:
+
+```sh
+npm run check:desktop-artifact-preflight                 # advisory (exit 0 with blockers)
+npm --prefix apps/desktop run preflight:artifact          # same, from the desktop package
+npm --prefix apps/desktop run preflight:artifact:strict   # --strict: missing prerequisites exit 1
+```
+
+It verifies the host platform maps to a supported target, `apps/desktop/package-lock.json` exists
+and names `@termora/desktop-app`, `electron` and `electron-builder` resolve under `apps/desktop`,
+`release/` is git-ignored, and no signing/publish credentials are present. Without `--strict`,
+missing prerequisites are reported as blockers and the command stays CI-safe; with `--strict` they
+are fatal. Signing/publish credentials in the environment always fail (exit `2`).
+
 ## Commands
 
 Dry run (safe on any machine, no toolchain required):

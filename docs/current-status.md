@@ -10,7 +10,7 @@ This is the repo-level truth table for the current implementation. It exists to 
 - Protected cockpit APIs for status, files, safe file preview, whitelisted actions, jobs, worktrees, GitHub status, events, and unread state.
 - Web UI slices for terminal sessions, split layout controls, multi-pane terminal rendering, file inspector, notifications/unread, GitHub status, and feature buildout tracking.
 - CLI MVP: `help`, `version`, `status`, `file`.
-- Desktop boundary: Electron launcher contracts, dynamic loader, preload bridge, lifecycle tests, smoke checks, unsigned packaging dry-run.
+- Desktop boundary: Electron launcher contracts, dynamic loader, preload bridge, lifecycle tests, smoke checks, unsigned packaging dry-run, and an advisory artifact-build preflight.
 - Dogfood checks: `npm run check:cockpit` and `npm run check:web-headless`.
 - CI gates on Node 20/22/24: lint, typecheck, build, tests, scaffold, desktop checks, platform readiness, security audit, dogfood checks.
 
@@ -30,4 +30,4 @@ This is the repo-level truth table for the current implementation. It exists to 
 
 ## Non-claims
 
-Termora has no store submission evidence, signed artifacts, notarization evidence, published installers, or app-store submission yet. Any public claim must stay scoped to the evidence above and the platform readiness checklist.
+Termora has no store submission evidence, signed artifacts, notarization evidence, published installers, or app-store submission yet. Any public claim must stay scoped to the evidence above, the platform readiness checklist, and `docs/release-evidence-manifest.json`.

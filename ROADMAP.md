@@ -14,7 +14,7 @@ Termora is moving from mobile terminal access to a complete installable cockpit 
 - [x] Web cockpit slices: notifications/unread, file inspector, GitHub status, split layout controls, multi-pane terminal view model.
 - [x] CLI MVP: help/version/status/file with local fallback or authenticated remote mode.
 - [x] Desktop app boundary: programmatic agent runtime seam, Electron launcher contracts, preload bridge, dynamic Electron loader, desktop tests, smoke/launch checks.
-- [x] Unsigned desktop packaging dry-run helper and platform readiness checker.
+- [x] Unsigned desktop packaging dry-run helper, artifact build preflight, and platform readiness checker.
 - [x] Security audit gate with production dependency audit clean.
 
 ## Capability parity tracker

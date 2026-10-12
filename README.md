@@ -71,7 +71,7 @@ Termora now has a verified local-first cockpit foundation. The current repo stat
 - **Cockpit UI slices** — file inspector, GitHub workflow status, notifications/unread panel, controlled split layout, and multi-pane terminal rendering foundations.
 - **CLI MVP** — `termora help`, `version`, `status`, and `file <path>` with local fallback or authenticated remote API mode.
 - **Desktop app boundary** — Electron main/preload/launcher contracts, dynamic Electron loader, desktop lifecycle tests, desktop smoke and launch-smoke contracts.
-- **Dogfood and release gates** — `check:cockpit`, `check:web-headless`, `check:desktop-boundary`, `check:desktop-smoke`, `check:desktop-launch`, `check:platform-readiness`, and `check:security-audit` run locally/CI.
+- **Dogfood and release gates** — `check:cockpit`, `check:web-headless`, `check:desktop-boundary`, `check:desktop-smoke`, `check:desktop-launch`, `check:desktop-artifact-preflight`, `check:platform-readiness`, and `check:security-audit` run locally/CI.
 - **Security hygiene** — production audit gate is clean; desktop out-of-workspace audit is separately checked before release work.
 
 ### Guarded, not yet released

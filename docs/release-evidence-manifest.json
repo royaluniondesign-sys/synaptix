@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "policy": "No artifact is supported until its evidence row is satisfied and the artifact is recorded in a GitHub Release. Rows here are data only: no signing/notarization/publish secrets, and no artifact may be marked supported before evidence exists.",
+  "statusCategories": [
+    "implemented",
+    "gated",
+    "missing"
+  ],
+  "surfaces": [
+    "desktop",
+    "mobile",
+    "cli"
+  ],
+  "artifacts": [
+    {
+      "id": "macos-dmg",
+      "artifact": "macOS `.dmg`",
+      "surface": "desktop",
+      "statusCategory": "missing",
+      "evidenceRequired": "Signed + notarized build installed and smoke-tested on macOS",
+      "nextEvidenceCommand": "manual: run signed/notarized macOS release workflow (pending)",
+      "expectedObservation": "GitHub Release contains signed/notarized .dmg plus macOS install smoke log",
+      "evidenceSatisfied": false,
+      "supported": false
+    },
+    {
+      "id": "macos-zip",
+      "artifact": "macOS `.zip`",
+      "surface": "desktop",
+      "statusCategory": "missing",
+      "evidenceRequired": "Zipped app launches agent and serves the web UI",
+      "nextEvidenceCommand": "manual: run signed/notarized macOS release workflow (pending)",
+      "expectedObservation": "GitHub Release contains signed/notarized .zip plus unzip/launch smoke log",
+      "evidenceSatisfied": false,
+      "supported": false
+    },
+    {
+      "id": "windows-nsis",
+      "artifact": "Windows `NSIS` installer",
+      "surface": "desktop",
+      "statusCategory": "missing",
+      "evidenceRequired": "Native modules rebuilt; installed app starts agent",
+      "nextEvidenceCommand": "manual: run signed Windows release workflow (pending)",
+      "expectedObservation": "GitHub Release contains signed NSIS installer plus Windows install smoke log",
+      "evidenceSatisfied": false,
+      "supported": false
+    },
+    {
+      "id": "linux-appimage",
+      "artifact": "Linux `AppImage`",
+      "surface": "desktop",
+      "statusCategory": "missing",
+      "evidenceRequired": "node-pty/better-sqlite3 runtime verified on Linux",
+      "nextEvidenceCommand": "manual: run Linux unsigned artifact workflow after electron-builder is installed",
+      "expectedObservation": "GitHub Release contains AppImage plus Linux terminal smoke log",
+      "evidenceSatisfied": false,
+      "supported": false
+    },
+    {
+      "id": "linux-deb",
+      "artifact": "Linux `.deb`",
+      "surface": "desktop",
+      "statusCategory": "missing",
+      "evidenceRequired": "Package installs and starts after AppImage is stable",
+      "nextEvidenceCommand": "manual: run Linux unsigned artifact workflow after AppImage smoke passes",
+      "expectedObservation": "GitHub Release contains .deb plus install/start smoke log",
+      "evidenceSatisfied": false,
+      "supported": false
+    },
+    {
+      "id": "android-apk",
+      "artifact": "Android `.apk`",
+      "surface": "mobile",
+      "statusCategory": "missing",
+      "evidenceRequired": "Expo build on GitHub Releases with device smoke test",
+      "nextEvidenceCommand": "manual: add Expo/EAS toolchain, then build APK and physical-device smoke (pending)",
+      "expectedObservation": "GitHub Release contains APK plus physical-device install smoke log",
+      "evidenceSatisfied": false,
+      "supported": false
+    },
+    {
+      "id": "ios-app-store",
+      "artifact": "iOS App Store build",
+      "surface": "mobile",
+      "statusCategory": "missing",
+      "evidenceRequired": "APNs entitlement flow automated; TestFlight build verified",
+      "nextEvidenceCommand": "manual: add Expo/EAS + APNs entitlement flow, then run TestFlight device smoke (pending)",
+      "expectedObservation": "TestFlight build launches on a physical device with pairing flow smoke log",
+      "evidenceSatisfied": false,
+      "supported": false
+    },
+    {
+      "id": "cli-binary",
+      "artifact": "CLI binary",
+      "surface": "cli",
+      "statusCategory": "missing",
+      "evidenceRequired": "Bundled by installers and runnable as termora",
+      "nextEvidenceCommand": "manual: build installer artifact, then run bundled termora --help (pending)",
+      "expectedObservation": "Installed app exposes bundled termora --help output",
+      "evidenceSatisfied": false,
+      "supported": false
+    }
+  ]
+}

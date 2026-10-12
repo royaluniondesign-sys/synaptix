@@ -52,7 +52,10 @@
     "check:cockpit": "node scripts/check-cockpit.mjs",
     "package:desktop:unsigned": "node scripts/package-desktop-unsigned.mjs",
     "check:desktop-launch": "node scripts/smoke-desktop-launch.mjs",
-    "check:web-headless": "node scripts/check-web-headless.mjs"
+    "check:desktop-artifact-preflight": "node scripts/check-desktop-artifact-preflight.mjs",
+    "check:web-headless": "node scripts/check-web-headless.mjs",
+    "test:scripts": "node --test \"scripts/__tests__/**/*.test.mjs\"",
+    "check:mobile-scaffold": "npm --prefix apps/mobile run typecheck && npm --prefix apps/mobile test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
