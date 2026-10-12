@@ -16,7 +16,7 @@
 // win-unpacked/Termora.exe (Windows).
 
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
 import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -77,7 +77,9 @@ if (!artifact || !existsSync(artifact)) {
 const port = await freePort()
 const home = mkdtempSync(join(tmpdir(), 'termora-smoke-'))
 const isAppImage = artifact.endsWith('.AppImage')
-const appArgs = [...(isAppImage ? ['--appimage-extract-and-run'] : []), '--no-sandbox', '--disable-gpu']
+// GUI-subsystem builds (Windows) write nothing to stdout, so Chromium logs to a file we can read on failure.
+const electronLog = join(home, 'electron.log')
+const appArgs = [...(isAppImage ? ['--appimage-extract-and-run'] : []), '--no-sandbox', '--disable-gpu', '--enable-logging', `--log-file=${electronLog}`]
 // Only Linux needs a virtual display; macOS and Windows runners have a session.
 const needsVirtualDisplay = process.platform === 'linux' && !process.env.DISPLAY
 const [command, commandArgs] = needsVirtualDisplay
@@ -130,6 +132,7 @@ function stopApp(signal) {
 stopApp('SIGTERM')
 await sleep(1_500)
 stopApp('SIGKILL')
+if (failure && existsSync(electronLog)) log += `\n--- electron.log ---\n${readFileSync(electronLog, 'utf8').slice(-8_000)}`
 rmSync(home, { recursive: true, force: true })
 
 const evidence = {
