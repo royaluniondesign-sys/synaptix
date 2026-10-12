@@ -131,8 +131,8 @@ See `docs/product-plan.md` for the order and the reasoning.
 
 - [x] Replace hard-coded sample tasks, agents and terminal text in the cockpit with real state or empty states.
 - [x] Remove machine paths and names from the interface (guarded by `scripts/__tests__/web-truthfulness.test.mjs`).
-- [ ] Fix the mobile layout (bottom bar, clipped panels, phone mock overlap).
-- [ ] Screenshot checks at desktop and phone sizes in CI.
-- [ ] Linux AppImage passes the CI smoke test; version, icon and asar fixed.
+- [x] Fix the mobile layout (bottom bar, clipped panels, phone mock overlap).
+- [x] Layout and screenshot checks at desktop and phone sizes in CI (`.github/workflows/web-layout.yml`).
+- [x] Linux AppImage passes the CI smoke test; version, icon and asar fixed. Still a workflow artifact, not a release: unsigned, placeholder icon, no GitHub Release.
 - [ ] Public web page with real screenshots, install steps and download links.
 - [ ] Ten real users and one pricing question before any paid tier is built.
