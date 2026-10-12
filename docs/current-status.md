@@ -12,6 +12,8 @@ This is the repo-level truth table for the current implementation. It exists to 
 - CLI MVP: `help`, `version`, `status`, `file`.
 - Agent registry backend: built-in and custom CLI agent profiles (argv templates, no shell), PATH availability check, and a heuristic output-to-status parser (`idle/running/editing/testing/waiting/failed/done`) behind `/api/cockpit/agents`. Cockpit panel lists, adds and removes agents and classifies pasted output; it is not yet wired to live PTY sessions. The parser is a heuristic, not a protocol.
 - Desktop boundary: Electron launcher contracts, dynamic loader, preload bridge, lifecycle tests, smoke checks, unsigned packaging dry-run, and an advisory artifact-build preflight.
+- Linux AppImage: built unsigned in CI on every desktop-related change and launched under a virtual display; the smoke test checks `/api/health`, the served web UI and the app version. The output is a 7-day workflow artifact, not a published release.
+- Browser-only demo build of the cockpit (`build:demo`) and a CI layout check at desktop and phone sizes.
 - Dogfood checks: `npm run check:cockpit` and `npm run check:web-headless`.
 - CI gates on Node 20/22/24: lint, typecheck, build, tests, scaffold, desktop checks, platform readiness, security audit, dogfood checks.
 
