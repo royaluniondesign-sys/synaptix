@@ -124,3 +124,15 @@ A feature is done only when:
 - [ ] Expose the Termora CLI from desktop installers.
 - [ ] Keep PWA as mobile baseline; add Expo shell for push/deep links/upload.
 - [ ] Add relay/push only after local pairing and mobile shell are stable.
+
+## Milestone 9 — Product truthfulness and first users
+
+See `docs/product-plan.md` for the order and the reasoning.
+
+- [ ] Replace hard-coded sample tasks, agents and terminal text in the cockpit with real state or empty states.
+- [ ] Remove machine paths and names from the interface.
+- [ ] Fix the mobile layout (bottom bar, clipped panels, phone mock overlap).
+- [ ] Screenshot checks at desktop and phone sizes in CI.
+- [ ] Linux AppImage passes the CI smoke test; version, icon and asar fixed.
+- [ ] Public web page with real screenshots, install steps and download links.
+- [ ] Ten real users and one pricing question before any paid tier is built.
