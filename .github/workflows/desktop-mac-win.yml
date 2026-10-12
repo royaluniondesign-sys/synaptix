@@ -99,6 +99,18 @@ jobs:
           cat apps/desktop/release/desktop/smoke-evidence.json
           exit $status
 
+      # Windows GUI apps leave no stdout; the faulting module and the signature
+      # state of the build are the evidence needed to diagnose an early crash.
+      - name: Windows diagnostics
+        if: failure() && matrix.target == 'win'
+        shell: pwsh
+        run: |
+          Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=(Get-Date).AddMinutes(-15)} -ErrorAction SilentlyContinue |
+            Where-Object { $_.Message -match 'Termora' } |
+            Select-Object -First 5 | ForEach-Object { $_.Message }
+          Get-AuthenticodeSignature apps/desktop/release/desktop/win-unpacked/Termora.exe, apps/desktop/release/desktop/Termora-0.2.0-win-x64.exe |
+            Format-List Path, Status, SignerCertificate
+
       - name: Record checksums
         if: always()
         working-directory: apps/desktop/release/desktop
