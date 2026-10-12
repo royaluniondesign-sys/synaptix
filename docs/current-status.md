@@ -10,6 +10,7 @@ This is the repo-level truth table for the current implementation. It exists to 
 - Protected cockpit APIs for status, files, safe file preview, whitelisted actions, jobs, worktrees, GitHub status, events, and unread state.
 - Web UI slices for terminal sessions, split layout controls, multi-pane terminal rendering, file inspector, notifications/unread, GitHub status, and feature buildout tracking.
 - CLI MVP: `help`, `version`, `status`, `file`.
+- Agent registry backend: built-in and custom CLI agent profiles (argv templates, no shell), PATH availability check, and a heuristic output-to-status parser (`idle/running/editing/testing/waiting/failed/done`) behind `/api/cockpit/agents`. Cockpit panel lists, adds and removes agents and classifies pasted output; it is not yet wired to live PTY sessions. The parser is a heuristic, not a protocol.
 - Desktop boundary: Electron launcher contracts, dynamic loader, preload bridge, lifecycle tests, smoke checks, unsigned packaging dry-run, and an advisory artifact-build preflight.
 - Dogfood checks: `npm run check:cockpit` and `npm run check:web-headless`.
 - CI gates on Node 20/22/24: lint, typecheck, build, tests, scaffold, desktop checks, platform readiness, security audit, dogfood checks.

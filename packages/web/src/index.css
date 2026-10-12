@@ -768,3 +768,25 @@ body { background: var(--tm-bg); }
 }
 .tm-phone-actions button:hover, .tm-oct-command-strip button.active { border-color:rgba(113,112,255,.45) !important; color:#f7f8f8 !important; }
 .tm-oct-phone { box-shadow:0 24px 70px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.08) inset !important; }
+
+/* Agent registry panel */
+.tm-registry-list { list-style:none; margin:0; padding:10px; display:flex; flex-direction:column; gap:6px; }
+.tm-registry-list li { display:flex; align-items:center; gap:8px; padding:6px 8px; border:1px solid rgba(255,255,255,.08); border-radius:8px; }
+.tm-registry-list li > div { flex:1; min-width:0; }
+.tm-registry-list strong { display:block; font-size:11px; }
+.tm-registry-list span { display:block; color:#7f7f7f; font-size:10px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tm-registry-list em { font-style:normal; color:#777; font-size:9px; text-transform:uppercase; }
+.tm-registry-list button, .tm-registry-form button, .tm-registry-probe button { font-size:10px; padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,.14); background:transparent; color:inherit; cursor:pointer; }
+.tm-registry-list button:disabled, .tm-registry-form button:disabled, .tm-registry-probe button:disabled { opacity:.5; cursor:default; }
+.tm-registry-dot { width:7px; height:7px; border-radius:50%; flex:none; }
+.tm-registry-dot.ok { background:#3ecf8e; }
+.tm-registry-dot.off { background:#555; }
+.tm-registry-error { color:#ff7b7b; }
+.tm-registry-form, .tm-registry-probe { display:flex; flex-direction:column; gap:6px; padding:10px; }
+.tm-registry-form input, .tm-registry-form textarea, .tm-registry-probe select, .tm-registry-probe textarea { font:inherit; font-size:11px; padding:6px 8px; border-radius:6px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); color:inherit; }
+.tm-registry-form > div { display:flex; gap:6px; }
+.tm-registry-probe small { color:#777; font-size:9px; }
+.tm-registry-state { align-self:flex-start; font-size:10px; text-transform:uppercase; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.2); }
+.tm-registry-state.failed { color:#ff7b7b; border-color:#ff7b7b; }
+.tm-registry-state.waiting { color:#f5a524; border-color:#f5a524; }
+.tm-registry-state.done { color:#3ecf8e; border-color:#3ecf8e; }

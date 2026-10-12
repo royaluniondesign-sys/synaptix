@@ -37,7 +37,7 @@ These are first-class product surfaces, not cosmetic labels. Each item must end 
 | Rich Repo Previews | Planned | Markdown, images, PDFs, docs, logs, web previews in cockpit panes. |
 | Computer Use | Planned | Safe visible-UI operation for apps/browsers when CLI-only is insufficient. |
 | Notifications/unread | Backend + UI partial | Push done/failed/needs-input/rate-limit-reset; unread task/session markers. |
-| Any CLI Agent | Planned | Command-template registry for any terminal-based agent with status parser hooks. |
+| Any CLI Agent | Backend + UI live (beta) | Command-template registry (`/api/cockpit/agents`) with built-in profiles, custom agents, a heuristic status parser, and a cockpit panel to list/add/remove agents and classify output. Live session status badges still missing. |
 
 ## Milestone 1 — Professional mobile cockpit
 
