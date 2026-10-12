@@ -74,6 +74,14 @@ if (!artifact || !existsSync(artifact)) {
   process.exit(2)
 }
 
+// Windows: overriding USERPROFILE makes the packaged app crash at startup (0x80000003, no log),
+// so the app runs with the real profile and its ~/.termora data. Only do that on a throwaway CI
+// runner, or when explicitly asked.
+if (process.platform === 'win32' && !process.env.CI && !process.argv.includes('--allow-real-home')) {
+  console.error('smoke-desktop: on Windows this test uses the real user profile; run it in CI or pass --allow-real-home')
+  process.exit(2)
+}
+
 const port = await freePort()
 const home = mkdtempSync(join(tmpdir(), 'termora-smoke-'))
 const isAppImage = artifact.endsWith('.AppImage')
@@ -87,8 +95,8 @@ const [command, commandArgs] = needsVirtualDisplay
   : [artifact, appArgs]
 
 const child = spawn(command, commandArgs, {
-  // HOME on Unix, USERPROFILE on Windows: the agent keeps its data under the home directory.
-  env: { ...process.env, HOME: home, USERPROFILE: home, TERMORA_PORT: String(port), NODE_OPTIONS: '', ELECTRON_ENABLE_LOGGING: '1' },
+  // The agent keeps its data under the home directory; point HOME at a throwaway one (not on Windows, see above).
+  env: { ...process.env, ...(process.platform === 'win32' ? {} : { HOME: home }), TERMORA_PORT: String(port), NODE_OPTIONS: '', ELECTRON_ENABLE_LOGGING: '1' },
   stdio: ['ignore', 'pipe', 'pipe'],
   detached: process.platform !== 'win32',
 })
