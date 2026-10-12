@@ -62,3 +62,4 @@ apps/desktop/stage/
 
 # Browser-only demo build output
 packages/web/dist-demo/
+web-layout-shots/
