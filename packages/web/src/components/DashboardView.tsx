@@ -6,6 +6,7 @@ import { useSplitLayout } from '../hooks/useSplitLayout';
 import { SplitLayoutControlsView } from './SplitLayoutControls';
 import { MultiPaneTerminal } from './MultiPaneTerminal';
 import { AgentRegistryPanel } from './AgentRegistryPanel';
+import { CAPABILITIES, OVERVIEW_TASK_ID, deriveAgents, deriveTasks, gateSummary, overviewTask, type DotTone, type TaskItem } from '../lib/cockpit-model';
 
 interface DashboardViewProps {
   sessions: Session[];
@@ -22,14 +23,9 @@ interface DashboardViewProps {
 }
 
 type IconName = 'terminal' | 'branch' | 'bot' | 'files' | 'search' | 'settings' | 'close' | 'desktop' | 'plus' | 'mobile' | 'github' | 'activity';
-type DotTone = 'green' | 'orange' | 'red' | 'muted';
 
-type TaskItem = { id: string; title: string; meta: string; status: DotTone; agent: string; next: string; command: string };
-type AgentItem = { id: string; name: string; state: 'thinking' | 'running' | 'queued' | 'blocked'; work: string; tone: DotTone };
 type FileItem = { path: string; kind: 'dir' | 'file'; status?: 'modified' | 'new' | 'clean' };
-type CockpitStatus = { machine: string; root: string; git: { branch: string; dirty: boolean; status: string; lastCommit: string }; agents: Array<{ id: string; name: string; state: string; available: boolean; version?: string }>; worktrees?: Array<{ index: number; path: string; branch: string }>; recentJobs: Array<{ id: string; action: string; status: string; output: string }>; files: { entries: Array<{ name: string; path: string; kind: 'dir' | 'file'; size: number; modifiedAt: string }> } };
-type CapabilityState = 'live' | 'backend' | 'planned';
-type CapabilityItem = { name: string; state: CapabilityState; detail: string; action: string };
+type CockpitStatus = { machine: string; root: string; gates?: string[]; git: { branch: string; dirty: boolean; status: string; lastCommit: string }; agents: Array<{ id: string; name: string; state: string; available: boolean; version?: string }>; worktrees?: Array<{ index: number; path: string; branch: string }>; recentJobs: Array<{ id: string; action: string; status: string; output: string }>; files: { entries: Array<{ name: string; path: string; kind: 'dir' | 'file'; size: number; modifiedAt: string }> } };
 type FilePreview = { path: string; size: number; truncated: boolean; binary: boolean; content: string };
 type GithubStatus = {
   installed: boolean;
@@ -46,53 +42,7 @@ type GithubStatus = {
 };
 
 
-const TASKS: TaskItem[] = [
-  { id: 'ui-shell', title: 'UI shell parity', meta: 'multi-pane workspace + phone control', status: 'orange', agent: 'Hermes', next: 'verify responsive splits', command: 'npm run build' },
-  { id: 'workers', title: 'Agent workers', meta: 'queue, lanes, model routing', status: 'green', agent: 'OpenCode', next: 'spawn short review worker', command: 'opencode run --pure' },
-  { id: 'files', title: 'SFTP/file utility', meta: 'right rail tree + file actions', status: 'green', agent: 'Hermes Linux', next: 'wire remote file browser', command: 'termora files open' },
-  { id: 'mobile', title: 'Mobile control', meta: 'pair, resume, quick actions', status: 'green', agent: 'Termora Mobile', next: 'promote actions to real routes', command: 'termora pair' },
-  { id: 'verify', title: 'Verification gates', meta: 'lint/typecheck/test/build/CI', status: 'muted', agent: 'CI', next: 'watch latest GitHub run', command: 'gh run watch' },
-];
-
-const AGENTS: AgentItem[] = [
-  { id: 'hermes', name: 'Hermes', state: 'thinking', work: 'orchestrating layout + gates', tone: 'orange' },
-  { id: 'opencode', name: 'OpenCode', state: 'queued', work: 'short isolated implementation lane', tone: 'green' },
-  { id: 'linux', name: 'Linux Hermes', state: 'running', work: 'server capture + verification', tone: 'green' },
-  { id: 'ci', name: 'GitHub CI', state: 'blocked', work: 'waits for push', tone: 'muted' },
-];
-
-const FILES: FileItem[] = [
-  { path: '.github/workflows/ci.yml', kind: 'file', status: 'clean' },
-  { path: 'docs/images/desktop-dashboard.png', kind: 'file', status: 'modified' },
-  { path: 'docs/images/phone-dashboard.png', kind: 'file', status: 'modified' },
-  { path: 'packages/web/src/App.tsx', kind: 'file', status: 'clean' },
-  { path: 'packages/web/src/components/DashboardView.tsx', kind: 'file', status: 'modified' },
-  { path: 'packages/web/src/components/TerminalView.tsx', kind: 'file', status: 'clean' },
-  { path: 'packages/web/src/index.css', kind: 'file', status: 'modified' },
-  { path: 'packages/agent/src/index.ts', kind: 'file', status: 'clean' },
-  { path: 'README.md', kind: 'file', status: 'clean' },
-];
-
 const COMMANDS = ['new terminal', 'spawn agent', 'open file tree', 'run gates', 'capture UI', 'watch CI', 'fan out worktrees', 'list worktrees', 'clean worktrees'];
-
-const CAPABILITIES: CapabilityItem[] = [
-  { name: 'Mobile Companion', state: 'live', detail: 'phone pairing, resume, steering surface', action: 'push notifications + native wrappers' },
-  { name: 'Parallel Worktrees', state: 'backend', detail: 'worktree tests/foundation', action: 'fan-out UI + compare winner' },
-  { name: 'Terminal Splits', state: 'backend', detail: 'real PTY/tmux sessions', action: 'user-created split layouts' },
-  { name: 'Design Mode', state: 'planned', detail: 'browser capture tooling exists', action: 'DOM/CSS/screenshot prompt capture' },
-  { name: 'GitHub & Linear', state: 'backend', detail: 'gh auth/repo/branch status slice', action: 'in-app PR/issues/task boards' },
-  { name: 'SSH Worktrees', state: 'planned', detail: 'remote server workflow proven', action: 'host registry + SSH spawn' },
-  { name: 'Annotate AI Diffs', state: 'planned', detail: 'git status endpoints started', action: 'inline diff comments to agent' },
-  { name: 'Drag Files to Agents', state: 'backend', detail: 'file-tree API foundation', action: 'attachments into prompts' },
-  { name: 'Termora CLI', state: 'planned', detail: 'npm scripts today', action: 'worktree/snapshot/click/fill commands' },
-  { name: 'Quick Open', state: 'backend', detail: 'command strip prototype', action: 'global search across repo/context' },
-  { name: 'Usage Tracking', state: 'planned', detail: 'provider constraints documented', action: 'rate-limit/account UI' },
-  { name: 'Rich Repo Previews', state: 'planned', detail: 'docs/media previews today', action: 'Markdown/image/PDF preview panes' },
-  { name: 'Computer Use', state: 'planned', detail: 'Hermes automation used in QA', action: 'safe visible-UI workflows' },
-  { name: 'Notifications', state: 'planned', detail: 'status visible in cockpit', action: 'done/failed/needs-input push + unread' },
-  { name: 'Any CLI Agent', state: 'backend', detail: 'terminal-host model', action: 'agent registry + parser hooks' },
-];
-
 
 function Icon({ name }: { name: IconName }) {
   if (name === 'github') return <span className="tm-oct-icon-text">GH</span>;
@@ -121,14 +71,7 @@ function WindowChrome({ activeTask }: { activeTask: TaskItem }) {
     <div className="tm-oct-windowbar">
       <div className="tm-oct-lights"><i /><i /><i /></div>
       <div className="tm-oct-window-title">Termora</div>
-      <div className="tm-oct-tabs">
-        <span className="active">{activeTask.title}</span>
-        <span>Agents</span>
-        <span>Files</span>
-        <span>Terminal</span>
-        <span>Mobile</span>
-      </div>
-      <div className="tm-oct-window-actions">⌘K · ⌥A · ⇧Tab</div>
+      <div className="tm-oct-tabs"><span className="active">{activeTask.title}</span></div>
     </div>
   );
 }
@@ -154,64 +97,65 @@ function CommandStrip({ activeCommand, onCommand, onCreateSession }: { activeCom
   );
 }
 
-function WorkspaceSidebar({ activeTaskId, activeCommand, onTaskSelect, onCommand, onCreateSession }: { activeTaskId: string; activeCommand: string; onTaskSelect: (id: string) => void; onCommand: (cmd: string) => void; onCreateSession: () => void }) {
-  const pinned = ['rud-server', 'termora/main', 'worktrees', 'captures'];
+function WorkspaceSidebar({ status, tasks, activeTaskId, activeCommand, onTaskSelect, onCommand, onCreateSession }: { status: CockpitStatus | null; tasks: TaskItem[]; activeTaskId: string; activeCommand: string; onTaskSelect: (id: string) => void; onCommand: (cmd: string) => void; onCreateSession: () => void }) {
+  const pinned = status ? [
+    { label: status.machine, tag: 'host', tone: 'green' as DotTone },
+    { label: status.git.branch || 'detached', tag: status.git.dirty ? 'dirty' : 'clean', tone: (status.git.dirty ? 'orange' : 'green') as DotTone },
+  ] : [];
   return (
     <aside className="tm-oct-workspace">
-      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('run gates')}><Icon name="activity" /> <span>Mission Control</span></button>
-      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('spawn agent')}><Icon name="bot" /> <span>Agents</span></button>
-      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('open file tree')}><Icon name="files" /> <span>SFTP / Files</span></button>
-      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('capture UI')}><Icon name="mobile" /> <span>Mobile Control</span></button>
+      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('run gates')}><Icon name="activity" /> <span>Run gates</span></button>
+      <button className="tm-oct-navline button" type="button" onClick={() => onCommand('open file tree')}><Icon name="files" /> <span>Files</span></button>
       <div className="tm-oct-side-section">
-        <div className="tm-oct-section-title"><span>Workspaces</span><button type="button" onClick={onCreateSession}><Icon name="plus" /></button></div>
-        <div className="tm-oct-subtitle">Pinned <em>{pinned.length}</em></div>
-        {pinned.map((item, idx) => (
-          <button type="button" className="tm-oct-pin" key={item} onClick={() => onCommand(idx < 2 ? 'new terminal' : 'open file tree')}><Dot tone={idx === 1 ? 'orange' : 'green'} /><span>{item}</span><em>{idx === 1 ? 'main' : 'live'}</em></button>
+        <div className="tm-oct-section-title"><span>Workspace</span><button type="button" aria-label="New terminal" onClick={onCreateSession}><Icon name="plus" /></button></div>
+        {pinned.length === 0 && <p className="tm-oct-github-note">Waiting for the agent…</p>}
+        {pinned.map((item) => (
+          <div className="tm-oct-pin" key={item.label}><Dot tone={item.tone} /><span>{item.label}</span><em>{item.tag}</em></div>
         ))}
       </div>
       <div className="tm-oct-side-section grow">
-        <div className="tm-oct-subtitle">In progress <em>{TASKS.length}</em></div>
+        <div className="tm-oct-subtitle">Worktrees and jobs <em>{tasks.length}</em></div>
         <div className="tm-oct-task-list">
-          {TASKS.map((task) => (
+          {tasks.length === 0 && <p className="tm-oct-github-note">Nothing yet. Write a task prompt under “Control state” and fan out worktrees, or run gates.</p>}
+          {tasks.map((task) => (
             <button type="button" className={`tm-oct-task ${task.id === activeTaskId ? 'active' : ''}`} key={task.id} onClick={() => onTaskSelect(task.id)}>
               <div><Dot tone={task.status} /><strong>{task.title}</strong></div>
               <span>{task.meta}</span>
-              <div className="tm-oct-task-icons"><Icon name="github" /><Icon name="bot" /><Icon name="terminal" /></div>
             </button>
           ))}
         </div>
       </div>
-      <div className="tm-oct-statusbar-mini"><span>cmd: {activeCommand}</span><span>ssh live</span></div>
+      <div className="tm-oct-statusbar-mini"><span>cmd: {activeCommand}</span></div>
     </aside>
   );
 }
 
-function UtilityPanel({ activeTask, activeCommand }: { activeTask: TaskItem; activeCommand: string }) {
+function UtilityPanel({ activeTask, activeCommand, fanoutPrompt, onPromptChange, gates }: { activeTask: TaskItem; activeCommand: string; fanoutPrompt: string; onPromptChange: (value: string) => void; gates: string }) {
   return (
     <section className="tm-oct-utility-pane">
       <div className="tm-oct-pane-head"><div><Icon name="activity" /><strong>Control state</strong></div><span>{activeCommand}</span></div>
       <div className="tm-oct-detail-grid">
-        <div><span>Owner</span><strong>{activeTask.agent}</strong></div>
-        <div><span>Next action</span><strong>{activeTask.next}</strong></div>
-        <div><span>Command</span><strong>{activeTask.command}</strong></div>
-        <div><span>Mode</span><strong>operate · inspect</strong></div>
+        <div><span>Selected</span><strong>{activeTask.title}</strong></div>
+        <div><span>Detail</span><strong>{activeTask.meta}</strong></div>
       </div>
-      <div className="tm-oct-gates">
-        {['lint', 'typecheck', 'test', 'build', 'capture', 'ci'].map((gate, idx) => <span key={gate} className={idx < 4 ? 'done' : idx === 4 ? 'active' : ''}><Dot tone={idx < 5 ? 'green' : 'muted'} />{gate}</span>)}
-      </div>
+      <label className="tm-oct-prompt">
+        <span>Task prompt for fan-out</span>
+        <textarea id="fanout-prompt" rows={2} placeholder="Describe the task each worktree should work on" value={fanoutPrompt} onChange={(event) => onPromptChange(event.target.value)} />
+      </label>
+      <p className="tm-oct-github-note">{gates}</p>
     </section>
   );
 }
 
 
 function CapabilityCoverage({ onAction }: { onAction: (action: string) => void }) {
-  const visible = CAPABILITIES.slice(0, 9);
+  const visible = CAPABILITIES;
   return (
     <section className="tm-oct-capability-pane">
       <div className="tm-oct-pane-head"><div><Icon name="activity" /><strong>Feature buildout</strong></div><span>{CAPABILITIES.length} surfaces</span></div>
       <div className="tm-oct-capability-grid">
         {visible.map((item) => (
-          <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} onClick={() => onAction(item.name === 'Parallel Worktrees' ? 'list worktrees' : item.name === 'GitHub & Linear' ? 'github-status' : item.state === 'planned' ? 'git-status' : 'run-gates')}>
+          <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} disabled={item.name !== 'Parallel Worktrees' && item.name !== 'GitHub & task workflows'} onClick={() => onAction(item.name === 'Parallel Worktrees' ? 'list worktrees' : 'github-status')}>
             <div><strong>{item.name}</strong><em>{item.state}</em></div>
             <span>{item.detail}</span>
             <small>{item.action}</small>
@@ -260,24 +204,6 @@ function GithubWorkflowPane({ status, error, onRefresh }: { status: GithubStatus
   );
 }
 
-function AgentQueue({ activeAgentId, onAgentSelect }: { activeAgentId: string; onAgentSelect: (id: string) => void }) {
-  return (
-    <section className="tm-oct-agent-pane">
-      <div className="tm-oct-pane-head"><div><Icon name="bot" /><strong>Agent queue</strong></div><span>4 lanes</span></div>
-      <div className="tm-oct-agent-list">
-        {AGENTS.map((agent) => (
-          <button type="button" key={agent.id} className={agent.id === activeAgentId ? 'active' : ''} onClick={() => onAgentSelect(agent.id)}>
-            <Dot tone={agent.tone} />
-            <div><strong>{agent.name}</strong><span>{agent.work}</span></div>
-            <em>{agent.state}</em>
-            {agent.state === 'thinking' && <i className="tm-oct-thinking"><b /><b /><b /></i>}
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function TerminalPane({ title, subtitle, children, active = false }: { title: string; subtitle?: string; children: React.ReactNode; active?: boolean }) {
   return (
     <section className={`tm-oct-pane ${active ? 'active' : ''}`}>
@@ -287,20 +213,19 @@ function TerminalPane({ title, subtitle, children, active = false }: { title: st
   );
 }
 
-function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, onSessionSelect, onCloseSession, wsClient, messageBus, getSessionOutput }: Pick<DashboardViewProps, 'sessions' | 'activeSessionId' | 'onSessionSelect' | 'onCloseSession' | 'wsClient' | 'messageBus' | 'getSessionOutput'> & { activeTask: TaskItem; activeAgent: AgentItem }) {
+function LiveSessionPane({ sessions, activeSessionId, activeTask, onSessionSelect, onCloseSession, wsClient, messageBus, getSessionOutput }: Pick<DashboardViewProps, 'sessions' | 'activeSessionId' | 'onSessionSelect' | 'onCloseSession' | 'wsClient' | 'messageBus' | 'getSessionOutput'> & { activeTask: TaskItem }) {
   const [confirmClose, setConfirmClose] = useState<string | null>(null);
   const { layout, setMode, assignActiveSession, clearPane } = useSplitLayout(sessions, activeSessionId);
   const multiPane = layout.mode !== 'single';
   const active = sessions.find((s) => s.id === activeSessionId) ?? sessions[0];
-  const displaySessions = sessions.length ? sessions : [{ id: 'demo', name: activeTask.title, cwd: '/home/rud/termora', status: 'run', snapshot: '' } as Session];
+  const displaySessions = sessions;
   const handleClose = useCallback((session: Session) => (event: React.MouseEvent) => {
     event.stopPropagation();
     if (confirmClose === session.id) { onCloseSession(session.id); setConfirmClose(null); } else { setConfirmClose(session.id); }
   }, [confirmClose, onCloseSession]);
-  const fallback = `<span style="color:#7170ff">${activeAgent.name}</span> · ${activeAgent.state}\n<span style="color:#8a8f98">/home/rud/termora · ${activeTask.id}</span>\n\nTask: ${activeTask.title}\nUtility: ${activeTask.meta}\nNext: ${activeTask.next}\nCommand: ${activeTask.command}\n\n$ ${activeTask.command}\n<span style="color:#8a8f98">output streams here while the sidebars remain usable…</span>`;
   return (
     <section className="tm-oct-live-pane">
-      <div className="tm-oct-pane-head"><div><Icon name="terminal" /><strong>{active?.name ?? activeTask.title}</strong></div><span>{activeAgent.name} · {activeAgent.state}</span></div>
+      <div className="tm-oct-pane-head"><div><Icon name="terminal" /><strong>{active?.name ?? activeTask.title}</strong></div><span>{sessions.length} session{sessions.length === 1 ? '' : 's'}</span></div>
       <div className="tm-oct-live-tabs">
         {displaySessions.slice(0, 4).map((session) => (
           <button key={session.id} type="button" className={session.id === active?.id ? 'active' : ''} onClick={() => onSessionSelect(session.id)}>
@@ -331,19 +256,19 @@ function LiveSessionPane({ sessions, activeSessionId, activeTask, activeAgent, o
           onClearPane={clearPane}
         />
       ) : (
-        <pre className="tm-oct-terminal main" dangerouslySetInnerHTML={{ __html: fallback }} />
+        <pre className="tm-oct-terminal main">{sessions.length === 0 ? 'No terminal session yet.\nUse “new terminal” to start one on this machine.' : 'Select a session tab to attach.'}</pre>
       )}
-      <div className="tm-oct-inputbar"><span>›</span><em>Actions remain live: tasks, file tree, agents, mobile resume</em></div>
+      <div className="tm-oct-inputbar"><span>›</span><em>Type in a session pane to send input</em></div>
     </section>
   );
 }
 
-function FileTreeRail({ activeFile, files, onFileSelect, onFileAction }: { activeFile: string; files: FileItem[]; onFileSelect: (path: string) => void; onFileAction: (action: string) => void }) {
+function FileTreeRail({ title, activeFile, files, onFileSelect, onFileAction }: { title: string; activeFile: string; files: FileItem[]; onFileSelect: (path: string) => void; onFileAction: (action: string) => void }) {
   return (
     <aside className="tm-oct-filetree">
-      <div className="tm-oct-file-head"><strong>termora</strong><div><Icon name="search" /><Icon name="settings" /></div></div>
-      <div className="tm-oct-file-search"><Icon name="search" /><span>filter files / SFTP paths</span></div>
+      <div className="tm-oct-file-head"><strong>{title}</strong></div>
       <div className="tm-oct-tree-list operational">
+        {files.length === 0 && <p className="tm-oct-github-note">No files listed yet.</p>}
         {files.map((file) => (
           <button type="button" className={file.path === activeFile ? 'selected' : ''} key={file.path} onClick={() => onFileSelect(file.path)}>
             <Icon name={file.kind === 'dir' ? 'files' : 'terminal'} />
@@ -352,40 +277,37 @@ function FileTreeRail({ activeFile, files, onFileSelect, onFileAction }: { activ
           </button>
         ))}
       </div>
-      <div className="tm-oct-file-actions"><button type="button" onClick={() => onFileAction('list-files')}>Open</button><button type="button" onClick={() => onFileAction('git-status')}>Stage</button><button type="button" onClick={() => onFileAction('git-status')}>Upload</button></div>
+      <div className="tm-oct-file-actions"><button type="button" onClick={() => onFileAction('list-files')}>Refresh</button></div>
     </aside>
   );
 }
 
-function PhonePreview({ connectionStatus, latencyMs, activeTask, phoneMode, setPhoneMode, onCreateSession, onAction }: { connectionStatus: ConnectionStatus; latencyMs: number | null; activeTask: TaskItem; phoneMode: string; setPhoneMode: (mode: string) => void; onCreateSession: () => void; onAction: (action: string) => void }) {
+function PhonePreview({ status, agentCount, taskCount, connectionStatus, latencyMs, activeTask, phoneMode, setPhoneMode, onCreateSession, onAction }: { status: CockpitStatus | null; agentCount: number; taskCount: number; connectionStatus: ConnectionStatus; latencyMs: number | null; activeTask: TaskItem; phoneMode: string; setPhoneMode: (mode: string) => void; onCreateSession: () => void; onAction: (action: string) => void }) {
   const online = connectionStatus === 'connected';
   return (
-    <aside className="tm-oct-phone">
-      <div className="tm-phone-status"><span>3:53</span><span>⌁ ◒ 44</span></div>
-      <div className="tm-phone-brand"><img src="/termora-logo.svg" alt="" /><strong>Termora</strong><Icon name="settings" /></div>
-      <h2>Control from mobile</h2>
-      <div className="tm-phone-mode-tabs">{['desktop', 'agents', 'files'].map((mode) => <button key={mode} type="button" className={phoneMode === mode ? 'active' : ''} onClick={() => { setPhoneMode(mode); onAction(mode === 'files' ? 'list-files' : mode === 'agents' ? 'opencode-smoke' : 'git-status'); }}>{mode}</button>)}</div>
+    <aside className="tm-oct-phone" aria-label="Phone layout preview">
+      <div className="tm-phone-brand"><img src="/termora-logo.svg" alt="" /><strong>Termora</strong></div>
+      <h2>Phone view</h2>
+      <div className="tm-phone-mode-tabs">{['desktop', 'agents', 'files'].map((mode) => <button key={mode} type="button" className={phoneMode === mode ? 'active' : ''} onClick={() => { setPhoneMode(mode); onAction(mode === 'files' ? 'list-files' : 'git-status'); }}>{mode}</button>)}</div>
       <div className="tm-phone-stats">
-        <div><Icon name="bot" /><strong>{AGENTS.length}</strong><span>Agent lanes</span></div>
-        <div><Icon name="activity" /><strong>{TASKS.length}</strong><span>Tasks live</span></div>
-        <div><Icon name="branch" /><strong>6</strong><span>Gates</span></div>
+        <div><Icon name="bot" /><strong>{agentCount}</strong><span>Agents</span></div>
+        <div><Icon name="activity" /><strong>{taskCount}</strong><span>Tasks</span></div>
+        <div><Icon name="branch" /><strong>{status?.gates?.length ?? 0}</strong><span>Gates</span></div>
       </div>
-      <label>Desktop</label>
-      <div className="tm-phone-card"><Icon name="desktop" /><div><strong>RUD-SERVER</strong><span><Dot tone={online ? 'green' : 'red'} /> {online ? 'Connected' : 'Offline'} · {latencyMs ?? 47}ms</span></div><em>›</em></div>
-      <label>Resume task</label>
-      <div className="tm-phone-card"><Icon name="terminal" /><div><strong>{activeTask.title}</strong><span>{activeTask.next}</span></div><em>›</em></div>
+      <label>Machine</label>
+      <div className="tm-phone-card"><Icon name="desktop" /><div><strong>{status?.machine ?? '—'}</strong><span><Dot tone={online ? 'green' : 'red'} /> {online ? 'Connected' : 'Offline'} · {latencyMs != null ? `${latencyMs} ms` : '— ms'}</span></div></div>
+      <label>Selected</label>
+      <div className="tm-phone-card"><Icon name="terminal" /><div><strong>{activeTask.title}</strong><span>{activeTask.meta}</span></div></div>
       <label>Quick actions</label>
-      <div className="tm-phone-actions"><button type="button" onClick={() => onAction('git-status')}><Icon name="desktop" /> Pair</button><button type="button" onClick={onCreateSession}><Icon name="plus" /> Terminal</button></div>
-      <div className="tm-phone-actions"><button type="button" onClick={() => onAction('opencode-smoke')}><Icon name="bot" /> Agent</button><button type="button" onClick={() => onAction('list-files')}><Icon name="files" /> Files</button></div>
-      <div className="tm-phone-home" />
+      <div className="tm-phone-actions"><button type="button" onClick={onCreateSession}><Icon name="plus" /> Terminal</button><button type="button" onClick={() => onAction('list-files')}><Icon name="files" /> Files</button></div>
     </aside>
   );
 }
 
 export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCreateSession, onCloseSession, connectionStatus, latencyMs, authToken, wsClient, messageBus, getSessionOutput }: DashboardViewProps) {
-  const [activeTaskId, setActiveTaskId] = useState(TASKS[0].id);
-  const [activeAgentId, setActiveAgentId] = useState(AGENTS[0].id);
-  const [activeFile, setActiveFile] = useState('packages/web/src/components/DashboardView.tsx');
+  const [activeTaskId, setActiveTaskId] = useState<string>(OVERVIEW_TASK_ID);
+  const [activeFile, setActiveFile] = useState('');
+  const [fanoutPrompt, setFanoutPrompt] = useState('');
   const [activeCommand, setActiveCommand] = useState('run gates');
   const [phoneMode, setPhoneMode] = useState('desktop');
   const [cockpitStatus, setCockpitStatus] = useState<CockpitStatus | null>(null);
@@ -398,8 +320,9 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   const [worktreeBusy, setWorktreeBusy] = useState(false);
 
   const authHeaders = useMemo(() => authToken ? { Authorization: `Bearer ${authToken}` } : undefined, [authToken]);
-  const activeTask = useMemo(() => TASKS.find((task) => task.id === activeTaskId) ?? TASKS[0], [activeTaskId]);
-  const activeAgent = useMemo(() => AGENTS.find((agent) => agent.id === activeAgentId) ?? AGENTS[0], [activeAgentId]);
+  const tasks = useMemo(() => deriveTasks(cockpitStatus), [cockpitStatus]);
+  const agents = useMemo(() => deriveAgents(cockpitStatus), [cockpitStatus]);
+  const activeTask = useMemo(() => tasks.find((task) => task.id === activeTaskId) ?? overviewTask(cockpitStatus), [tasks, activeTaskId, cockpitStatus]);
 
   const refreshCockpitStatus = useCallback(async () => {
     if (!authHeaders) return;
@@ -430,7 +353,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   useEffect(() => { void refreshGithubStatus(); }, [refreshGithubStatus]);
 
   useEffect(() => {
-    if (!authHeaders) return;
+    if (!authHeaders || !activeFile) { setFilePreview(null); return; }
     let cancelled = false;
     void (async () => {
       try {
@@ -447,6 +370,10 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
 
   const runWorktreeAction = useCallback(async (action: 'create' | 'list' | 'cleanup') => {
     if (!authHeaders || worktreeBusy) return;
+    if (action === 'create' && !fanoutPrompt.trim()) {
+      setWorktreeOutput('Write a task prompt under “Control state” before fanning out worktrees.');
+      return;
+    }
     setWorktreeBusy(true);
     setActiveCommand(action === 'create' ? 'fan out worktrees' : action === 'list' ? 'list worktrees' : 'clean worktrees');
     setLastBackendAction(`worktrees:${action}`);
@@ -455,7 +382,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
         const response = await fetch('/api/cockpit/worktrees/fanout', {
           method: 'POST',
           headers: { ...authHeaders, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: activeTask.next, count: 2 }),
+          body: JSON.stringify({ prompt: fanoutPrompt.trim(), count: 2 }),
         });
         if (!response.ok) throw new Error(`fanout ${response.status}`);
         const result = await response.json() as { count?: number; worktrees?: Array<{ branch: string; path: string }> };
@@ -488,7 +415,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
     } finally {
       setWorktreeBusy(false);
     }
-  }, [authHeaders, worktreeBusy, activeTask.next, refreshCockpitStatus]);
+  }, [authHeaders, worktreeBusy, fanoutPrompt, refreshCockpitStatus]);
 
   const runBackendAction = useCallback(async (action: string) => {
     if (action === 'fan out worktrees') { void runWorktreeAction('create'); return; }
@@ -498,9 +425,10 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
     setLastBackendAction(action);
     if (!authHeaders) return;
     if (action === 'new terminal') { onCreateSession(); return; }
-    const backendAction = action === 'spawn agent' ? 'create-worktree-fanout' : action === 'open file tree' ? 'list-files' : action === 'capture UI' ? 'git-status' : action === 'watch CI' ? 'git-status' : action;
+    if (action === 'spawn agent') { void runWorktreeAction('create'); return; }
+    const backendAction = action === 'open file tree' ? 'list-files' : action === 'capture UI' || action === 'watch CI' ? 'git-status' : action;
     try {
-      const response = await fetch('/api/cockpit/actions', { method: 'POST', headers: { ...authHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: backendAction, path: '.', prompt: activeTask.next, count: 2 }) });
+      const response = await fetch('/api/cockpit/actions', { method: 'POST', headers: { ...authHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: backendAction, path: '.' }) });
       if (!response.ok) throw new Error(`action ${backendAction} ${response.status}`);
       await response.json();
       await refreshCockpitStatus();
@@ -510,36 +438,33 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
       setCockpitError(error instanceof Error ? error.message : 'cockpit action failed');
     }
   }, [authHeaders, onCreateSession, refreshCockpitStatus, refreshGithubStatus, runWorktreeAction]);
-  const backendFiles: FileItem[] = useMemo(() => cockpitStatus?.files.entries.map((entry) => ({ path: entry.path, kind: entry.kind, status: entry.path === activeFile ? 'modified' : 'clean' })) ?? FILES, [activeFile, cockpitStatus]);
-  const backendAgent = cockpitStatus?.agents.find((agent) => agent.id === activeAgentId);
-  const effectiveAgent = backendAgent ? { ...activeAgent, state: backendAgent.state === 'ready' ? 'queued' as const : activeAgent.state, work: backendAgent.available ? 'backend connected' : 'backend unavailable' } : activeAgent;
+  const backendFiles: FileItem[] = useMemo(() => cockpitStatus?.files.entries.map((entry) => ({ path: entry.path, kind: entry.kind, status: entry.path === activeFile ? 'modified' : 'clean' })) ?? [], [activeFile, cockpitStatus]);
   const previewText = worktreeOutput ?? (filePreview
     ? `file: ${filePreview.path} · ${filePreview.size} bytes${filePreview.truncated ? ' · truncated' : ''}\n\n${filePreview.binary ? '(binary file — no text preview)' : filePreview.content}`
-    : `file: ${activeFile}\nstatus: ${FILES.find((f) => f.path === activeFile)?.status ?? 'clean'}\n\ncommand: ${activeTask.command}\nnext: ${activeTask.next}\n\nThis pane is the operational inspector: selecting tasks, agents or files changes what the operator sees without leaving the cockpit.`);
+    : activeFile ? `Could not load ${activeFile}.` : 'Select a file in the tree to preview it.');
 
   return (
     <div className="tm-orca-stage">
       <WindowChrome activeTask={activeTask} />
       <CommandStrip activeCommand={activeCommand} onCommand={runBackendAction} onCreateSession={onCreateSession} />
       <div className="tm-orca-grid operational">
-        <WorkspaceSidebar activeTaskId={activeTaskId} activeCommand={activeCommand} onTaskSelect={setActiveTaskId} onCommand={runBackendAction} onCreateSession={onCreateSession} />
+        <WorkspaceSidebar status={cockpitStatus} tasks={tasks} activeTaskId={activeTask.id} activeCommand={activeCommand} onTaskSelect={setActiveTaskId} onCommand={runBackendAction} onCreateSession={onCreateSession} />
         <main className="tm-orca-center operational">
-          <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} activeTask={activeTask} activeAgent={effectiveAgent} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} wsClient={wsClient} messageBus={messageBus} getSessionOutput={getSessionOutput} />
+          <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} activeTask={activeTask} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} wsClient={wsClient} messageBus={messageBus} getSessionOutput={getSessionOutput} />
           <div className="tm-oct-split-stack operational">
-            <UtilityPanel activeTask={activeTask} activeCommand={`${activeCommand} · backend ${lastBackendAction}${cockpitError ? ` · ${cockpitError}` : ''}`} />
-            <AgentQueue activeAgentId={activeAgentId} onAgentSelect={setActiveAgentId} />
+            <UtilityPanel activeTask={activeTask} activeCommand={`${activeCommand} · backend ${lastBackendAction}${cockpitError ? ` · ${cockpitError}` : ''}`} fanoutPrompt={fanoutPrompt} onPromptChange={setFanoutPrompt} gates={gateSummary(cockpitStatus)} />
             <AgentRegistryPanel authToken={authToken} />
             <CapabilityCoverage onAction={runBackendAction} />
             <GithubWorkflowPane status={githubStatus} error={githubError} onRefresh={() => void refreshGithubStatus()} />
-            <TerminalPane title="selected file / run output" subtitle={activeFile} active>
+            <TerminalPane title="selected file / run output" subtitle={activeFile || 'none selected'} active>
 {previewText}
             </TerminalPane>
           </div>
         </main>
-        <FileTreeRail activeFile={activeFile} files={backendFiles} onFileSelect={setActiveFile} onFileAction={runBackendAction} />
+        <FileTreeRail title={cockpitStatus ? cockpitStatus.root.split('/').filter(Boolean).pop() ?? 'files' : 'files'} activeFile={activeFile} files={backendFiles} onFileSelect={setActiveFile} onFileAction={runBackendAction} />
       </div>
-      <div className="tm-oct-bottom"><span><Dot tone="orange" /> task: {activeTask.title}</span><span>agent: {activeAgent.name}</span><span>worktrees: {cockpitStatus?.worktrees?.length ?? 0}</span><span>file: {activeFile.split('/').pop()}</span><span>cmd: {activeCommand}</span></div>
-      <PhonePreview connectionStatus={connectionStatus} latencyMs={latencyMs} activeTask={activeTask} phoneMode={phoneMode} setPhoneMode={setPhoneMode} onCreateSession={onCreateSession} onAction={runBackendAction} />
+      <div className="tm-oct-bottom"><span>task: {activeTask.title}</span><span>worktrees: {cockpitStatus?.worktrees?.length ?? 0}</span><span>file: {activeFile ? activeFile.split('/').pop() : 'none'}</span><span>cmd: {activeCommand}</span></div>
+      <PhonePreview status={cockpitStatus} agentCount={agents.length} taskCount={tasks.length} connectionStatus={connectionStatus} latencyMs={latencyMs} activeTask={activeTask} phoneMode={phoneMode} setPhoneMode={setPhoneMode} onCreateSession={onCreateSession} onAction={runBackendAction} />
     </div>
   );
 }

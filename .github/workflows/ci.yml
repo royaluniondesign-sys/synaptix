@@ -47,6 +47,9 @@ jobs:
       - name: Build
         run: npx turbo run build
 
+      - name: Script and truthfulness tests
+        run: npm run test:scripts
+
       - name: App scaffold contract
         run: npm run check:app-scaffold
 

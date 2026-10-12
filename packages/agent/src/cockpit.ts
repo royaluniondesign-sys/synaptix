@@ -235,13 +235,7 @@ async function buildStatus() {
       status: status.output,
       lastCommit: lastCommit.output,
     },
-    agents: [
-      { id: 'hermes', name: 'Hermes', state: 'orchestrating', available: true },
-      ...registered
-        .filter((agent) => agent.id !== 'hermes')
-        .map((agent) => ({ id: agent.id, name: agent.name, state: agent.available ? 'ready' : 'unavailable', available: agent.available })),
-      { id: 'ci', name: 'GitHub CI', state: 'remote', available: true },
-    ],
+    agents: registered.map((agent) => ({ id: agent.id, name: agent.name, state: agent.available ? 'ready' : 'unavailable', available: agent.available })),
     gates: ['lint', 'typecheck', 'test', 'build'],
     commands: ['git-status', 'run-gates', 'list-files', 'read-file', 'opencode-smoke', 'create-worktree-fanout', 'list-worktrees', 'github-status'],
     worktrees: await listFanoutWorktrees(repoRoot),
