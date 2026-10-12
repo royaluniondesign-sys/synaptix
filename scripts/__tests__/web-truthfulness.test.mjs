@@ -33,3 +33,12 @@ test('capability names match rows of the ROADMAP capability table', () => {
   assert.ok(names.length >= 15, 'expected the full capability list')
   for (const name of names) assert.ok(roadmap.includes(`| ${name} |`), `ROADMAP.md has no row for "${name}"`)
 })
+
+test('web assets and styles carry no proprietary brand fonts', () => {
+  const fontsDir = join(root, 'packages', 'web', 'public', 'fonts')
+  let entries = []
+  try { entries = readdirSync(fontsDir) } catch { /* directory removed: expected */ }
+  assert.deepEqual(entries, [], 'packages/web/public/fonts must not ship font files; use @fontsource (OFL) instead')
+  const offenders = walk(webSrc).filter((file) => /Anthropic (Sans|Mono|Serif)|Styrene/.test(readFileSync(file, 'utf8')))
+  assert.deepEqual(offenders, [])
+})

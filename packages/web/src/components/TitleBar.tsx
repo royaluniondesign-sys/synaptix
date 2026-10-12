@@ -55,7 +55,7 @@ export function TitleBar({
         {editing ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
             <span style={{
-              fontFamily: "'Geist Mono', 'Anthropic Mono', monospace",
+              fontFamily: "'Geist Mono', monospace",
               fontSize: 12,
               color: S.text1,
               background: S.surface2,
@@ -84,7 +84,7 @@ export function TitleBar({
             <span
               onClick={onEditStart}
               style={{
-                fontFamily: "'Geist Mono', 'Anthropic Mono', monospace",
+                fontFamily: "'Geist Mono', monospace",
                 fontSize: 12, color: S.text1, cursor: 'pointer',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}
