@@ -180,7 +180,7 @@ const checkConfig = (path, { required, forbidden }, label) => {
 checkConfig(
   'apps/desktop/electron-builder.config.cjs',
   {
-    required: ['appId', 'productName', 'dmg', 'zip', 'nsis', 'AppImage', 'deb'],
+    required: ['appId', 'productName', 'dmg', 'zip', 'nsis', 'AppImage'],
     forbidden: FORBIDDEN_CONFIG_KEYS,
   },
   'electron-builder config',

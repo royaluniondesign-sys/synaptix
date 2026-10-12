@@ -81,3 +81,34 @@ with `CSC_IDENTITY_AUTO_DISCOVERY=false`.
 
 A successful local build is not evidence of support. Record the smoke test in the readiness
 checklist first.
+
+## Linux AppImage in CI (unsigned)
+
+`.github/workflows/desktop-linux.yml` builds and smoke-tests an unsigned AppImage on `ubuntu-24.04`.
+It runs on changes to the desktop app, agent, web, CLI or the packaging scripts, and on demand.
+
+Steps, all reproducible locally on a Linux host:
+
+```sh
+npm ci && npx turbo run build
+npm --prefix apps/desktop ci
+npm --prefix apps/desktop run build
+npm --prefix apps/desktop run stage                       # scripts/stage-app.mjs
+node scripts/package-desktop-unsigned.mjs --target linux --run
+node scripts/smoke-appimage.mjs                           # runs under xvfb-run if DISPLAY is unset
+```
+
+- `stage` builds `apps/desktop/stage/`, a self-contained app directory that mirrors the relative
+  lookups the agent does for the web UI. electron-builder packages that directory
+  (`directories.app` in `electron-builder.config.cjs`) and rebuilds `better-sqlite3` and `node-pty`
+  against Electron's ABI. The rebuild downloads Electron headers, so it needs network access.
+- `asar` is disabled for now: the agent reads the web UI relative to its own files and `node-pty`
+  ships a helper that must stay executable. Enabling asar with `asarUnpack` is a follow-up.
+- The smoke test launches the packaged app with a throwaway `HOME`, waits for `/api/health`, checks
+  that `/` serves HTML, then stops it. It prints a JSON evidence record and fails with the app's log tail.
+- The workflow uploads the AppImage, `SHA256SUMS` and the smoke evidence as a **workflow artifact**
+  kept for 7 days. It does not create a GitHub Release, sign, or notarize anything.
+
+A passing run is evidence for the `Linux AppImage` row only after it is recorded in
+`docs/release-evidence-manifest.json` and a GitHub Release carries the artifact. Until then the
+row stays `missing`. The `.deb` target is not built.

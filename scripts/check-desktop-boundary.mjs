@@ -26,10 +26,10 @@ const REQUIRED_FILES = [
   'apps/desktop/src/__tests__/desktop-preload.test.ts',
 ]
 
-// The real Electron launcher depends on the `electron` package, which is now
-// declared in apps/desktop/package.json only. Packaging tooling (electron-builder
-// and friends) stays forbidden so the scaffold never claims installed installers.
-const PACKAGING_KEYS = ['electron-builder', 'electron-builder-squirrel-windows']
+// Electron and electron-builder are declared in apps/desktop/package.json only
+// (apps/desktop is outside root workspaces). The Squirrel Windows packager stays
+// forbidden: Windows installers are NSIS, and nothing else is claimed.
+const PACKAGING_KEYS = ['electron-builder-squirrel-windows']
 const LAUNCHER_SOURCES = [
   'apps/desktop/src/electron-loader.ts',
   'apps/desktop/src/electron-main.ts',
@@ -67,7 +67,7 @@ if (desktopPkg) {
   for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
     const deps = desktopPkg[section] ?? {}
     for (const key of PACKAGING_KEYS) {
-      if (key in deps) fail(`desktop ${section} declares ${key}; scaffold must not claim packaging`)
+      if (key in deps) fail(`desktop ${section} declares ${key}; packaging stays limited to electron-builder`)
     }
   }
   // The real launcher entry needs a scoped Electron dependency, declared only
