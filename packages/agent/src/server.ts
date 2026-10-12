@@ -26,13 +26,21 @@ import type { AgentConfig } from './config.js';
  * hardcoded literal, so /api/info can never drift from what's installed.
  */
 function readPackageVersion(): string {
-  try {
-    const pkgPath = join(import.meta.dirname, '..', '..', '..', 'package.json');
-    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version?: string };
-    return pkg.version ?? '0.0.0';
-  } catch {
-    return '0.0.0';
+  // The workspace root in a checkout; the agent's own package.json when the
+  // agent is packaged without the repository around it (desktop app).
+  const candidates = [
+    join(import.meta.dirname, '..', '..', '..', 'package.json'),
+    join(import.meta.dirname, '..', 'package.json'),
+  ];
+  for (const candidate of candidates) {
+    try {
+      const pkg = JSON.parse(readFileSync(candidate, 'utf-8')) as { version?: string };
+      if (pkg.version) return pkg.version;
+    } catch {
+      // try the next location
+    }
   }
+  return '0.0.0';
 }
 
 const APP_VERSION = readPackageVersion();
