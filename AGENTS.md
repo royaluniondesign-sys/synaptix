@@ -21,6 +21,7 @@ npm test                                  # all packages
 npm run check:platform-readiness          # if you touched docs, desktop, mobile or packaging
 npm run check:desktop-boundary            # if you touched apps/desktop
 npm run test:scripts                      # if you touched scripts/
+npm run build:demo -w @termora/web && node scripts/check-web-layout.mjs   # if you touched packages/web (needs Playwright)
 ```
 
 CI runs Node 20, 22 and 24. Desktop packaging needs Node 22+ and its own install: `npm --prefix apps/desktop ci`.

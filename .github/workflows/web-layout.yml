@@ -1,0 +1,68 @@
+name: Web layout
+
+# Builds the browser-only demo of the cockpit and checks it in a real Chromium at
+# a desktop and a phone size: no sideways scrolling, the phone view scrolls with
+# a wheel event, no uncaught script errors, and "new terminal" opens a session.
+# Screenshots are uploaded as a workflow artifact for inspection.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/web/**'
+      - 'scripts/check-web-layout.mjs'
+      - '.github/workflows/web-layout.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/web/**'
+      - 'scripts/check-web-layout.mjs'
+      - '.github/workflows/web-layout.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  layout:
+    name: Desktop and phone layout
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the demo
+        run: npm run build:demo -w @termora/web
+
+      # Not saved to package.json or the lockfile: only this check needs it.
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Check layout
+        run: node scripts/check-web-layout.mjs web-layout-shots
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-layout-screenshots
+          path: web-layout-shots/*.png
+          retention-days: 7
+          if-no-files-found: ignore

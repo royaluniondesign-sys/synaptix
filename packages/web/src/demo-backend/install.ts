@@ -274,7 +274,7 @@ function showBanner(): void {
   const banner = document.createElement('div');
   banner.setAttribute('role', 'status');
   banner.textContent = 'DEMO · simulated backend. Nothing here runs on a real machine.';
-  banner.style.cssText = 'position:fixed;right:12px;bottom:32px;z-index:99999;padding:6px 10px;border-radius:999px;font:600 11px system-ui,sans-serif;background:#f5a524;color:#1a1200;box-shadow:0 2px 12px rgba(0,0,0,.4);pointer-events:none';
+  banner.style.cssText = 'position:fixed;right:10px;top:8px;z-index:99999;padding:4px 9px;border-radius:999px;font:600 10px system-ui,sans-serif;background:#f5a524;color:#1a1200;box-shadow:0 2px 12px rgba(0,0,0,.4);pointer-events:none';
   document.body.appendChild(banner);
 }
 
