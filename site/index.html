@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Termora</title>
+<meta name="description" content="Open-source cockpit for real terminals and CLI coding agents on your own machine, from a browser or phone. Early alpha.">
+<style>
+  :root {
+    --bg: #08090a; --panel: #101214; --line: #23272c; --text: #d0d6e0; --muted: #8a919b;
+    --head: #f7f8f8; --accent: #10b981; --warn: #e5b567;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
+  code { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+  pre { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 12px 0; }
+  pre code { background: none; border: 0; padding: 0; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+  header.top { border-bottom: 1px solid var(--line); }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { font-weight: 700; color: var(--head); letter-spacing: 0.01em; text-decoration: none; }
+  .brand span { color: var(--accent); }
+  nav a { margin-left: 18px; color: var(--muted); text-decoration: none; font-size: 0.95rem; }
+  nav a:hover { color: var(--head); }
+  .hero { padding: 72px 0 40px; }
+  .tag { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 0.82rem; color: var(--warn); }
+  h1 { color: var(--head); font-size: clamp(2rem, 6vw, 3.1rem); line-height: 1.12; margin: 16px 0 14px; letter-spacing: -0.02em; }
+  .lead { font-size: 1.15rem; max-width: 640px; color: var(--text); margin: 0 0 24px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-block; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--line); color: var(--head); text-decoration: none; font-weight: 600; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #04130d; }
+  section { padding: 36px 0; border-top: 1px solid var(--line); }
+  h2 { color: var(--head); font-size: 1.45rem; margin: 0 0 12px; letter-spacing: -0.01em; }
+  ul { padding-left: 20px; } li { margin: 6px 0; }
+  .note { color: var(--muted); font-size: 0.92rem; }
+  .demo { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  .demo iframe { display: block; width: 100%; height: 640px; border: 0; background: #000; }
+  .demo .bar { padding: 8px 14px; font-size: 0.85rem; color: var(--warn); border-bottom: 1px solid var(--line); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } .demo iframe { height: 560px; } nav a { margin-left: 12px; } }
+  footer { padding: 28px 0 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="#">termora<span>_</span></a>
+  <nav><a href="#demo">Demo</a><a href="#status">Status</a><a href="#install">Install</a><a href="#privacy">Privacy</a></nav>
+</div></header>
+
+<main>
+<div class="wrap">
+  <div class="hero">
+    <span class="tag">Early alpha · open source · no hosted service</span>
+    <h1>Your machine, in your hands.</h1>
+    <p class="lead">Termora streams the real terminals and coding agents running on your own computer to a browser or your phone. Nothing runs in a cloud workspace; the shell is yours.</p>
+    <div class="cta">
+      <a class="btn primary" href="#demo">Try the demo</a>
+      <a class="btn" href="#install">Install from source</a>
+      <a class="btn" href="https://github.com/royaluniondesign-sys/termora">GitHub</a>
+    </div>
+  </div>
+
+  <section id="demo">
+    <h2>Try it in your browser</h2>
+    <p>This is the real cockpit interface. It runs against a simulated backend inside this page, so you can open terminals and click around without installing anything.</p>
+    <div class="demo">
+      <div class="bar">Demo · simulated backend: no real machine is connected and nothing you type leaves this page.</div>
+      <iframe src="demo/" title="Termora cockpit demo (simulated backend)" loading="lazy"></iframe>
+    </div>
+    <p class="note"><a href="demo/">Open the demo full screen</a>.</p>
+  </section>
+
+  <section id="what">
+    <h2>What it does today</h2>
+    <ul>
+      <li><strong>Real terminals.</strong> Sessions are real PTYs streamed over WebSocket, with tmux persistence when tmux is available. Pair a phone or browser by scanning a QR code.</li>
+      <li><strong>An agent registry.</strong> Built-in profiles for Claude Code, Codex, OpenCode, Hermes, Aider, Gemini CLI and Goose, plus custom ones. Agents start as argument lists, never through a shell, and launching them is off unless you set <code>TERMORA_ENABLE_AGENT_SPAWN=1</code>.</li>
+      <li><strong>Status from output.</strong> A heuristic reads an agent's terminal output and labels it idle, running, editing, testing, waiting, failed or done. It is a guess from text, not a protocol the agents speak.</li>
+      <li><strong>Git worktree fan-out.</strong> Start the same task in several isolated worktrees.</li>
+      <li><strong>A desktop shell.</strong> An Electron app that bundles the agent and the interface.</li>
+    </ul>
+  </section>
+
+  <section id="status">
+    <h2>What is not done</h2>
+    <div class="cols">
+      <div>
+        <p><strong>Desktop builds</strong></p>
+        <ul>
+          <li>Linux (AppImage), macOS (Apple Silicon) and Windows (x64) packages build in CI and start correctly in an automated test.</li>
+          <li>They are unsigned, not notarized, and not published as a release. There is no download button because there is nothing to download yet.</li>
+          <li>No macOS Intel build.</li>
+          <li>A person has not yet installed and used them on a Mac or a Windows PC.</li>
+        </ul>
+      </div>
+      <div>
+        <p><strong>Product</strong></p>
+        <ul>
+          <li>SSH and SFTP to other machines are not finished.</li>
+          <li>The native mobile app is a scaffold; use the browser or the installable web app.</li>
+          <li>No accounts, no relay service, no paid plan.</li>
+          <li>Few people have used it. Expect rough edges.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">The full list, kept in step with the code, is in the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/docs/current-status.md">status document</a> and the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/ROADMAP.md">roadmap</a>.</p>
+  </section>
+
+  <section id="install">
+    <h2>Install from source</h2>
+    <p>Needs Node.js 20 or newer on macOS or Linux.</p>
+<pre><code>git clone https://github.com/royaluniondesign-sys/termora.git
+cd termora
+npm install
+TUNNEL=local npm run dev</code></pre>
+    <p>The terminal prints a QR code and an address. Open it from your phone or another browser on the same network.</p>
+    <p class="note">Windows: only the CI-built desktop package exists, and WSL support is not documented yet.</p>
+  </section>
+
+  <section id="privacy">
+    <h2>Privacy</h2>
+    <ul>
+      <li>Termora runs on your machine. There is no Termora server, account or sign-up.</li>
+      <li>The application code contains no analytics or telemetry. This page loads no scripts, fonts or trackers from other sites.</li>
+      <li><strong>Without <code>TUNNEL=local</code>, Termora tries to open a public tunnel</strong> (ngrok, then SSH through localhost.run) so your phone can reach it from outside your network. Traffic then passes through that provider. Access is protected by a pairing token, but the address is public. Set <code>TUNNEL=local</code> to stay on your own network.</li>
+    </ul>
+  </section>
+
+  <section id="help">
+    <h2>Help us test it</h2>
+    <p>The most useful thing right now is someone running it on their own machine and telling us what broke. Open an issue on <a href="https://github.com/royaluniondesign-sys/termora/issues">GitHub</a> with your OS, Node version and what you did.</p>
+  </section>
+</div>
+</main>
+
+<footer><div class="wrap">
+  Termora is open source under the MIT license. <a href="https://github.com/royaluniondesign-sys/termora">Source</a> · <a href="https://github.com/royaluniondesign-sys/termora/blob/main/LICENSE">License</a>
+</div></footer>
+</body>
+</html>
