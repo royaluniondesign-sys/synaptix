@@ -286,7 +286,7 @@ function PhonePreview({ status, agentCount, taskCount, connectionStatus, latency
   const online = connectionStatus === 'connected';
   return (
     <aside className="tm-oct-phone" aria-label="Phone layout preview">
-      <div className="tm-phone-brand"><img src="/termora-logo.svg" alt="" /><strong>Termora</strong></div>
+      <div className="tm-phone-brand"><img src={`${import.meta.env.BASE_URL}termora-logo.svg`} alt="" /><strong>Termora</strong></div>
       <h2>Phone view</h2>
       <div className="tm-phone-mode-tabs">{['desktop', 'agents', 'files'].map((mode) => <button key={mode} type="button" className={phoneMode === mode ? 'active' : ''} onClick={() => { setPhoneMode(mode); onAction(mode === 'files' ? 'list-files' : 'git-status'); }}>{mode}</button>)}</div>
       <div className="tm-phone-stats">

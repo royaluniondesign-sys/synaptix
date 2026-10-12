@@ -236,7 +236,7 @@ function DesktopSidebar({ current, onChange, onNewSession, sessionBadge, unreadB
     }}>
       <div style={{ padding: '18px 14px 14px', borderBottom: `1px solid ${S.border}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <img src="/termora-logo.svg" alt="" style={{ width: 22, height: 22 }} />
+          <img src={`${import.meta.env.BASE_URL}termora-logo.svg`} alt="" style={{ width: 22, height: 22 }} />
           <span style={{ fontSize: 13, fontWeight: 700, color: S.text1, letterSpacing: -0.4, flex: 1 }}>termora</span>
           <span style={{
             width: 7, height: 7, borderRadius: '50%', background: statusColor,
