@@ -15,7 +15,7 @@ on:
       - 'packages/web/**'
       - 'packages/cli/**'
       - 'scripts/package-desktop-unsigned.mjs'
-      - 'scripts/smoke-appimage.mjs'
+      - 'scripts/smoke-desktop.mjs'
       - '.github/workflows/desktop-linux.yml'
   push:
     branches: [main]
@@ -25,7 +25,7 @@ on:
       - 'packages/web/**'
       - 'packages/cli/**'
       - 'scripts/package-desktop-unsigned.mjs'
-      - 'scripts/smoke-appimage.mjs'
+      - 'scripts/smoke-desktop.mjs'
       - '.github/workflows/desktop-linux.yml'
 
 concurrency:
@@ -81,7 +81,7 @@ jobs:
       - name: Smoke test packaged app
         run: |
           set +e
-          node scripts/smoke-appimage.mjs --timeout-ms 150000 > apps/desktop/release/desktop/smoke-evidence.json
+          node scripts/smoke-desktop.mjs --timeout-ms 150000 > apps/desktop/release/desktop/smoke-evidence.json
           status=$?
           cat apps/desktop/release/desktop/smoke-evidence.json
           exit $status

@@ -1,17 +1,21 @@
 #!/usr/bin/env node
-// Smoke test for a packaged Termora Linux build.
+// Smoke test for a packaged Termora desktop build (Linux, macOS or Windows).
 //
-// Launches the packaged app (an .AppImage, or an unpacked `termora` binary)
-// under a virtual display with a throwaway HOME, waits for the embedded agent
+// Launches the packaged app (a Linux .AppImage, or the unpacked app of any
+// platform) with a throwaway home directory (under a virtual display on Linux), waits for the embedded agent
 // to answer /api/health, checks that the web cockpit is served and that
 // /api/info reports a real version (not 0.0.0), then stops the
 // app. Prints a JSON evidence record and exits non-zero on any failure.
 //
 // It runs the app only; it never signs, uploads, or publishes anything.
 //
-// Usage: node scripts/smoke-appimage.mjs [path-to-AppImage-or-binary] [--timeout-ms 120000]
+// Usage: node scripts/smoke-desktop.mjs [path-to-app-binary-or-AppImage] [--timeout-ms 120000]
+//
+// Without a path it looks in apps/desktop/release/desktop for the build of the
+// current platform: *.AppImage (Linux), mac*/Termora.app (macOS) or
+// win-unpacked/Termora.exe (Windows).
 
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
 import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
@@ -26,8 +30,20 @@ function findArtifact() {
   if (positional[0]) return resolve(positional[0])
   const dir = resolve('apps/desktop/release/desktop')
   if (!existsSync(dir)) return null
-  const hit = readdirSync(dir).find((name) => name.endsWith('.AppImage'))
-  return hit ? join(dir, hit) : null
+  const entries = readdirSync(dir)
+  if (process.platform === 'linux') {
+    const hit = entries.find((name) => name.endsWith('.AppImage'))
+    return hit ? join(dir, hit) : null
+  }
+  if (process.platform === 'darwin') {
+    for (const name of entries.filter((entry) => entry.startsWith('mac'))) {
+      const binary = join(dir, name, 'Termora.app', 'Contents', 'MacOS', 'Termora')
+      if (existsSync(binary)) return binary
+    }
+    return null
+  }
+  const binary = join(dir, 'win-unpacked', 'Termora.exe')
+  return existsSync(binary) ? binary : null
 }
 
 function freePort() {
@@ -54,7 +70,7 @@ async function probe(url) {
 
 const artifact = findArtifact()
 if (!artifact || !existsSync(artifact)) {
-  console.error('smoke-appimage: no artifact found; build one with `npm run package:desktop:unsigned -- --target linux --run`')
+  console.error('smoke-desktop: no packaged app found; build one with `node scripts/package-desktop-unsigned.mjs --target <linux|mac|win> --run`')
   process.exit(2)
 }
 
@@ -62,15 +78,17 @@ const port = await freePort()
 const home = mkdtempSync(join(tmpdir(), 'termora-smoke-'))
 const isAppImage = artifact.endsWith('.AppImage')
 const appArgs = [...(isAppImage ? ['--appimage-extract-and-run'] : []), '--no-sandbox', '--disable-gpu']
-const hasDisplay = Boolean(process.env.DISPLAY)
-const [command, commandArgs] = hasDisplay
-  ? [artifact, appArgs]
-  : ['xvfb-run', ['-a', artifact, ...appArgs]]
+// Only Linux needs a virtual display; macOS and Windows runners have a session.
+const needsVirtualDisplay = process.platform === 'linux' && !process.env.DISPLAY
+const [command, commandArgs] = needsVirtualDisplay
+  ? ['xvfb-run', ['-a', artifact, ...appArgs]]
+  : [artifact, appArgs]
 
 const child = spawn(command, commandArgs, {
-  env: { ...process.env, HOME: home, TERMORA_PORT: String(port), NODE_OPTIONS: '', ELECTRON_ENABLE_LOGGING: '1' },
+  // HOME on Unix, USERPROFILE on Windows: the agent keeps its data under the home directory.
+  env: { ...process.env, HOME: home, USERPROFILE: home, TERMORA_PORT: String(port), NODE_OPTIONS: '', ELECTRON_ENABLE_LOGGING: '1' },
   stdio: ['ignore', 'pipe', 'pipe'],
-  detached: true,
+  detached: process.platform !== 'win32',
 })
 let log = ''
 const collect = (chunk) => { log = (log + chunk.toString()).slice(-20_000) }
@@ -102,13 +120,21 @@ if (!failure && !checks.health) failure = `agent did not answer /api/health with
 if (!failure && !(checks.webUi?.status === 200 && checks.webUi.html)) failure = 'web cockpit was not served at /'
 if (!failure && (!checks.version || checks.version === '0.0.0')) failure = `/api/info reports version ${JSON.stringify(checks.version)}; expected the app version`
 
-try { process.kill(-child.pid, 'SIGTERM') } catch { /* already gone */ }
+function stopApp(signal) {
+  if (process.platform === 'win32') {
+    spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'])
+    return
+  }
+  try { process.kill(-child.pid, signal) } catch { /* already gone */ }
+}
+stopApp('SIGTERM')
 await sleep(1_500)
-try { process.kill(-child.pid, 'SIGKILL') } catch { /* already gone */ }
+stopApp('SIGKILL')
 rmSync(home, { recursive: true, force: true })
 
 const evidence = {
   artifact,
+  platform: process.platform,
   kind: isAppImage ? 'AppImage' : 'unpacked',
   port,
   ok: !failure,

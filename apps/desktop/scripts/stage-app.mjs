@@ -19,7 +19,7 @@
 // Requires `npm run build` (root) and `npm --prefix apps/desktop run build` first.
 // It installs production dependencies with npm; it does not sign or publish.
 
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -93,6 +93,18 @@ const install = spawnSync(
   { cwd: stage, stdio: 'inherit', shell: process.platform === 'win32' },
 )
 if (install.status !== 0) process.exit(install.status ?? 1)
+
+// npm drops execute bits and the install ran with --ignore-scripts, so node-pty's
+// spawn-helper (macOS/Linux) must be made executable again or terminals fail
+// with "posix_spawnp failed". electron-builder keeps file modes when packaging.
+if (process.platform !== 'win32') {
+  const ptyDir = join(stage, 'node_modules', 'node-pty')
+  const walk = (dir) => readdirSync(dir).flatMap((name) => {
+    const full = join(dir, name)
+    return statSync(full).isDirectory() ? walk(full) : name === 'spawn-helper' ? [full] : []
+  })
+  if (existsSync(ptyDir)) for (const helper of walk(ptyDir)) chmodSync(helper, 0o755)
+}
 
 cpSync(sources.desktopDist, join(stage, 'desktop', 'dist'), { recursive: true })
 cpSync(sources.cliDist, join(stage, 'cli'), { recursive: true })

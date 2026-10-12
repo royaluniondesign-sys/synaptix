@@ -145,9 +145,13 @@ if (hostTargets.length === 0) {
   process.exit(1)
 }
 
+// npx is npx.cmd on Windows, which needs a shell to resolve.
+const useShell = process.platform === 'win32'
+
 const probe = spawnSync('npx', ['--no-install', 'electron-builder', '--version'], {
   env: childEnv,
   cwd: desktopDir,
+  shell: useShell,
   stdio: 'pipe',
   encoding: 'utf8',
 })
@@ -167,7 +171,7 @@ let failed = false
 for (const target of hostTargets) {
   const command = commandFor(target)
   console.log(`\nRunning unsigned ${target.id} build: ${command.join(' ')}`)
-  const result = spawnSync(command[0], command.slice(1), { env: childEnv, stdio: 'inherit', cwd: desktopDir })
+  const result = spawnSync(command[0], command.slice(1), { env: childEnv, stdio: 'inherit', cwd: desktopDir, shell: useShell })
   if (result.status !== 0) failed = true
 }
 
