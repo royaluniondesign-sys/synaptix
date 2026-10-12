@@ -129,8 +129,8 @@ A feature is done only when:
 
 See `docs/product-plan.md` for the order and the reasoning.
 
-- [ ] Replace hard-coded sample tasks, agents and terminal text in the cockpit with real state or empty states.
-- [ ] Remove machine paths and names from the interface.
+- [x] Replace hard-coded sample tasks, agents and terminal text in the cockpit with real state or empty states.
+- [x] Remove machine paths and names from the interface (guarded by `scripts/__tests__/web-truthfulness.test.mjs`).
 - [ ] Fix the mobile layout (bottom bar, clipped panels, phone mock overlap).
 - [ ] Screenshot checks at desktop and phone sizes in CI.
 - [ ] Linux AppImage passes the CI smoke test; version, icon and asar fixed.
