@@ -59,3 +59,6 @@ apps/demo-video/
 
 # Desktop packaging staging directory (generated)
 apps/desktop/stage/
+
+# Browser-only demo build output
+packages/web/dist-demo/
