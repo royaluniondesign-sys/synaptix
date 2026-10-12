@@ -72,6 +72,10 @@ with `CSC_IDENTITY_AUTO_DISCOVERY=false`.
 
 `release/` is git-ignored; never commit local artifacts or installer output.
 
+The `Desktop macOS and Windows (unsigned)` workflow builds the mac (arm64 only, no Intel) and win (x64)
+targets on GitHub runners and runs `scripts/smoke-desktop.mjs` against each. Its results are workflow
+artifacts kept for 7 days; nothing is signed, notarized or published.
+
 ## Why these stay pending/manual
 
 - The `electron` dependency is scoped to `apps/desktop` for the real launcher, but `electron-builder`
@@ -95,7 +99,7 @@ npm --prefix apps/desktop ci
 npm --prefix apps/desktop run build
 npm --prefix apps/desktop run stage                       # scripts/stage-app.mjs
 node scripts/package-desktop-unsigned.mjs --target linux --run
-node scripts/smoke-appimage.mjs                           # runs under xvfb-run if DISPLAY is unset
+node scripts/smoke-desktop.mjs                           # runs under xvfb-run if DISPLAY is unset
 ```
 
 - `stage` builds `apps/desktop/stage/`, a self-contained app directory that mirrors the relative

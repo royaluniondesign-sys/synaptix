@@ -1,0 +1,145 @@
+name: Desktop macOS and Windows (unsigned)
+
+# Builds unsigned macOS (arm64) and Windows (x64) packages of the Electron shell,
+# launches each one and checks that the embedded agent serves the web cockpit.
+# Nothing here signs, notarizes, publishes, or uploads to a release: artifacts
+# are workflow artifacts kept for 7 days. macOS Intel is not built.
+# See docs/desktop-unsigned-packaging.md.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - 'packages/agent/**'
+      - 'packages/web/**'
+      - 'packages/cli/**'
+      - 'scripts/package-desktop-unsigned.mjs'
+      - 'scripts/smoke-desktop.mjs'
+      - '.github/workflows/desktop-mac-win.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - 'packages/agent/**'
+      - 'packages/web/**'
+      - 'packages/cli/**'
+      - 'scripts/package-desktop-unsigned.mjs'
+      - 'scripts/smoke-desktop.mjs'
+      - '.github/workflows/desktop-mac-win.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: macOS arm64 (unsigned)
+            os: macos-latest
+            target: mac
+            artifact: termora-macos-arm64-unsigned
+            files: |
+              apps/desktop/release/desktop/*.dmg
+              apps/desktop/release/desktop/*.zip
+          - label: Windows x64 (unsigned)
+            os: windows-latest
+            target: win
+            artifact: termora-windows-x64-unsigned
+            files: |
+              apps/desktop/release/desktop/*.exe
+              !apps/desktop/release/desktop/win-unpacked/**
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install workspace dependencies
+        run: npm ci
+
+      - name: Build workspace
+        run: npx turbo run build
+
+      - name: Install desktop dependencies
+        run: npm --prefix apps/desktop ci
+
+      - name: Build desktop shell
+        run: npm --prefix apps/desktop run build
+
+      - name: Stage self-contained app directory
+        run: npm --prefix apps/desktop run stage
+
+      - name: Package unsigned app
+        run: node scripts/package-desktop-unsigned.mjs --target ${{ matrix.target }} --run
+
+      - name: Smoke test packaged app
+        run: |
+          set +e
+          node scripts/smoke-desktop.mjs --timeout-ms 150000 > apps/desktop/release/desktop/smoke-evidence.json
+          status=$?
+          cat apps/desktop/release/desktop/smoke-evidence.json
+          exit $status
+
+      # Windows GUI apps leave no stdout; the faulting module and the signature
+      # state of the build are the evidence needed to diagnose an early crash.
+      - name: Windows diagnostics
+        if: failure() && matrix.target == 'win'
+        shell: pwsh
+        run: |
+          Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=(Get-Date).AddMinutes(-15)} -ErrorAction SilentlyContinue |
+            Where-Object { $_.Message -match 'Termora' } |
+            Select-Object -First 5 | ForEach-Object { $_.Message }
+          $root = "apps/desktop/release/desktop/win-unpacked"
+          $exe = Join-Path (Get-Location) "$root/Termora.exe"
+          Write-Host "== A: Electron binary as plain Node =="
+          $env:ELECTRON_RUN_AS_NODE = '1'
+          & $exe -e "console.log('electron', process.versions.electron, 'node', process.versions.node)"
+          Write-Host "exit=$LASTEXITCODE"
+          Write-Host "== B: native modules from app.asar.unpacked =="
+          & $exe -e "const p=require('path');const b=p.join(process.cwd(),'$root','resources','app.asar.unpacked','node_modules');for(const m of ['node-pty','better-sqlite3']){try{require(p.join(b,m));console.log(m,'loads')}catch(e){console.log(m,'FAILS',e.message)}}"
+          Write-Host "exit=$LASTEXITCODE"
+          Remove-Item Env:ELECTRON_RUN_AS_NODE
+          Write-Host "== C: app with default environment =="
+          $proc = Start-Process -FilePath $exe -PassThru
+          Start-Sleep -Seconds 6
+          if ($proc.HasExited) { Write-Host "exited code=$($proc.ExitCode)" } else { Write-Host "still running"; Stop-Process -Id $proc.Id -Force }
+          Get-AuthenticodeSignature apps/desktop/release/desktop/win-unpacked/Termora.exe, apps/desktop/release/desktop/Termora-0.2.0-win-x64.exe |
+            Format-List Path, Status, SignerCertificate
+
+      - name: Record checksums
+        if: always()
+        working-directory: apps/desktop/release/desktop
+        run: |
+          if command -v sha256sum >/dev/null; then sum=sha256sum; else sum="shasum -a 256"; fi
+          $sum *.dmg *.zip *.exe 2>/dev/null | tee SHA256SUMS || true
+
+      - name: Upload workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            ${{ matrix.files }}
+            apps/desktop/release/desktop/SHA256SUMS
+            apps/desktop/release/desktop/smoke-evidence.json
+          retention-days: 7
+          if-no-files-found: error

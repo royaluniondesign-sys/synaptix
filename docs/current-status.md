@@ -13,6 +13,7 @@ This is the repo-level truth table for the current implementation. It exists to 
 - Agent registry backend: built-in and custom CLI agent profiles (argv templates, no shell), PATH availability check, and a heuristic output-to-status parser (`idle/running/editing/testing/waiting/failed/done`) behind `/api/cockpit/agents`. Cockpit panel lists, adds and removes agents and classifies pasted output; it is not yet wired to live PTY sessions. The parser is a heuristic, not a protocol.
 - Desktop boundary: Electron launcher contracts, dynamic loader, preload bridge, lifecycle tests, smoke checks, unsigned packaging dry-run, and an advisory artifact-build preflight.
 - Linux AppImage: built unsigned in CI on every desktop-related change and launched under a virtual display; the smoke test checks `/api/health`, the served web UI and the app version. The output is a 7-day workflow artifact, not a published release.
+- macOS arm64 and Windows x64: built unsigned in CI and launched with the same smoke test (`/api/health`, web UI, app version). Workflow artifacts kept 7 days; not signed, not notarized, no macOS Intel build, no published release.
 - Browser-only demo build of the cockpit (`build:demo`) and a CI layout check at desktop and phone sizes.
 - Dogfood checks: `npm run check:cockpit` and `npm run check:web-headless`.
 - CI gates on Node 20/22/24: lint, typecheck, build, tests, scaffold, desktop checks, platform readiness, security audit, dogfood checks.
@@ -20,7 +21,7 @@ This is the repo-level truth table for the current implementation. It exists to 
 ## Guarded
 
 - Real Electron GUI launch on host machines.
-- Unsigned desktop artifacts for macOS, Windows, and Linux.
+- Signed, notarized or published desktop releases for macOS, Windows, and Linux (CI builds are unsigned workflow artifacts).
 - Native mobile app build from the Expo scaffold.
 - CLI distribution through npm/installers.
 
