@@ -7,10 +7,14 @@
 // Layout produced (mirrors the relative lookups in packages/agent/src/server.ts):
 //   stage/package.json                      app manifest (main -> desktop/dist/electron-main.js)
 //   stage/desktop/dist/                     compiled Electron main + preload
-//   stage/node_modules/@termora/agent/      compiled agent + its package.json
-//   stage/node_modules/@termora/web/dist/   built web cockpit
-//   stage/node_modules/package.json         version file the agent reads
+//   stage/vendor/termora-agent/             compiled agent (installed as @termora/agent)
+//   stage/vendor/termora-web/dist/          built web cockpit (installed as @termora/web)
+//   stage/node_modules/@termora/{agent,web} copies made by `npm install --install-links`
 //   stage/cli/                              compiled CLI (copied to resources by the builder config)
+//
+// electron-builder only packages dependencies declared in the app's package.json,
+// so the agent and web UI are declared as file: dependencies instead of being
+// copied into node_modules by hand (which electron-builder silently drops).
 //
 // Requires `npm run build` (root) and `npm --prefix apps/desktop run build` first.
 // It installs production dependencies with npm; it does not sign or publish.
@@ -46,6 +50,22 @@ const agentPkg = JSON.parse(readFileSync(sources.agentPkg, 'utf8'))
 rmSync(stage, { recursive: true, force: true })
 mkdirSync(stage, { recursive: true })
 
+// Vendored local packages. The agent keeps no dependencies of its own here: its
+// third-party dependencies are declared once, in the app manifest below.
+const vendor = join(stage, 'vendor')
+const agentVendor = join(vendor, 'termora-agent')
+const webVendor = join(vendor, 'termora-web')
+mkdirSync(agentVendor, { recursive: true })
+mkdirSync(webVendor, { recursive: true })
+cpSync(sources.agentDist, join(agentVendor, 'dist'), { recursive: true })
+const { dependencies: _agentDeps, devDependencies: _agentDevDeps, scripts: _agentScripts, ...agentManifest } = agentPkg
+writeFileSync(join(agentVendor, 'package.json'), `${JSON.stringify(agentManifest, null, 2)}\n`)
+cpSync(sources.webDist, join(webVendor, 'dist'), { recursive: true })
+writeFileSync(
+  join(webVendor, 'package.json'),
+  `${JSON.stringify({ name: '@termora/web', version: rootPkg.version, private: true }, null, 2)}\n`,
+)
+
 const manifest = {
   name: 'termora',
   productName: 'Termora',
@@ -56,27 +76,25 @@ const manifest = {
   license: rootPkg.license,
   type: 'module',
   main: 'desktop/dist/electron-main.js',
-  // Production dependencies of the agent: electron-builder rebuilds the native
-  // ones (better-sqlite3, node-pty) against Electron's ABI.
-  dependencies: agentPkg.dependencies,
+  // Third-party runtime dependencies of the agent; electron-builder rebuilds the
+  // native ones (better-sqlite3, node-pty) against Electron's ABI.
+  dependencies: {
+    ...agentPkg.dependencies,
+    '@termora/agent': 'file:vendor/termora-agent',
+    '@termora/web': 'file:vendor/termora-web',
+  },
 }
 writeFileSync(join(stage, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`)
 
 console.log('stage-app: installing production dependencies (no scripts; electron-builder rebuilds natives)')
-const install = spawnSync('npm', ['install', '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund'], {
-  cwd: stage,
-  stdio: 'inherit',
-  shell: process.platform === 'win32',
-})
+const install = spawnSync(
+  'npm',
+  ['install', '--omit=dev', '--ignore-scripts', '--install-links', '--no-audit', '--no-fund'],
+  { cwd: stage, stdio: 'inherit', shell: process.platform === 'win32' },
+)
 if (install.status !== 0) process.exit(install.status ?? 1)
 
 cpSync(sources.desktopDist, join(stage, 'desktop', 'dist'), { recursive: true })
-const agentTarget = join(stage, 'node_modules', '@termora', 'agent')
-mkdirSync(agentTarget, { recursive: true })
-cpSync(sources.agentDist, join(agentTarget, 'dist'), { recursive: true })
-cpSync(sources.agentPkg, join(agentTarget, 'package.json'))
-cpSync(sources.webDist, join(stage, 'node_modules', '@termora', 'web', 'dist'), { recursive: true })
-writeFileSync(join(stage, 'node_modules', 'package.json'), `${JSON.stringify({ name: 'termora-runtime', version: rootPkg.version }, null, 2)}\n`)
 cpSync(sources.cliDist, join(stage, 'cli'), { recursive: true })
 
 console.log(`stage-app: staged Termora ${rootPkg.version} at ${stage}`)

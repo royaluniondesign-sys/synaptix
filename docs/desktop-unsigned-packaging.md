@@ -102,10 +102,17 @@ node scripts/smoke-appimage.mjs                           # runs under xvfb-run 
   lookups the agent does for the web UI. electron-builder packages that directory
   (`directories.app` in `electron-builder.config.cjs`) and rebuilds `better-sqlite3` and `node-pty`
   against Electron's ABI. The rebuild downloads Electron headers, so it needs network access.
+- electron-builder only packages dependencies declared in the app manifest, so `stage` declares the
+  agent and the web UI as `file:` dependencies (installed with `--install-links`) instead of copying them
+  into `node_modules` by hand, which it silently drops.
+- Known gap: the agent reads its version from `node_modules/package.json` and falls back to `0.0.0`
+  in the packaged app, so `/api/info` reports `0.0.0` until that lookup is fixed.
 - `asar` is disabled for now: the agent reads the web UI relative to its own files and `node-pty`
   ships a helper that must stay executable. Enabling asar with `asarUnpack` is a follow-up.
 - The smoke test launches the packaged app with a throwaway `HOME`, waits for `/api/health`, checks
   that `/` serves HTML, then stops it. It prints a JSON evidence record and fails with the app's log tail.
+- The workflow fails when the smoke test fails (the evidence is written to a file first so the exit code
+  is not masked by a pipe) and still uploads the evidence for inspection.
 - The workflow uploads the AppImage, `SHA256SUMS` and the smoke evidence as a **workflow artifact**
   kept for 7 days. It does not create a GitHub Release, sign, or notarize anything.
 

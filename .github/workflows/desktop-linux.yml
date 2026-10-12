@@ -76,14 +76,23 @@ jobs:
       - name: Package unsigned AppImage
         run: node scripts/package-desktop-unsigned.mjs --target linux --run
 
+      # Write the evidence first, then fail on its exit code: piping into tee
+      # would hide a failing smoke test behind tee's own success.
       - name: Smoke test packaged app
-        run: node scripts/smoke-appimage.mjs --timeout-ms 150000 | tee apps/desktop/release/desktop/smoke-evidence.json
+        run: |
+          set +e
+          node scripts/smoke-appimage.mjs --timeout-ms 150000 > apps/desktop/release/desktop/smoke-evidence.json
+          status=$?
+          cat apps/desktop/release/desktop/smoke-evidence.json
+          exit $status
 
       - name: Record checksum
+        if: always()
         working-directory: apps/desktop/release/desktop
         run: sha256sum *.AppImage | tee SHA256SUMS
 
       - name: Upload workflow artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: termora-linux-appimage-unsigned
