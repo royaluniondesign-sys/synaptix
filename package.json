@@ -54,7 +54,7 @@
     "check:desktop-launch": "node scripts/smoke-desktop-launch.mjs",
     "check:desktop-artifact-preflight": "node scripts/check-desktop-artifact-preflight.mjs",
     "check:web-headless": "node scripts/check-web-headless.mjs",
-    "test:scripts": "node --test \"scripts/__tests__/**/*.test.mjs\"",
+    "test:scripts": "node scripts/run-script-tests.mjs",
     "check:mobile-scaffold": "npm --prefix apps/mobile run typecheck && npm --prefix apps/mobile test"
   },
   "devDependencies": {
