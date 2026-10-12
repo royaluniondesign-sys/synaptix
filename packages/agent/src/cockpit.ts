@@ -1,12 +1,13 @@
 import express from 'express';
 import { execFile, spawn } from 'node:child_process';
-import { closeSync, existsSync, openSync, readdirSync, readSync, statSync } from 'node:fs';
+import { closeSync, openSync, readdirSync, readSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { hostname } from 'node:os';
 import type { Express } from 'express';
 import { createFanoutWorktrees, listFanoutWorktrees, removeWorktree, slugify } from './worktree.js';
 import { collectGithubStatus } from './github.js';
 import { notificationStore } from './event-bus.js';
+import { AGENT_STATES, AgentProfileError, AgentRegistry, expandArgs, parseAgentStatus } from './agent-registry.js';
 
 type JobStatus = 'running' | 'success' | 'failed';
 
@@ -30,12 +31,21 @@ type WorktreeLaunchBody = {
   prompt?: string;
   count?: number;
   agentCommand?: string;
+  /** Registered agent profile id; takes precedence over agentCommand. */
+  agentId?: string;
   runAgents?: boolean;
 };
 
 const repoRoot = resolve(import.meta.dirname, '..', '..', '..');
 const jobs = new Map<string, CockpitJob>();
+let agentRegistry: AgentRegistry | undefined;
+
+function getAgentRegistry(): AgentRegistry {
+  agentRegistry ??= new AgentRegistry(process.env.TERMORA_AGENTS_FILE || undefined);
+  return agentRegistry;
+}
 const MAX_OUTPUT = 32_000;
+const MAX_STATUS_INPUT = 64_000;
 const MAX_PREVIEW_BYTES = 256 * 1024;
 const BINARY_SNIFF_BYTES = 8_000;
 
@@ -177,6 +187,9 @@ async function launchWorktreeFanout(body: WorktreeLaunchBody) {
   const promptSlug = slugify(prompt);
   const worktrees = await createFanoutWorktrees(repoRoot, count, promptSlug);
   const runAgents = body.runAgents === true && process.env.TERMORA_ENABLE_AGENT_SPAWN === '1';
+  const agentId = String(body.agentId ?? '').trim();
+  const profile = agentId ? getAgentRegistry().get(agentId) : undefined;
+  if (agentId && !profile) throw new Error(`Unknown agent: ${agentId}`);
   const agentCommand = String(body.agentCommand ?? '').trim();
   const agentJobs: CockpitJob[] = [];
 
@@ -191,7 +204,11 @@ async function launchWorktreeFanout(body: WorktreeLaunchBody) {
     };
   }
 
-  if (runAgents && agentCommand) {
+  if (runAgents && profile) {
+    for (const worktree of worktrees) {
+      agentJobs.push(startJob('agent-worktree', profile.command, expandArgs(profile, { prompt }), worktree.path));
+    }
+  } else if (runAgents && agentCommand) {
     const [command, ...args] = agentCommand.split(/\s+/);
     for (const worktree of worktrees) {
       agentJobs.push(startJob('agent-worktree', command, args.map((arg) => arg === '{prompt}' ? prompt : arg), worktree.path));
@@ -202,14 +219,12 @@ async function launchWorktreeFanout(body: WorktreeLaunchBody) {
 }
 
 async function buildStatus() {
-  const [branch, status, lastCommit, opencodeVersion] = await Promise.all([
+  const [branch, status, lastCommit] = await Promise.all([
     runCommand('git', ['branch', '--show-current']),
     runCommand('git', ['status', '--short']),
     runCommand('git', ['log', '-1', '--oneline']),
-    existsSync('/home/rud/.opencode/bin/opencode')
-      ? runCommand('/home/rud/.opencode/bin/opencode', ['--version'])
-      : Promise.resolve({ ok: false, output: 'opencode not installed at expected path' }),
   ]);
+  const registered = getAgentRegistry().list();
 
   return {
     machine: hostname(),
@@ -222,7 +237,9 @@ async function buildStatus() {
     },
     agents: [
       { id: 'hermes', name: 'Hermes', state: 'orchestrating', available: true },
-      { id: 'opencode', name: 'OpenCode', state: opencodeVersion.ok ? 'ready' : 'unavailable', available: opencodeVersion.ok, version: opencodeVersion.output },
+      ...registered
+        .filter((agent) => agent.id !== 'hermes')
+        .map((agent) => ({ id: agent.id, name: agent.name, state: agent.available ? 'ready' : 'unavailable', available: agent.available })),
       { id: 'ci', name: 'GitHub CI', state: 'remote', available: true },
     ],
     gates: ['lint', 'typecheck', 'test', 'build'],
@@ -287,7 +304,7 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
           res.status(202).json({ action: body.action, job: startJob('run-gates', 'npm', ['run', 'lint']) });
           return;
         case 'opencode-smoke':
-          res.json({ action: body.action, result: await runCommand('/home/rud/.opencode/bin/opencode', ['--version']) });
+          res.json({ action: body.action, result: await runCommand('opencode', ['--version']) });
           return;
         case 'github-status':
           res.json({ action: body.action, result: await collectGithubStatus(runCommand) });
@@ -352,6 +369,57 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : 'Unable to remove worktrees' });
     }
+  });
+
+  app.get('/api/cockpit/agents', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    res.json({ agents: getAgentRegistry().list(), states: AGENT_STATES });
+  });
+
+  app.post('/api/cockpit/agents', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    try {
+      res.status(201).json({ agent: getAgentRegistry().register(req.body ?? {}) });
+    } catch (error) {
+      if (error instanceof AgentProfileError) {
+        res.status(400).json({ error: error.message });
+        return;
+      }
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unable to register agent' });
+    }
+  });
+
+  app.delete('/api/cockpit/agents/:id', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    const profile = getAgentRegistry().get(req.params.id);
+    if (profile?.builtin) {
+      res.status(400).json({ error: 'Built-in agents cannot be removed' });
+      return;
+    }
+    if (!getAgentRegistry().remove(req.params.id)) {
+      res.status(404).json({ error: 'Agent not found' });
+      return;
+    }
+    res.json({ removed: req.params.id });
+  });
+
+  app.post('/api/cockpit/agents/:id/status', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    const profile = getAgentRegistry().get(req.params.id);
+    if (!profile) {
+      res.status(404).json({ error: 'Agent not found' });
+      return;
+    }
+    const output = typeof req.body?.output === 'string' ? req.body.output : '';
+    if (output.length > MAX_STATUS_INPUT) {
+      res.status(413).json({ error: `output exceeds ${MAX_STATUS_INPUT} characters` });
+      return;
+    }
+    res.json({ id: profile.id, state: parseAgentStatus(profile, output) });
   });
 
   app.get('/api/cockpit/jobs/:id', async (req, res) => {
