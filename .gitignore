@@ -56,3 +56,6 @@ apps/demo-video/
 # Local orchestration artifacts
 .hermes-work/
 .omo/
+
+# Desktop packaging staging directory (generated)
+apps/desktop/stage/
