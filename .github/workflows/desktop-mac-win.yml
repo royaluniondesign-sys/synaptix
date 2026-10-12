@@ -108,6 +108,20 @@ jobs:
           Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=(Get-Date).AddMinutes(-15)} -ErrorAction SilentlyContinue |
             Where-Object { $_.Message -match 'Termora' } |
             Select-Object -First 5 | ForEach-Object { $_.Message }
+          $root = "apps/desktop/release/desktop/win-unpacked"
+          $exe = Join-Path (Get-Location) "$root/Termora.exe"
+          Write-Host "== A: Electron binary as plain Node =="
+          $env:ELECTRON_RUN_AS_NODE = '1'
+          & $exe -e "console.log('electron', process.versions.electron, 'node', process.versions.node)"
+          Write-Host "exit=$LASTEXITCODE"
+          Write-Host "== B: native modules from app.asar.unpacked =="
+          & $exe -e "const p=require('path');const b=p.join(process.cwd(),'$root','resources','app.asar.unpacked','node_modules');for(const m of ['node-pty','better-sqlite3']){try{require(p.join(b,m));console.log(m,'loads')}catch(e){console.log(m,'FAILS',e.message)}}"
+          Write-Host "exit=$LASTEXITCODE"
+          Remove-Item Env:ELECTRON_RUN_AS_NODE
+          Write-Host "== C: app with default environment =="
+          $proc = Start-Process -FilePath $exe -PassThru
+          Start-Sleep -Seconds 6
+          if ($proc.HasExited) { Write-Host "exited code=$($proc.ExitCode)" } else { Write-Host "still running"; Stop-Process -Id $proc.Id -Force }
           Get-AuthenticodeSignature apps/desktop/release/desktop/win-unpacked/Termora.exe, apps/desktop/release/desktop/Termora-0.2.0-win-x64.exe |
             Format-List Path, Status, SignerCertificate
 
