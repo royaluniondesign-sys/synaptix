@@ -135,5 +135,6 @@ See `docs/product-plan.md` for the order and the reasoning.
 - [x] Layout and screenshot checks at desktop and phone sizes in CI (`.github/workflows/web-layout.yml`).
 - [x] Linux AppImage passes the CI smoke test; version, icon and asar fixed. Still a workflow artifact, not a release: unsigned, placeholder icon, no GitHub Release.
 - [x] macOS arm64 (DMG/ZIP) and Windows x64 (NSIS) unsigned builds pass the same CI smoke test (`.github/workflows/desktop-mac-win.yml`). Workflow artifacts only: unsigned, not notarized, no macOS Intel build, not installed or used by a person on those systems.
-- [ ] Public web page with real screenshots, install steps and download links.
+- [x] Static public site (`site/`) with the live demo, honest status, install-from-source steps and a privacy section builds in CI (`.github/workflows/site.yml`). Not deployed anywhere.
+- [ ] Publish the site, and add real screenshots and download links once a release exists.
 - [ ] Ten real users and one pricing question before any paid tier is built.

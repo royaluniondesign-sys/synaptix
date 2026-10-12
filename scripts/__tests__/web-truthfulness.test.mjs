@@ -42,3 +42,8 @@ test('web assets and styles carry no proprietary brand fonts', () => {
   const offenders = walk(webSrc).filter((file) => /Anthropic (Sans|Mono|Serif)|Styrene/.test(readFileSync(file, 'utf8')))
   assert.deepEqual(offenders, [])
 })
+
+test('the web app requests nothing from other sites at load time', () => {
+  const html = readFileSync(join(root, 'packages', 'web', 'index.html'), 'utf8')
+  assert.doesNotMatch(html, /(?:href|src)=["']https?:\/\//i, 'index.html must not link remote fonts, styles or scripts')
+})
