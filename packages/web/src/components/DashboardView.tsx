@@ -5,6 +5,7 @@ import type { MessageBus } from '../lib/message-bus';
 import { useSplitLayout } from '../hooks/useSplitLayout';
 import { SplitLayoutControlsView } from './SplitLayoutControls';
 import { MultiPaneTerminal } from './MultiPaneTerminal';
+import { AgentRegistryPanel } from './AgentRegistryPanel';
 
 interface DashboardViewProps {
   sessions: Session[];
@@ -527,6 +528,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
           <div className="tm-oct-split-stack operational">
             <UtilityPanel activeTask={activeTask} activeCommand={`${activeCommand} · backend ${lastBackendAction}${cockpitError ? ` · ${cockpitError}` : ''}`} />
             <AgentQueue activeAgentId={activeAgentId} onAgentSelect={setActiveAgentId} />
+            <AgentRegistryPanel authToken={authToken} />
             <CapabilityCoverage onAction={runBackendAction} />
             <GithubWorkflowPane status={githubStatus} error={githubError} onRefresh={() => void refreshGithubStatus()} />
             <TerminalPane title="selected file / run output" subtitle={activeFile} active>
