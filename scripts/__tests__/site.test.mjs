@@ -58,3 +58,18 @@ test('the Pages workflow is manual only and holds no secrets', () => {
   assert.doesNotMatch(triggers, /\b(push|pull_request|schedule|release):/, 'merging must never publish by itself')
   assert.doesNotMatch(workflow, /secrets\./, 'GitHub Pages deploys with the built-in token; no secrets needed')
 })
+
+test('the page uses the project logo and the build script copies it', () => {
+  const build = readFileSync(new URL('../build-site.mjs', import.meta.url), 'utf8')
+  assert.match(html, /src="termora-logo\.svg"/)
+  assert.match(html, /rel="icon" href="termora-logo\.svg"/)
+  assert.ok(build.includes("'assets/termora-logo.svg'"), 'build-site.mjs must copy assets/termora-logo.svg')
+})
+
+test('no unprovable superlatives, and every difference states its cost', () => {
+  // The page says outright that it is NOT claiming exclusivity; that negated sentence is the one allowed use.
+  const claims = text.replace(/not a claim that nobody else/i, '')
+  assert.doesNotMatch(claims, /\b(?:the only|the first|no other|nobody else|best-in-class|the best|fastest|better than|unlike)\b/i, 'comparative claims need evidence this page cannot give')
+  assert.match(text, /What it costs/)
+  assert.match(text, /not a claim that nobody else/i)
+})
