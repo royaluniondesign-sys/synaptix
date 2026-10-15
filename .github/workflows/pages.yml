@@ -1,13 +1,22 @@
 name: Publish site (GitHub Pages)
 
 # Publishes the static site (site/ plus the browser-only demo) to GitHub Pages.
-# Manual on purpose: it runs only when someone starts it from the Actions tab, so
-# merging this file never publishes anything. Before the first run, set
-# Settings > Pages > Build and deployment > Source to "GitHub Actions".
+# It runs when a change to the site itself reaches main, and it can still be started
+# by hand from the Actions tab. Changes to the application (packages/**) do not
+# publish anything, so unreviewed UI work never goes live by accident. The page
+# tests run first; if they fail, nothing is deployed.
+# Requires Settings > Pages > Build and deployment > Source = "GitHub Actions".
 # See docs/site-publishing.md.
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'scripts/build-site.mjs'
+      - 'assets/termora-logo.svg'
+      - '.github/workflows/pages.yml'
 
 concurrency:
   group: pages

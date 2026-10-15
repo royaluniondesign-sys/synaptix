@@ -3,7 +3,10 @@
 The site in `site/` is built by CI on every change (`.github/workflows/site.yml`) and kept as a
 7-day workflow artifact. Nothing publishes it automatically.
 
-`.github/workflows/pages.yml` publishes it to GitHub Pages when someone runs it by hand.
+`.github/workflows/pages.yml` publishes it to GitHub Pages. It runs by itself when a change to the
+site reaches `main` (files in `site/`, `scripts/build-site.mjs`, the logo, or the workflow itself), and
+it can also be started by hand. Changes to the application under `packages/` do not publish anything.
+The page tests run first; if they fail, nothing is deployed.
 
 ## One-time setup
 
@@ -14,11 +17,12 @@ GitHub Pages is free for public repositories. This repository is public.
 
 ## Publish
 
-1. Open **Actions > Publish site (GitHub Pages) > Run workflow** on `main`.
-2. When the `Deploy to GitHub Pages` job finishes, its summary shows the URL. For this repository it
-   is `https://royaluniondesign-sys.github.io/termora/`.
+Merge a change to the site into `main`. The `Publish site (GitHub Pages)` workflow starts on its own,
+and when its `Deploy to GitHub Pages` job finishes, the summary shows the URL. For this repository it
+is `https://royaluniondesign-sys.github.io/termora/`.
 
-Re-run the workflow to publish a newer version. Take the site down from **Settings > Pages**.
+To publish without changing the site, open **Actions > Publish site (GitHub Pages) > Run workflow**
+on `main`. Take the site down from **Settings > Pages**.
 
 ## Custom domain (optional, later)
 
