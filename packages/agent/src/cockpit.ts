@@ -8,6 +8,7 @@ import { createFanoutWorktrees, listFanoutWorktrees, removeWorktree, slugify } f
 import { collectGithubStatus } from './github.js';
 import { notificationStore } from './event-bus.js';
 import { AGENT_STATES, AgentProfileError, AgentRegistry, expandArgs, parseAgentStatus } from './agent-registry.js';
+import { listListeningPorts } from './ports.js';
 
 type JobStatus = 'running' | 'success' | 'failed';
 
@@ -253,6 +254,12 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
     } catch (error) {
       res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to build cockpit status' });
     }
+  });
+
+  app.get('/api/cockpit/ports', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    res.json({ ports: await listListeningPorts() });
   });
 
   app.get('/api/cockpit/files', async (req, res) => {

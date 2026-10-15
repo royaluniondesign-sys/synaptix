@@ -66,7 +66,7 @@ export function StatusBar({
   const isConnected = connectionStatus === 'connected';
   const isReconnecting = connectionStatus === 'reconnecting';
   const statusColor = isConnected ? S.success : isReconnecting ? S.warning : S.error;
-  const statusLabel = isConnected ? 'SSH' : isReconnecting ? 'SYNC' : 'OFF';
+  const statusLabel = isConnected ? 'LIVE' : isReconnecting ? 'SYNC' : 'OFF';
 
   return (
     <div style={{
@@ -74,7 +74,7 @@ export function StatusBar({
       background: S.bg, borderBottom: `1px solid ${S.border}`,
       flexShrink: 0, overflow: 'hidden',
     }}>
-      {/* SSH status */}
+      {/* Connection status */}
       <Segment title={`Connection: ${connectionStatus}`}>
         <Dot color={statusColor} pulse={isConnected} />
         <span style={{ color: statusColor, fontWeight: 600 }}>{statusLabel}</span>

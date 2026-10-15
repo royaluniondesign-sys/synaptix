@@ -613,7 +613,8 @@ export function App() {
     return <AuthScreen auth={auth} onBootstrapSubmit={authenticateWithBootstrap} />;
   }
 
-  if (!onboardingDone) {
+  // The public demo opens straight on the cockpit; the welcome flow is for a real first run.
+  if (!onboardingDone && import.meta.env.VITE_DEMO !== '1') {
     return <OnboardingFlow onComplete={completeOnboarding} />;
   }
 

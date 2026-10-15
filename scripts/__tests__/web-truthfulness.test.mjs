@@ -47,3 +47,8 @@ test('the web app requests nothing from other sites at load time', () => {
   const html = readFileSync(join(root, 'packages', 'web', 'index.html'), 'utf8')
   assert.doesNotMatch(html, /(?:href|src)=["']https?:\/\//i, 'index.html must not link remote fonts, styles or scripts')
 })
+
+test('the web copy does not claim SSH or one-tap tunnels, which do not exist yet', () => {
+  const offenders = walk(webSrc).filter((file) => /SSH terminal|\? 'SSH'|in one tap|Works offline/.test(readFileSync(file, 'utf8')))
+  assert.deepEqual(offenders, [], 'SSH/SFTP is not implemented; the connection status is a WebSocket to the local agent')
+})

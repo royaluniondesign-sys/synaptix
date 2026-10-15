@@ -60,10 +60,10 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 300 }}>
-        <FeatureRow icon="⚡" label="Real SSH terminal" desc="Full xterm, not a stripped-down shell" />
-        <FeatureRow icon="🌐" label="Instant tunnels" desc="ngrok, SSH reverse — one tap" />
+        <FeatureRow icon="⚡" label="Real terminal" desc="Full xterm, not a stripped-down shell" />
+        <FeatureRow icon="🌐" label="Reach it from your phone" desc="Optional public tunnel (ngrok or SSH), or your own network" />
         <FeatureRow icon="🤖" label="Agent control" desc="Run Claude Code, OpenCode & more" />
-        <FeatureRow icon="📱" label="PWA — install as app" desc="Works offline, opens instantly" />
+        <FeatureRow icon="📱" label="PWA — install as app" desc="Add it to your home screen" />
       </div>
 
       <button
@@ -309,7 +309,7 @@ function StepDone({ onComplete }: { onComplete: () => void }) {
   const tips = [
     { icon: '📋', text: 'Tap Dashboard → sessions grid, stats, tunnels at a glance' },
     { icon: '⌨️', text: 'Terminals → custom keyboard with per-key colors' },
-    { icon: '🌐', text: 'Tunnels → expose local ports to the internet in one tap' },
+    { icon: '🌐', text: 'Ports → see what is listening on this machine' },
     { icon: '⚙️', text: 'Settings → keyboard skins, themes, connection info' },
   ];
 
