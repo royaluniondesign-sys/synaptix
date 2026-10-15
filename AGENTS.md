@@ -35,6 +35,12 @@ CI runs Node 20, 22 and 24. Desktop packaging needs Node 22+ and its own install
 - Agents are launched as argv arrays, never through a shell. Spawning external agents stays behind `TERMORA_ENABLE_AGENT_SPAWN=1`.
 - Do not hardcode machine paths (`/home/<user>`, `/Users/<user>`) in source. Resolve from PATH or config.
 - Reference research on other products (`docs/reference-research/`) records patterns and structure only. Do not copy their code, assets or copy text.
+- Do not decompile, unpack or reverse-engineer another product's binary (for example an `app.asar`). Use its public source or documentation. `docs/reference-research/orca-evidence-ledger.md` shows the method: read the source, record patterns in your own words.
+- Never push to `main`. Work on a branch, open a PR and merge only with CI green. A direct push on 15 Oct left `main` red and added an unauthenticated route.
+- Before you start and before you push, run `git fetch origin` and fast-forward to `origin/main`. Do not build on a stale checkout.
+- Authentication means verifying the token with `requireAuth`. Checking that a header exists or starts with `Bearer ` is not authentication.
+- UI and docs copy must not claim features that do not exist (SSH/SFTP, one-tap tunnels, offline use). `scripts/__tests__/web-truthfulness.test.mjs` enforces part of this.
+- Do not run the agent with a public tunnel from a checkout nobody has reviewed. Use `TUNNEL=local`.
 
 ## Conventions
 
