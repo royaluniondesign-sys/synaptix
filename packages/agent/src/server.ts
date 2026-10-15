@@ -6,6 +6,7 @@ import { WebSocketServer } from 'ws';
 import { join } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 import { hostname } from 'node:os';
+import { exec } from 'node:child_process';
 import {
   generateBootstrapToken,
   verifyBootstrapToken,
@@ -110,6 +111,40 @@ export function createAppServer(
       authUrl,
       machineName: hostname(),
       version: APP_VERSION,
+    });
+  });
+
+  // Ports endpoint — scans listening TCP/UDP ports via ss or lsof
+  app.get('/api/ports', (req, res) => {
+    const auth = req.headers.authorization;
+    if (!auth?.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return; }
+    const cmd = process.platform === 'linux'
+      ? `ss -tlnup 2>/dev/null || netstat -tlnup 2>/dev/null`
+      : `lsof -i -P -n 2>/dev/null | grep LISTEN`;
+    exec(cmd, { timeout: 5000 }, (err, stdout) => {
+      if (err) { res.json({ ports: [] }); return; }
+      const ports: Array<{ port: number; process: string; pid: number; proto: string }> = [];
+      const seen = new Set<number>();
+      for (const line of stdout.split('\n')) {
+        if (!line || line.startsWith('Netid') || line.startsWith('State') || line.startsWith('COMMAND')) continue;
+        let port = 0, proc = '', pid = 0, proto = 'tcp';
+        // lsof format: CMD PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
+        const lsofM = /^(\S+)\s+(\d+)\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+(TCP|UDP)\s+\S+:(\d+)\s*\(LISTEN\)/i.exec(line);
+        if (lsofM) {
+          proc = lsofM[1]; pid = parseInt(lsofM[2]); proto = lsofM[3].toLowerCase(); port = parseInt(lsofM[4]);
+        }
+        // ss format: tcp LISTEN 0 128 *:3000 *:* users:(("node",pid=123,fd=12))
+        const ssM = /^(tcp|udp)\s+LISTEN\s+\d+\s+\d+\s+[\S]*:(\d+)\s+.*users:\(\("([^"]+)",pid=(\d+)/i.exec(line);
+        if (ssM) {
+          proto = ssM[1]; port = parseInt(ssM[2]); proc = ssM[3]; pid = parseInt(ssM[4]);
+        }
+        if (port > 0 && port < 65536 && !seen.has(port)) {
+          seen.add(port);
+          ports.push({ port, process: proc || 'unknown', pid, proto });
+        }
+      }
+      ports.sort((a, b) => a.port - b.port);
+      res.json({ ports });
     });
   });
 

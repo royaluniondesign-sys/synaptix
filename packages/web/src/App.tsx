@@ -5,11 +5,18 @@ import { TunnelsView } from './components/TunnelsView';
 import { SettingsView } from './components/SettingsView';
 import { NotificationsView } from './components/NotificationsView';
 import { AuthScreen } from './components/AuthScreen';
+import { OnboardingFlow } from './components/OnboardingFlow';
+import { StatusBar } from './components/StatusBar';
+import { PortsView } from './components/PortsView';
+import { AgentsView } from './components/AgentsView';
+import { QuickOpen } from './components/QuickOpen';
 import { useAuth } from './hooks/useAuth';
 import { useSessionManager } from './hooks/useSessionManager';
 import { useSkin } from './hooks/useSkin';
 import { useLatency } from './hooks/useLatency';
 import { useNotifications } from './hooks/useNotifications';
+import { useOnboarding } from './hooks/useOnboarding';
+import { usePorts } from './hooks/usePorts';
 import { resolveAppSurface } from './lib/app-model';
 import type { View } from './lib/types';
 import type { ConnectionStatus, TerminalWSClient } from './lib/ws-client';
@@ -494,8 +501,12 @@ export function App() {
   const { skin, setSkin, perKeyColors, setPerKeyColors, keyboardMode, setKeyboardMode } = useSkin();
   const latencyMs = useLatency(wsClient, connectionStatus);
   const { notifications, unreadCount, markAllRead } = useNotifications(auth.token);
+  const { isDone: onboardingDone, complete: completeOnboarding } = useOnboarding();
+  const { ports, loading: portsLoading, error: portsError, refresh: refreshPorts } = usePorts(connectionStatus, auth.token);
 
   const [view, setView] = useState<View>('dashboard');
+  const [quickOpenVisible, setQuickOpenVisible] = useState(false);
+  const [tunnelUrl, setTunnelUrl] = useState<string | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
 
@@ -508,6 +519,27 @@ export function App() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  // Cmd+K / Ctrl+K global shortcut for Quick Open
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setQuickOpenVisible(v => !v);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // Fetch tunnel URL for the Ports view
+  useEffect(() => {
+    if (connectionStatus !== 'connected' || !auth.token) return;
+    fetch('/api/info', { headers: { Authorization: `Bearer ${auth.token}` } })
+      .then(r => r.json())
+      .then((d: { tunnelUrl?: string }) => setTunnelUrl(d.tunnelUrl ?? null))
+      .catch(() => {});
+  }, [connectionStatus, auth.token]);
 
   useEffect(() => {
     if (!awaitingNewSession.current) return;
@@ -581,6 +613,10 @@ export function App() {
     return <AuthScreen auth={auth} onBootstrapSubmit={authenticateWithBootstrap} />;
   }
 
+  if (!onboardingDone) {
+    return <OnboardingFlow onComplete={completeOnboarding} />;
+  }
+
   // Terminal with active session — full-screen, no tab bar
   if (surface.kind === 'terminal' && activeSession) {
     return (
@@ -625,6 +661,15 @@ export function App() {
       )}
 
       <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <StatusBar
+          connectionStatus={connectionStatus}
+          latencyMs={latencyMs}
+          sessionCount={sessions.length}
+          portCount={ports.length}
+          tunnelCount={tunnelUrl ? 1 : 0}
+          ports={ports}
+          onPortsClick={() => setView('ports')}
+        />
         <div style={{ flex: 1, overflow: 'hidden' }}>
           {view === 'dashboard' && (
             <DashboardView
@@ -679,6 +724,26 @@ export function App() {
               onBack={() => setView('dashboard')}
             />
           )}
+          {view === 'ports' && (
+            <PortsView
+              ports={ports}
+              loading={portsLoading}
+              error={portsError}
+              connectionStatus={connectionStatus}
+              onRefresh={refreshPorts}
+              tunnelUrl={tunnelUrl}
+            />
+          )}
+          {view === 'agents' && (
+            <AgentsView
+              sessions={sessions}
+              connectionStatus={connectionStatus}
+              wsClient={wsClient}
+              messageBus={messageBus}
+              onSessionSelect={handleSessionSelect}
+              onCreateSession={handleCreateSession}
+            />
+          )}
         </div>
 
         {showTabBar && (
@@ -692,6 +757,16 @@ export function App() {
       </div>
 
       {showFab && <FABButton onClick={handleCreateSession} />}
+
+      {quickOpenVisible && (
+        <QuickOpen
+          sessions={sessions}
+          onClose={() => setQuickOpenVisible(false)}
+          onSessionSelect={(id) => { setQuickOpenVisible(false); handleSessionSelect(id); }}
+          onNavigate={(v) => { setQuickOpenVisible(false); handleTabChange(v); }}
+          onRunCommand={(cmd) => { setQuickOpenVisible(false); handleRunCommand(cmd); }}
+        />
+      )}
     </div>
   );
 }
