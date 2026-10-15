@@ -4,8 +4,8 @@
   "description": "Installable cockpit for real terminals, machines, and developer workflows",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#141413",
-  "theme_color": "#141413",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
   "icons": [
     {
       "src": "/icon-192.png",
