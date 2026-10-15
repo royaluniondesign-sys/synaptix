@@ -23,7 +23,7 @@ export function usePorts(
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/ports', {
+      const res = await fetch('/api/cockpit/ports', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error(`${res.status}`);

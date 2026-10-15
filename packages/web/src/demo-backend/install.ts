@@ -81,6 +81,7 @@ async function route(method: string, url: URL, body: Json): Promise<Response | n
     if (action === 'list-files') return json({ action, result: { entries: DEMO_FILES } });
     return json({ action, result: { ok: true, output: 'simulated' } });
   }
+  if (method === 'GET' && path === '/api/cockpit/ports') return json({ ports: [] });
   if (method === 'GET' && path === '/api/cockpit/agents') {
     return json({ agents: allAgents(), states: ['idle', 'running', 'editing', 'testing', 'waiting', 'failed', 'done'] });
   }

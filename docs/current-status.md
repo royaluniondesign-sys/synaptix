@@ -14,6 +14,7 @@ This is the repo-level truth table for the current implementation. It exists to 
 - Desktop boundary: Electron launcher contracts, dynamic loader, preload bridge, lifecycle tests, smoke checks, unsigned packaging dry-run, and an advisory artifact-build preflight.
 - Linux AppImage: built unsigned in CI on every desktop-related change and launched under a virtual display; the smoke test checks `/api/health`, the served web UI and the app version. The output is a 7-day workflow artifact, not a published release.
 - macOS arm64 and Windows x64: built unsigned in CI and launched with the same smoke test (`/api/health`, web UI, app version). Workflow artifacts kept 7 days; not signed, not notarized, no macOS Intel build, no published release.
+- Welcome flow, connection status bar, ports panel, agents view and Cmd/Ctrl+K quick open (added 15 Oct). The ports panel lists listening TCP ports of the machine the agent runs on, behind `GET /api/cockpit/ports` (authenticated, 401 covered by a test). The other pieces have no component tests yet; the public demo skips the welcome flow.
 - Browser-only demo build of the cockpit (`build:demo`) and a CI layout check at desktop and phone sizes.
 - Dogfood checks: `npm run check:cockpit` and `npm run check:web-headless`.
 - CI gates on Node 20/22/24: lint, typecheck, build, tests, scaffold, desktop checks, platform readiness, security audit, dogfood checks.

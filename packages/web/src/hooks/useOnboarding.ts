@@ -16,7 +16,7 @@ export function useOnboarding() {
   });
 
   const complete = useCallback(() => {
-    try { localStorage.setItem(ONBOARDING_KEY, '1'); } catch {}
+    try { localStorage.setItem(ONBOARDING_KEY, '1'); } catch { /* storage unavailable: the welcome screen shows again next time */ }
     setIsDone(true);
   }, []);
 
@@ -24,7 +24,7 @@ export function useOnboarding() {
     setSeenTipsState(prev => {
       const next = new Set(prev);
       next.add(tipId);
-      try { localStorage.setItem(TIPS_KEY, JSON.stringify([...next])); } catch {}
+      try { localStorage.setItem(TIPS_KEY, JSON.stringify([...next])); } catch { /* storage unavailable: tips are not remembered */ }
       return next;
     });
   }, []);
@@ -33,7 +33,7 @@ export function useOnboarding() {
     try {
       localStorage.removeItem(ONBOARDING_KEY);
       localStorage.removeItem(TIPS_KEY);
-    } catch {}
+    } catch { /* storage unavailable: nothing to reset */ }
     setIsDone(false);
     setSeenTipsState(new Set());
   }, []);
