@@ -136,6 +136,6 @@ See `docs/product-plan.md` for the order and the reasoning.
 - [x] Linux AppImage passes the CI smoke test; version, icon and asar fixed. Still a workflow artifact, not a release: unsigned, placeholder icon, no GitHub Release.
 - [x] macOS arm64 (DMG/ZIP) and Windows x64 (NSIS) unsigned builds pass the same CI smoke test (`.github/workflows/desktop-mac-win.yml`). Workflow artifacts only: unsigned, not notarized, no macOS Intel build, not installed or used by a person on those systems.
 - [x] Static public site (`site/`) with the live demo, honest status, install-from-source steps and a privacy section builds in CI (`.github/workflows/site.yml`). Not deployed anywhere.
-- [x] Manual GitHub Pages publishing workflow (`.github/workflows/pages.yml`, see `docs/site-publishing.md`). It does nothing until someone enables Pages and runs it.
+- [x] GitHub Pages publishing workflow (`.github/workflows/pages.yml`, see `docs/site-publishing.md`). It publishes when a change to the site reaches `main`, not for application changes, and can be run by hand.
 - [ ] Publish the site, and add real screenshots and download links once a release exists.
 - [ ] Ten real users and one pricing question before any paid tier is built.

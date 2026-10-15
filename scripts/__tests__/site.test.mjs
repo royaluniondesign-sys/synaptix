@@ -51,11 +51,14 @@ test('every font the page references is copied by the build script', () => {
   for (const file of used) assert.ok(build.includes(`'${file}'`), `${file} is not in build-site.mjs`)
 })
 
-test('the Pages workflow is manual only and holds no secrets', () => {
+test('the Pages workflow publishes only for site changes on main and holds no secrets', () => {
   const workflow = readFileSync(new URL('../../.github/workflows/pages.yml', import.meta.url), 'utf8')
   const triggers = workflow.slice(workflow.indexOf('\non:'), workflow.indexOf('\nconcurrency:'))
   assert.match(triggers, /workflow_dispatch:/)
-  assert.doesNotMatch(triggers, /\b(push|pull_request|schedule|release):/, 'merging must never publish by itself')
+  assert.match(triggers, /push:\s+branches: \[main\]/, 'only pushes to main may publish')
+  assert.match(triggers, /- 'site\/\*\*'/)
+  assert.doesNotMatch(triggers, /\b(pull_request|schedule|release):/, 'a PR, a timer or a release must never publish')
+  assert.doesNotMatch(triggers, /packages\//, 'application changes must not publish the site')
   assert.doesNotMatch(workflow, /secrets\./, 'GitHub Pages deploys with the built-in token; no secrets needed')
 })
 
