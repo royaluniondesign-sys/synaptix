@@ -9,9 +9,11 @@ import { resolve } from 'node:path'
 const out = resolve('site-dist')
 const demo = resolve('packages/web/dist-demo')
 
-// Geist and Geist Mono (SIL OFL 1.1, from @fontsource) are served from the site itself,
+// Instrument Serif, Geist and Geist Mono (SIL OFL 1.1, from @fontsource) are served from the site itself,
 // so the page makes no requests to font CDNs.
 const FONTS = [
+  ['instrument-serif', 'instrument-serif-latin-400-normal.woff2'],
+  ['instrument-serif', 'instrument-serif-latin-400-italic.woff2'],
   ['geist', 'geist-latin-400-normal.woff2'],
   ['geist', 'geist-latin-500-normal.woff2'],
   ['geist', 'geist-latin-600-normal.woff2'],
@@ -29,6 +31,8 @@ rmSync(out, { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
 cpSync(resolve('site/index.html'), resolve(out, 'index.html'))
 cpSync(demo, resolve(out, 'demo'), { recursive: true })
+// The project logo, copied unchanged from assets/.
+cpSync(resolve('assets/termora-logo.svg'), resolve(out, 'termora-logo.svg'))
 mkdirSync(resolve(out, 'fonts'), { recursive: true })
 for (const [pkg, file] of FONTS) {
   const source = resolve('node_modules/@fontsource', pkg, 'files', file)
