@@ -10,6 +10,7 @@ import { StatusBar } from './components/StatusBar';
 import { PortsView } from './components/PortsView';
 import { AgentsView } from './components/AgentsView';
 import { QuickOpen } from './components/QuickOpen';
+import { ChatView } from './components/ChatView';
 import { useAuth } from './hooks/useAuth';
 import { useSessionManager } from './hooks/useSessionManager';
 import { useSkin } from './hooks/useSkin';
@@ -76,6 +77,15 @@ const TAB_CONFIG = [
       <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+    ),
+  },
+  {
+    id: 'chat' as const,
+    label: 'Chat',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     ),
   },
@@ -744,6 +754,12 @@ export function App() {
               messageBus={messageBus}
               onSessionSelect={handleSessionSelect}
               onCreateSession={handleCreateSession}
+            />
+          )}
+          {view === 'chat' && (
+            <ChatView
+              authToken={auth.token}
+              connectionStatus={connectionStatus}
             />
           )}
         </div>
