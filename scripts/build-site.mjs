@@ -31,6 +31,8 @@ rmSync(out, { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
 cpSync(resolve('site/index.html'), resolve(out, 'index.html'))
 cpSync(demo, resolve(out, 'demo'), { recursive: true })
+// Screenshots of the demo build, used as device mockups on the page.
+cpSync(resolve('site/img'), resolve(out, 'img'), { recursive: true })
 // The project logo, copied unchanged from assets/.
 cpSync(resolve('assets/termora-logo.svg'), resolve(out, 'termora-logo.svg'))
 mkdirSync(resolve(out, 'fonts'), { recursive: true })
