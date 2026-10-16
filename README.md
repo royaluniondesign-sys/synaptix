@@ -1,15 +1,15 @@
 <div align="center">
 
-<img src="assets/termora-banner.svg" alt="termora — Your machine, in your hands." width="100%" />
+<img src="assets/termora-banner.png" alt="termora: Your machine, in your hands." width="100%" />
 
 <br /><br />
 
-[![CI](https://img.shields.io/github/actions/workflow/status/royaluniondesign-sys/termora/ci.yml?branch=main&style=flat-square&label=CI&labelColor=08090a&color=10b981)](https://github.com/royaluniondesign-sys/termora/actions/workflows/ci.yml)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?style=flat-square&logo=typescript&logoColor=white&labelColor=08090a)](https://typescriptlang.org)
-[![Node.js](https://img.shields.io/badge/Node.js-20%20%7C%2022%20%7C%2024-10b981?style=flat-square&logo=node.js&logoColor=white&labelColor=08090a)](https://nodejs.org)
-[![PWA](https://img.shields.io/badge/Mobile-PWA%20installable-7170ff?style=flat-square&logo=pwa&logoColor=white&labelColor=08090a)](#quickstart)
-[![Terminal](https://img.shields.io/badge/PTY-real%20sessions-d0d6e0?style=flat-square&labelColor=08090a)](#terminal-cockpit)
-[![License: MIT](https://img.shields.io/badge/License-MIT-f7f8f8?style=flat-square&labelColor=08090a)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/royaluniondesign-sys/termora/ci.yml?branch=main&style=flat-square&label=CI&labelColor=09090b)](https://github.com/royaluniondesign-sys/termora/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-7170ff?style=flat-square&logo=typescript&logoColor=white&labelColor=09090b)](https://typescriptlang.org)
+[![Node.js](https://img.shields.io/badge/Node.js-20%20%7C%2022%20%7C%2024-7170ff?style=flat-square&logo=node.js&logoColor=white&labelColor=09090b)](https://nodejs.org)
+[![PWA](https://img.shields.io/badge/Mobile-PWA%20installable-7170ff?style=flat-square&logo=pwa&logoColor=white&labelColor=09090b)](#quickstart)
+[![Terminal](https://img.shields.io/badge/PTY-real%20sessions-7170ff?style=flat-square&labelColor=09090b)](#terminal-cockpit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-fafafa?style=flat-square&labelColor=09090b)](LICENSE)
 
 <br />
 
@@ -212,11 +212,11 @@ Termora is a local agent plus a mobile/browser cockpit. Your phone never talks t
 ### Core guarantees
 
 <p>
-  <img src="https://img.shields.io/badge/runtime-local--first-7170ff?style=flat-square&labelColor=08090a" alt="local-first runtime" />
-  <img src="https://img.shields.io/badge/shell-real%20PTYs-d0d6e0?style=flat-square&labelColor=08090a" alt="real PTYs" />
-  <img src="https://img.shields.io/badge/auth-QR%20%2B%20JWT-10b981?style=flat-square&labelColor=08090a" alt="QR plus JWT auth" />
-  <img src="https://img.shields.io/badge/sessions-up%20to%208-8a8f98?style=flat-square&labelColor=08090a" alt="up to 8 live sessions" />
-  <img src="https://img.shields.io/badge/transport-HTTPS%20%2B%20WebSocket-f7f8f8?style=flat-square&labelColor=08090a" alt="HTTPS and WebSocket" />
+  <img src="https://img.shields.io/badge/runtime-local--first-7170ff?style=flat-square&labelColor=09090b" alt="local-first runtime" />
+  <img src="https://img.shields.io/badge/shell-real%20PTYs-7170ff?style=flat-square&labelColor=09090b" alt="real PTYs" />
+  <img src="https://img.shields.io/badge/auth-QR%20%2B%20JWT-7170ff?style=flat-square&labelColor=09090b" alt="QR plus JWT auth" />
+  <img src="https://img.shields.io/badge/sessions-up%20to%208-8a8f98?style=flat-square&labelColor=09090b" alt="up to 8 live sessions" />
+  <img src="https://img.shields.io/badge/transport-HTTPS%20%2B%20WebSocket-fafafa?style=flat-square&labelColor=09090b" alt="HTTPS and WebSocket" />
 </p>
 
 ---
