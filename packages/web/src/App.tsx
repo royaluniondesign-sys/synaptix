@@ -11,6 +11,7 @@ import { PortsView } from './components/PortsView';
 import { AgentsView } from './components/AgentsView';
 import { QuickOpen } from './components/QuickOpen';
 import { ChatView } from './components/ChatView';
+import { UpdateNotification } from './components/UpdateNotification';
 import { useAuth } from './hooks/useAuth';
 import { useSessionManager } from './hooks/useSessionManager';
 import { useSkin } from './hooks/useSkin';
@@ -326,8 +327,36 @@ function DesktopSidebar({ current, onChange, onNewSession, sessionBadge, unreadB
         })}
       </nav>
 
-      <div style={{ padding: '10px 14px', borderTop: `1px solid ${S.border}` }}>
-        <span style={{ fontSize: 9, color: S.text3 }}>v{__APP_VERSION__} — RUD Lab</span>
+      <div style={{ padding: '8px 10px', borderTop: `1px solid ${S.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: 9, color: S.text3, flex: 1 }}>v{__APP_VERSION__} — RUD Lab</span>
+          <button
+            type="button"
+            title="Keyboard shortcuts: ⌘K Quick Open · ⌘N New Session"
+            style={{
+              background: 'transparent', border: `1px solid ${S.border}`,
+              borderRadius: 4, padding: '2px 5px', cursor: 'pointer',
+              color: S.text3, fontSize: 9, fontFamily: 'inherit',
+            }}
+          >
+            ⌘K
+          </button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {[
+            { keys: '⌘K', label: 'Quick Open' },
+            { keys: '⌘N', label: 'New Session' },
+          ].map(({ keys, label }) => (
+            <div key={keys} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 9, color: S.text3 }}>{label}</span>
+              <kbd style={{
+                fontSize: 8, color: S.text3,
+                background: S.surface3, border: `1px solid ${S.border}`,
+                borderRadius: 3, padding: '1px 4px', fontFamily: 'inherit',
+              }}>{keys}</kbd>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -785,6 +814,8 @@ export function App() {
           onRunCommand={(cmd) => { setQuickOpenVisible(false); handleRunCommand(cmd); }}
         />
       )}
+
+      <UpdateNotification currentVersion={__APP_VERSION__} />
     </div>
   );
 }

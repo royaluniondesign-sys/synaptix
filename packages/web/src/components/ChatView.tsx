@@ -33,11 +33,50 @@ interface ProviderConfig {
 }
 
 const PROVIDER_LABELS: Record<ChatProvider, string> = {
-  'claude-cli': 'Claude (CLI)',
-  'ollama': 'Ollama (local)',
+  'claude-cli': 'Claude',
+  'ollama': 'Ollama',
   'openai': 'OpenAI',
   'openrouter': 'OpenRouter',
 };
+
+function ProviderIcon({ provider, size = 16 }: { provider: ChatProvider; size?: number }) {
+  if (provider === 'claude-cli') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <rect width="24" height="24" rx="6" fill="#D97757" />
+        <text x="12" y="17" textAnchor="middle" fill="white" fontSize="13" fontWeight="700" fontFamily="serif">A</text>
+      </svg>
+    );
+  }
+  if (provider === 'ollama') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <rect width="24" height="24" rx="6" fill="#1c1c1e" stroke="#444" strokeWidth="1" />
+        <ellipse cx="12" cy="13" rx="5" ry="4" fill="#fff" opacity="0.9"/>
+        <circle cx="10" cy="11.5" r="1.2" fill="#1c1c1e"/>
+        <circle cx="14" cy="11.5" r="1.2" fill="#1c1c1e"/>
+        <path d="M9 7.5 Q12 5 15 7.5" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      </svg>
+    );
+  }
+  if (provider === 'openai') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <rect width="24" height="24" rx="6" fill="#10a37f" />
+        <path d="M12 4.5a4.5 4.5 0 0 1 4.33 5.77A3.5 3.5 0 0 1 18 13.5a3.5 3.5 0 0 1-3.5 3.5h-5A3.5 3.5 0 0 1 6 13.5a3.5 3.5 0 0 1 1.67-2.97A4.5 4.5 0 0 1 12 4.5z" fill="white" opacity="0.9"/>
+      </svg>
+    );
+  }
+  if (provider === 'openrouter') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <rect width="24" height="24" rx="6" fill="#6366f1" />
+        <path d="M6 12h12M15 9l3 3-3 3M9 9l-3 3 3 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+  }
+  return null;
+}
 
 const PROVIDER_MODELS: Record<ChatProvider, string[]> = {
   'claude-cli': ['claude', 'claude-code'],
@@ -274,12 +313,19 @@ export function ChatView({ authToken, connectionStatus }: ChatViewProps) {
           <h2 style={{ fontSize: 14, fontWeight: 600, color: S.text1, margin: 0, letterSpacing: -0.3 }}>
             AI Chat
           </h2>
-          <p style={{ fontSize: 10, color: S.text3, margin: '1px 0 0' }}>
-            {PROVIDER_LABELS[config.provider]} · {config.model}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
+            <ProviderIcon provider={config.provider} size={12} />
+            <span style={{ fontSize: 10, color: S.text3 }}>
+              {PROVIDER_LABELS[config.provider]} · {config.model}
+            </span>
             {PROVIDER_FREE[config.provider] && (
-              <span style={{ color: S.success, marginLeft: 4 }}>FREE</span>
+              <span style={{
+                fontSize: 8, fontWeight: 700, color: S.success,
+                background: `${S.success}15`, padding: '1px 5px',
+                borderRadius: 4, border: `1px solid ${S.success}30`,
+              }}>FREE</span>
             )}
-          </p>
+          </div>
         </div>
         <button
           type="button"
@@ -465,15 +511,8 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       alignItems: 'flex-start',
     }}>
       {!isUser && (
-        <div style={{
-          width: 24, height: 24, borderRadius: 6, flexShrink: 0,
-          background: `${S.primary}18`, border: `1px solid ${S.primary}30`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginTop: 2,
-        }}>
-          <svg width="11" height="11" viewBox="0 0 24 24" stroke={S.primary} fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
+        <div style={{ flexShrink: 0, marginTop: 2 }}>
+          <ProviderIcon provider={message.provider ?? 'claude-cli'} size={24} />
         </div>
       )}
       <div style={{
@@ -568,14 +607,8 @@ function ChatEmpty({ provider, model, onPrompt }: { provider: ChatProvider; mode
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px 0', gap: 16 }}>
-      <div style={{
-        width: 48, height: 48, borderRadius: 12,
-        background: `${S.primary}15`, border: `1px solid ${S.primary}30`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" stroke={S.primary} fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
+      <div style={{ transform: 'scale(2)', marginBottom: 8 }}>
+        <ProviderIcon provider={provider} size={28} />
       </div>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: S.text1, letterSpacing: -0.3 }}>
@@ -660,18 +693,23 @@ function ConfigPanel({ draft, onChange, onSave, onClose }: {
                 type="button"
                 onClick={() => onChange({ ...draft, provider: p, model: PROVIDER_MODELS[p][0] })}
                 style={{
-                  padding: '8px 10px', borderRadius: 7, cursor: 'pointer',
+                  padding: '10px 10px', borderRadius: 7, cursor: 'pointer',
                   border: `1px solid ${draft.provider === p ? S.primary : S.border}`,
                   background: draft.provider === p ? `${S.primary}15` : S.surface2,
                   color: draft.provider === p ? S.primary : S.text2,
                   fontSize: 10, fontWeight: 500, fontFamily: 'inherit',
-                  textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 2,
+                  textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8,
                 }}
               >
-                <span style={{ fontWeight: 600 }}>{PROVIDER_LABELS[p]}</span>
-                {PROVIDER_FREE[p] && (
-                  <span style={{ fontSize: 8, color: S.success }}>FREE</span>
-                )}
+                <ProviderIcon provider={p} size={20} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <span style={{ fontWeight: 600, fontSize: 11 }}>{PROVIDER_LABELS[p]}</span>
+                  {PROVIDER_FREE[p] ? (
+                    <span style={{ fontSize: 8, color: S.success, fontWeight: 600 }}>FREE</span>
+                  ) : (
+                    <span style={{ fontSize: 8, color: S.text3 }}>API key required</span>
+                  )}
+                </div>
               </button>
             ))}
           </div>
