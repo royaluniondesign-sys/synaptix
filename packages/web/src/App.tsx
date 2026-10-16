@@ -696,7 +696,7 @@ export function App() {
             />
           )}
           {view === 'tunnels' && (
-            <TunnelsView wsClient={wsClient} connectionStatus={connectionStatus} />
+            <TunnelsView wsClient={wsClient} connectionStatus={connectionStatus} tunnelUrl={tunnelUrl} />
           )}
           {view === 'notifications' && (
             <NotificationsView
