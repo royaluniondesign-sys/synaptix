@@ -559,12 +559,16 @@ export function App() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // Cmd+K / Ctrl+K global shortcut for Quick Open
+  // Cmd+K / Ctrl+K global shortcut for Quick Open; Cmd+, for Settings
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setQuickOpenVisible(v => !v);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === ',') {
+        e.preventDefault();
+        setView('settings');
       }
     };
     window.addEventListener('keydown', handler);
