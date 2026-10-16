@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- Source of assets/termora-banner.png (1280x640, also the GitHub social preview size).
+     Render steps are in docs/brand.md. Fonts come from the @fontsource packages (SIL OFL 1.1). -->
+<html lang="en"><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: "Instrument Serif"; font-style: normal; src: url("../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Instrument Serif"; font-style: italic; src: url("../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2") format("woff2"); }
+  @font-face { font-family: "Geist Mono"; font-weight: 500; src: url("../node_modules/@fontsource/geist-mono/files/geist-mono-latin-500-normal.woff2") format("woff2"); }
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 1280px; height: 640px; background: #7170ff; color: #09090b; overflow: hidden; position: relative; }
+  .frame { position: absolute; inset: 22px; border: 6px solid #09090b; }
+  .logo { position: absolute; top: 48px; left: 72px; width: 112px; height: 112px; border: 6px solid #09090b; box-shadow: 10px 10px 0 #09090b; }
+  .name { position: absolute; top: 70px; left: 220px; font: 400 76px/1 "Instrument Serif", serif; letter-spacing: -.01em; }
+  h1 { position: absolute; left: 66px; top: 188px; font: 400 182px/.82 "Instrument Serif", serif; letter-spacing: -.035em; white-space: nowrap; }
+  h1 em { display: block; color: #fafafa; text-shadow: 7px 7px 0 #09090b; }
+  .strip { position: absolute; left: 22px; right: 22px; bottom: 22px; height: 66px; background: #09090b; color: #fafafa; display: flex; align-items: center; padding: 0 50px; font: 500 22px/1 "Geist Mono", monospace; letter-spacing: .1em; text-transform: uppercase; gap: 34px; }
+  .strip span:first-child { color: #9a99ff; }
+</style></head>
+<body>
+  <div class="frame"></div>
+  <img class="logo" src="termora-logo.svg" alt="">
+  <div class="name">termora</div>
+  <h1>Your machine,<em>in your hands.</em></h1>
+  <div class="strip"><span>Early alpha</span><span>Real terminals</span><span>Coding agents</span><span>Your own machine</span><span>MIT</span></div>
+</body></html>
