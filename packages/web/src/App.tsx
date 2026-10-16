@@ -668,6 +668,7 @@ export function App() {
           sessionCount={sessions.length}
           portCount={ports.length}
           tunnelCount={tunnelUrl ? 1 : 0}
+          tunnelUrl={tunnelUrl}
           ports={ports}
           onPortsClick={() => setView('ports')}
         />

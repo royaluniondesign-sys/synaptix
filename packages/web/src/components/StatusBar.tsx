@@ -1,3 +1,4 @@
+import React from 'react';
 import type { ConnectionStatus } from '../lib/ws-client';
 import type { PortEntry } from '../hooks/usePorts';
 
@@ -18,6 +19,7 @@ interface StatusBarProps {
   sessionCount: number;
   portCount: number;
   tunnelCount: number;
+  tunnelUrl?: string | null;
   ports: PortEntry[];
   onPortsClick: () => void;
 }
@@ -61,8 +63,17 @@ function Segment({ children, onClick, title }: {
 }
 
 export function StatusBar({
-  connectionStatus, latencyMs, sessionCount, portCount, tunnelCount, ports, onPortsClick,
+  connectionStatus, latencyMs, sessionCount, portCount, tunnelCount, tunnelUrl, ports, onPortsClick,
 }: StatusBarProps) {
+  const [tunnelCopied, setTunnelCopied] = React.useState(false);
+
+  const copyTunnel = () => {
+    if (!tunnelUrl) return;
+    void navigator.clipboard.writeText(tunnelUrl).then(() => {
+      setTunnelCopied(true);
+      setTimeout(() => setTunnelCopied(false), 2000);
+    });
+  };
   const isConnected = connectionStatus === 'connected';
   const isReconnecting = connectionStatus === 'reconnecting';
   const statusColor = isConnected ? S.success : isReconnecting ? S.warning : S.error;
@@ -115,12 +126,17 @@ export function StatusBar({
 
       {/* Tunnels */}
       {tunnelCount > 0 && (
-        <Segment title={`${tunnelCount} active tunnel${tunnelCount !== 1 ? 's' : ''}`}>
-          <svg width="10" height="10" viewBox="0 0 24 24" stroke={S.success} fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <Segment
+          onClick={tunnelUrl ? copyTunnel : undefined}
+          title={tunnelUrl ? (tunnelCopied ? 'Copied!' : `${tunnelUrl} — click to copy`) : `${tunnelCount} active tunnel${tunnelCount !== 1 ? 's' : ''}`}
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" stroke={tunnelCopied ? S.primary : S.success} fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
-          <span style={{ color: S.success }}>{tunnelCount}</span>
+          <span style={{ color: tunnelCopied ? S.primary : S.success }}>
+            {tunnelCopied ? 'copied!' : tunnelCount}
+          </span>
         </Segment>
       )}
 
