@@ -6,7 +6,7 @@
   "description": "Installable mobile and web cockpit for real terminals, SSH/SFTP, multi-machine access, and agent workflows",
   "license": "MIT",
   "author": "termora contributors",
-  "homepage": "https://termora.dev",
+  "homepage": "https://royaluniondesign-sys.github.io/termora/",
   "repository": {
     "type": "git",
     "url": "https://github.com/royaluniondesign-sys/termora.git"
