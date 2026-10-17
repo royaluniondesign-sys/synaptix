@@ -11,7 +11,6 @@ import { PortsView } from './components/PortsView';
 import { AgentsView } from './components/AgentsView';
 import { QuickOpen } from './components/QuickOpen';
 import { ChatView } from './components/ChatView';
-import { UpdateNotification } from './components/UpdateNotification';
 import { useAuth } from './hooks/useAuth';
 import { useSessionManager } from './hooks/useSessionManager';
 import { useSkin } from './hooks/useSkin';
@@ -819,7 +818,6 @@ export function App() {
         />
       )}
 
-      <UpdateNotification currentVersion={__APP_VERSION__} />
     </div>
   );
 }

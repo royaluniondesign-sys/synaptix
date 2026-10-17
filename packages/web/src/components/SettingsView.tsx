@@ -294,7 +294,7 @@ const DEFAULT_AGENT_KEY = 'termora_default_agent';
 const DEFAULT_AGENTS = [
   { id: 'auto', label: 'Auto', desc: 'Best available agent for the task' },
   { id: 'none', label: 'No agent (blank terminal)', desc: 'Raw shell, no AI assistance' },
-  { id: 'claude', label: 'Claude', desc: 'claude CLI — uses your Claude Max subscription' },
+  { id: 'claude', label: 'Claude', desc: 'claude CLI — uses that CLI\'s own sign-in' },
   { id: 'codex', label: 'Codex', desc: 'codex CLI — OpenAI Codex agent' },
   { id: 'ollama', label: 'Ollama', desc: 'Local LLM — free, runs on your machine' },
 ];
@@ -431,7 +431,7 @@ const PROVIDERS_CONFIG = [
     free: true,
     type: 'cli' as const,
     cliCmd: 'claude auth login',
-    hint: 'Uses your Claude Max subscription — no extra cost.',
+    hint: 'Uses the sign-in of the claude CLI on this machine.',
   },
   {
     id: 'codex',
@@ -636,7 +636,7 @@ function ProviderAccountCard({ provider }: { provider: typeof PROVIDERS_CONFIG[0
             </div>
             <p style={{ fontSize: 10, color: S.text3 }}>{provider.hint}</p>
             <p style={{ fontSize: 10, color: S.text3, marginTop: 4 }}>
-              Stored locally in browser only — never sent to Termora servers.
+              Saved in this browser and sent with each chat message to the Termora agent, which forwards it to the provider. Over a public tunnel it also passes through the tunnel provider; use TUNNEL=local to avoid that.
             </p>
           </>
         )}
@@ -988,21 +988,10 @@ function NotificationsSection() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SHORTCUTS = [
-  { label: 'Quick Open',     keys: ['⌘', 'K'] },
-  { label: 'New Session',    keys: ['⌘', 'N'] },
-  { label: 'Close Session',  keys: ['⌘', 'W'] },
-  { label: 'Next Session',   keys: ['⌘', ']'] },
-  { label: 'Prev Session',   keys: ['⌘', '['] },
-  { label: 'Dashboard',      keys: ['⌘', '1'] },
-  { label: 'Terminal',       keys: ['⌘', '2'] },
-  { label: 'Chat',           keys: ['⌘', '3'] },
-  { label: 'Tunnels',        keys: ['⌘', '4'] },
-  { label: 'Settings',       keys: ['⌘', ','] },
-  { label: 'Copy selection', keys: ['⌘', 'C'] },
-  { label: 'Paste',          keys: ['⌘', 'V'] },
-  { label: 'Clear terminal', keys: ['⌘', 'L'] },
-  { label: 'Scroll up',      keys: ['⌘', '↑'] },
-  { label: 'Scroll down',    keys: ['⌘', '↓'] },
+  { label: 'Quick Open',     keys: ['⌘ / Ctrl', 'K'] },
+  { label: 'Settings',       keys: ['⌘ / Ctrl', ','] },
+  { label: 'Copy selection', keys: ['⌘ / Ctrl', 'C'] },
+  { label: 'Paste',          keys: ['⌘ / Ctrl', 'V'] },
 ];
 
 function ShortcutsSection() {
@@ -1040,19 +1029,8 @@ function StatsSection() {
     <>
       <SectionTitle label="Stats & Usage" desc="Session activity and resource usage." />
       <Card>
-        <SettingRow label="Sessions today" desc="PTY sessions created in the last 24h">
-          <span style={{ fontSize: 13, fontWeight: 600, color: S.primary, fontFamily: "'JetBrains Mono', monospace" }}>—</span>
-        </SettingRow>
-        <SettingRow label="Commands run" desc="Commands sent to active sessions">
-          <span style={{ fontSize: 13, fontWeight: 600, color: S.text2, fontFamily: "'JetBrains Mono', monospace" }}>—</span>
-        </SettingRow>
-        <SettingRow label="Data transferred" desc="WebSocket bytes in/out" last>
-          <span style={{ fontSize: 13, fontWeight: 600, color: S.text2, fontFamily: "'JetBrains Mono', monospace" }}>—</span>
-        </SettingRow>
-      </Card>
-      <Card style={{ marginTop: 10 }}>
         <div style={{ padding: '12px 14px', fontSize: 11, color: S.text3, lineHeight: 1.6 }}>
-          Usage tracking is local-only. No data is sent to any server. Statistics accumulate from agent startup.
+          Not implemented yet. Termora does not count sessions, commands or traffic, and sends no usage data anywhere.
         </div>
       </Card>
     </>
