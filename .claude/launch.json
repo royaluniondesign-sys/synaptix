@@ -3,10 +3,9 @@
   "configurations": [
     {
       "name": "termora-web",
-      "runtimeExecutable": "/opt/homebrew/bin/npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "5175"],
-      "port": 5175,
-      "cwd": "/Users/oxyzen/termora/packages/web"
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=packages/web"],
+      "port": 4031
     }
   ]
 }

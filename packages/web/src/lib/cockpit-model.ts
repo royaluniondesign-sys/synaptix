@@ -111,7 +111,7 @@ export const CAPABILITIES: CapabilityItem[] = [
   { name: 'Annotate AI Diffs', state: 'planned', detail: 'not started', action: 'inline comments to the agent' },
   { name: 'Drag Files to Agents', state: 'planned', detail: 'not started', action: 'attachments into prompts' },
   { name: 'Termora CLI', state: 'live', detail: 'help, version, status, file', action: 'worktrees, snapshots, agent runs' },
-  { name: 'Quick Open', state: 'planned', detail: 'not started', action: 'one search across the cockpit' },
+  { name: 'Quick Open', state: 'backend', detail: 'Cmd+K fuzzy search', action: 'sessions, views, quick actions' },
   { name: 'Usage Tracking', state: 'planned', detail: 'not started', action: 'rate limits and accounts' },
   { name: 'Rich Repo Previews', state: 'backend', detail: 'text file preview only', action: 'Markdown, images, PDF' },
   { name: 'Computer Use', state: 'planned', detail: 'not started', action: 'safe visible-UI workflows' },

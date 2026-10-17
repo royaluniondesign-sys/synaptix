@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { TerminalWSClient, ConnectionStatus } from '../lib/ws-client';
 
 const S = {
@@ -30,6 +30,7 @@ interface TunnelInfo {
 interface TunnelsViewProps {
   wsClient: TerminalWSClient | null;
   connectionStatus: ConnectionStatus;
+  tunnelUrl?: string | null;
 }
 
 function StatusBadge({ status }: { status: TunnelInfo['status'] }) {
@@ -205,42 +206,23 @@ function TunnelCard({ tunnel, onCopyUrl, onReconnect }: {
   );
 }
 
-export function TunnelsView({ wsClient, connectionStatus }: TunnelsViewProps) {
-  const [tunnels, setTunnels] = useState<TunnelInfo[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      if (connectionStatus === 'connected') {
-        setTunnels([
-          {
-            id: 'ngrok-main',
-            type: 'ngrok',
-            status: 'live',
-            localPort: 4031,
-            publicUrl: 'https://termora.ngrok.app',
-            label: 'MacBook Main',
-            os: 'macOS 14',
-            bytesForwarded: 2.3 * 1024 * 1024,
-          },
-          {
-            id: 'db-gateway',
-            type: 'ssh',
-            status: 'closed',
-            localPort: 5432,
-            publicUrl: '',
-            label: 'DB Gateway',
-            os: 'Ubuntu 22',
-          },
-        ]);
-      } else {
-        setTunnels([]);
-      }
-      setLoading(false);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [connectionStatus, wsClient]);
+export function TunnelsView({ connectionStatus, tunnelUrl }: TunnelsViewProps) {
+  const tunnels = useMemo<TunnelInfo[]>(() => {
+    if (connectionStatus !== 'connected' || !tunnelUrl) return [];
+    const type: TunnelInfo['type'] =
+      tunnelUrl.includes('ngrok') ? 'ngrok' :
+      tunnelUrl.includes('lhr.life') || tunnelUrl.includes('localtunnel') ? 'localtunnel' :
+      'ssh';
+    return [{
+      id: 'main',
+      type,
+      status: 'live',
+      localPort: 4031,
+      publicUrl: tunnelUrl,
+      label: 'MacBook Main',
+      bytesForwarded: undefined,
+    }];
+  }, [connectionStatus, tunnelUrl]);
 
   const handleCopyUrl = useCallback((url: string) => {
     console.log('Copied:', url);
@@ -293,17 +275,7 @@ export function TunnelsView({ wsClient, connectionStatus }: TunnelsViewProps) {
           </div>
         )}
 
-        {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[0, 1].map((i) => (
-              <div key={i} style={{
-                height: 120, background: S.surface2,
-                border: `1px solid ${S.border}`, borderRadius: 10,
-                opacity: 0.4,
-              }} />
-            ))}
-          </div>
-        ) : tunnels.length === 0 ? (
+        {tunnels.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '36px 0' }}>
             <svg width="28" height="28" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 10px', display: 'block', opacity: 0.5 }}>
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
