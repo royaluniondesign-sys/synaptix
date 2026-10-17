@@ -10,6 +10,7 @@ import { StatusBar } from './components/StatusBar';
 import { PortsView } from './components/PortsView';
 import { AgentsView } from './components/AgentsView';
 import { QuickOpen } from './components/QuickOpen';
+import { ChatView } from './components/ChatView';
 import { useAuth } from './hooks/useAuth';
 import { useSessionManager } from './hooks/useSessionManager';
 import { useSkin } from './hooks/useSkin';
@@ -76,6 +77,15 @@ const TAB_CONFIG = [
       <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+    ),
+  },
+  {
+    id: 'chat' as const,
+    label: 'Chat',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
     ),
   },
@@ -316,8 +326,36 @@ function DesktopSidebar({ current, onChange, onNewSession, sessionBadge, unreadB
         })}
       </nav>
 
-      <div style={{ padding: '10px 14px', borderTop: `1px solid ${S.border}` }}>
-        <span style={{ fontSize: 9, color: S.text3 }}>v{__APP_VERSION__} — RUD Lab</span>
+      <div style={{ padding: '8px 10px', borderTop: `1px solid ${S.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: 9, color: S.text3, flex: 1 }}>v{__APP_VERSION__} — RUD Lab</span>
+          <button
+            type="button"
+            title="Keyboard shortcuts: ⌘K Quick Open · ⌘N New Session"
+            style={{
+              background: 'transparent', border: `1px solid ${S.border}`,
+              borderRadius: 4, padding: '2px 5px', cursor: 'pointer',
+              color: S.text3, fontSize: 9, fontFamily: 'inherit',
+            }}
+          >
+            ⌘K
+          </button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {[
+            { keys: '⌘K', label: 'Quick Open' },
+            { keys: '⌘N', label: 'New Session' },
+          ].map(({ keys, label }) => (
+            <div key={keys} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 9, color: S.text3 }}>{label}</span>
+              <kbd style={{
+                fontSize: 8, color: S.text3,
+                background: S.surface3, border: `1px solid ${S.border}`,
+                borderRadius: 3, padding: '1px 4px', fontFamily: 'inherit',
+              }}>{keys}</kbd>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -520,12 +558,16 @@ export function App() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // Cmd+K / Ctrl+K global shortcut for Quick Open
+  // Cmd+K / Ctrl+K global shortcut for Quick Open; Cmd+, for Settings
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setQuickOpenVisible(v => !v);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === ',') {
+        e.preventDefault();
+        setView('settings');
       }
     };
     window.addEventListener('keydown', handler);
@@ -668,6 +710,7 @@ export function App() {
           sessionCount={sessions.length}
           portCount={ports.length}
           tunnelCount={tunnelUrl ? 1 : 0}
+          tunnelUrl={tunnelUrl}
           ports={ports}
           onPortsClick={() => setView('ports')}
         />
@@ -695,7 +738,7 @@ export function App() {
             />
           )}
           {view === 'tunnels' && (
-            <TunnelsView wsClient={wsClient} connectionStatus={connectionStatus} />
+            <TunnelsView wsClient={wsClient} connectionStatus={connectionStatus} tunnelUrl={tunnelUrl} />
           )}
           {view === 'notifications' && (
             <NotificationsView
@@ -745,6 +788,12 @@ export function App() {
               onCreateSession={handleCreateSession}
             />
           )}
+          {view === 'chat' && (
+            <ChatView
+              authToken={auth.token}
+              connectionStatus={connectionStatus}
+            />
+          )}
         </div>
 
         {showTabBar && (
@@ -768,6 +817,7 @@ export function App() {
           onRunCommand={(cmd) => { setQuickOpenVisible(false); handleRunCommand(cmd); }}
         />
       )}
+
     </div>
   );
 }

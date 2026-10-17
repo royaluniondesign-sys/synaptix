@@ -9,6 +9,7 @@ import { collectGithubStatus } from './github.js';
 import { notificationStore } from './event-bus.js';
 import { AGENT_STATES, AgentProfileError, AgentRegistry, expandArgs, parseAgentStatus } from './agent-registry.js';
 import { listListeningPorts } from './ports.js';
+import { parseChatRequest, streamChat } from './chat.js';
 
 type JobStatus = 'running' | 'success' | 'failed';
 
@@ -432,5 +433,24 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
       return;
     }
     res.json({ job });
+  });
+
+  // ── AI chat proxy ──────────────────────────────────────────────────────────
+  // POST { provider, model?, messages?, prompt, apiKey?, ollamaUrl? } → server-sent events (see chat.ts).
+  // Input is validated in chat.ts. The claude CLI is an external agent, so it stays behind TERMORA_ENABLE_AGENT_SPAWN=1.
+  app.post('/api/cockpit/chat', async (req, res) => {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+
+    const parsed = parseChatRequest(req.body);
+    if ('error' in parsed) {
+      res.status(400).json({ error: parsed.error });
+      return;
+    }
+    if (parsed.value.provider === 'claude-cli' && process.env.TERMORA_ENABLE_AGENT_SPAWN !== '1') {
+      res.status(403).json({ error: 'Set TERMORA_ENABLE_AGENT_SPAWN=1 to run the claude CLI from the chat.' });
+      return;
+    }
+    streamChat(res, parsed.value);
   });
 }
