@@ -23,7 +23,9 @@ termora/
 │   ├── web/        # Frontend — React + xterm.js + MacBook Pro UI
 │   └── cli/        # CLI wrapper — bootstraps and manages the agent
 ├── apps/
-│   └── landing/    # Landing page at termora.dev (static HTML)
+│   ├── desktop/    # Electron shell (own package-lock.json)
+│   └── mobile/     # Expo scaffold, contracts and tests only
+├── site/           # Public site, published to GitHub Pages when it changes on main
 ├── turbo.json      # Turborepo task configuration
 └── package.json    # Root workspace config
 ```
