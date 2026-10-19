@@ -21,7 +21,7 @@ export interface Session {
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 
-export type View = 'dashboard' | 'terminal' | 'tunnels' | 'notifications' | 'settings' | 'reconnect' | 'ports' | 'agents' | 'chat';
+export type View = 'dashboard' | 'terminal' | 'tunnels' | 'notifications' | 'settings' | 'reconnect' | 'ports' | 'agents' | 'chat' | 'tasks' | 'automations' | 'mobile';
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 
