@@ -154,13 +154,33 @@ function CapabilityCoverage({ onAction }: { onAction: (action: string) => void }
     <section className="tm-oct-capability-pane">
       <div className="tm-oct-pane-head"><div><Icon name="activity" /><strong>Feature buildout</strong></div><span>{CAPABILITIES.length} surfaces</span></div>
       <div className="tm-oct-capability-grid">
-        {visible.map((item) => (
-          <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} disabled={item.name !== 'Parallel Worktrees' && item.name !== 'GitHub & task workflows'} onClick={() => onAction(item.name === 'Parallel Worktrees' ? 'list worktrees' : 'github-status')}>
-            <div><strong>{item.name}</strong><em>{item.state}</em></div>
-            <span>{item.detail}</span>
-            <small>{item.action}</small>
-          </button>
-        ))}
+        {visible.map((item) => {
+          const ACTION_MAP: Record<string, string> = {
+            'Parallel Worktrees': 'list worktrees',
+            'GitHub & task workflows': 'github-status',
+            'Terminal Splits': 'new terminal',
+            'Quick Open': 'quick-open',
+            'Notifications/unread': 'notifications',
+            'Termora CLI': 'run gates',
+            'Any CLI Agent': 'spawn agent',
+            'Rich Repo Previews': 'open file tree',
+            'Mobile Companion': 'mobile',
+            'Design Mode': 'capture UI',
+            'SSH Worktrees': 'settings-ssh',
+            'Annotate AI Diffs': 'github-status',
+            'Drag Files to Agents': 'spawn agent',
+            'Usage Tracking': 'settings-account',
+            'Computer Use': 'settings-computer-use',
+          };
+          const action = ACTION_MAP[item.name] ?? item.name.toLowerCase().replace(/\s+/g, '-');
+          return (
+            <button key={item.name} type="button" className={`tm-oct-capability ${item.state}`} onClick={() => onAction(action)}>
+              <div><strong>{item.name}</strong><em>{item.state}</em></div>
+              <span>{item.detail}</span>
+              <small>{item.action}</small>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
@@ -421,6 +441,13 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
     if (action === 'fan out worktrees') { void runWorktreeAction('create'); return; }
     if (action === 'list worktrees') { void runWorktreeAction('list'); return; }
     if (action === 'clean worktrees') { void runWorktreeAction('cleanup'); return; }
+    if (action === 'quick-open' || action === 'notifications' || action === 'mobile' ||
+        action.startsWith('settings-')) {
+      setActiveCommand(action);
+      setLastBackendAction(action);
+      void refreshCockpitStatus();
+      return;
+    }
     setActiveCommand(action);
     setLastBackendAction(action);
     if (!authHeaders) return;

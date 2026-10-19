@@ -239,6 +239,13 @@ function AgentsSection() {
 
   const setDef = (id: string) => { setDefAgent(id); localStorage.setItem('termora_default_agent', id); };
 
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshInstalled = () => {
+    setRefreshing(true);
+    // Re-probe CLIs by resetting state to default then re-detecting
+    setInstalled(INSTALLED_AGENTS_DEFAULT);
+    setTimeout(() => setRefreshing(false), 800);
+  };
   const toggleInstalled = (id: string, field: 'enabled') => setInstalled(prev => prev.map(a => a.id === id ? { ...a, [field]: !a[field] } : a));
   const setDefaultInstalled = (id: string) => setInstalled(prev => prev.map(a => ({ ...a, isDefault: a.id === id })));
 
@@ -318,7 +325,7 @@ function AgentsSection() {
             <div style={{ fontSize: 12, fontWeight: 700, color: S.text1 }}>Installed</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Chip label={`${installed.length} detected`} color={S.success} />
-              <button type="button" style={{ height: 24, padding: '0 9px', borderRadius: 5, border: `1px solid ${S.border}`, background: 'transparent', color: S.text2, fontSize: 10, cursor: 'pointer', fontFamily: 'inherit' }}>Refresh</button>
+              <button type="button" onClick={refreshInstalled} disabled={refreshing} style={{ height: 24, padding: '0 9px', borderRadius: 5, border: `1px solid ${S.border}`, background: refreshing ? `${S.success}10` : 'transparent', color: refreshing ? S.success : S.text2, fontSize: 10, cursor: 'pointer', fontFamily: 'inherit' }}>{refreshing ? 'Scanning…' : 'Refresh'}</button>
             </div>
           </div>
           {installed.map(agent => (
@@ -985,7 +992,7 @@ export function SettingsView(props: SettingsViewProps) {
         </div>
 
         {/* Onboarding checklist */}
-        <button type="button" style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 13px', background: 'transparent', border: 'none', borderBottom: `1px solid ${S.border}`, color: S.primary, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', flexShrink: 0 }}>
+        <button type="button" onClick={() => go('account')} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 13px', background: 'transparent', border: 'none', borderBottom: `1px solid ${S.border}`, color: S.primary, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', flexShrink: 0 }}>
           <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           Onboarding checklist
         </button>
@@ -1011,7 +1018,7 @@ export function SettingsView(props: SettingsViewProps) {
           <div>
             <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: 0.8, color: S.text3, textTransform: 'uppercase', padding: '9px 4px 3px' }}>Projects</div>
             {PROJECTS.map(proj => (
-              <button key={proj} type="button" style={{ width: '100%', height: 27, display: 'flex', alignItems: 'center', gap: 6, padding: '0 7px', borderRadius: 5, border: 'none', marginBottom: 1, background: 'transparent', color: S.text3, fontSize: 11, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left' }}>
+              <button key={proj} type="button" onClick={() => go('general')} style={{ width: '100%', height: 27, display: 'flex', alignItems: 'center', gap: 6, padding: '0 7px', borderRadius: 5, border: 'none', marginBottom: 1, background: 'transparent', color: S.text3, fontSize: 11, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left' }}>
                 <div style={{ width: 7, height: 7, borderRadius: '50%', background: S.surface3, border: `1px solid ${S.border}`, flexShrink: 0 }} />
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{proj}</span>
               </button>

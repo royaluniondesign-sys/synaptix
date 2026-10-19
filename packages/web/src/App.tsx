@@ -91,6 +91,19 @@ const TAB_CONFIG = [
     ),
   },
   {
+    id: 'agents' as const,
+    label: 'Agents',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="8" width="14" height="10" rx="3" />
+        <path d="M12 4v4" />
+        <circle cx="9" cy="13" r="1" />
+        <circle cx="15" cy="13" r="1" />
+        <path d="M9 17h6" />
+      </svg>
+    ),
+  },
+  {
     id: 'settings' as const,
     label: 'Settings',
     icon: (
@@ -232,10 +245,11 @@ function FABButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function DesktopSidebar({ current, onChange, onNewSession, sessionBadge, unreadBadge, connectionStatus }: {
+function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionBadge, unreadBadge, connectionStatus }: {
   current: View;
   onChange: (v: View) => void;
   onNewSession: () => void;
+  onQuickOpen: () => void;
   sessionBadge: string | null;
   unreadBadge: string | null;
   connectionStatus: ConnectionStatus;
@@ -332,7 +346,8 @@ function DesktopSidebar({ current, onChange, onNewSession, sessionBadge, unreadB
           <span style={{ fontSize: 9, color: S.text3, flex: 1 }}>v{__APP_VERSION__} — RUD Lab</span>
           <button
             type="button"
-            title="Keyboard shortcuts: ⌘K Quick Open · ⌘N New Session"
+            onClick={onQuickOpen}
+            title="Quick Open — search sessions, commands, views"
             style={{
               background: 'transparent', border: `1px solid ${S.border}`,
               borderRadius: 4, padding: '2px 5px', cursor: 'pointer',
@@ -698,6 +713,7 @@ export function App() {
           current={view}
           onChange={handleTabChange}
           onNewSession={handleCreateSession}
+          onQuickOpen={() => setQuickOpenVisible(true)}
           sessionBadge={sessionBadge}
           unreadBadge={unreadBadge}
           connectionStatus={connectionStatus}

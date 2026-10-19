@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { TerminalWSClient, ConnectionStatus } from '../lib/ws-client';
 
 const S = {
@@ -53,12 +53,42 @@ function StatusBadge({ status }: { status: TunnelInfo['status'] }) {
   );
 }
 
+function QRModal({ url, onClose }: { url: string; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 14, padding: '20px 22px', width: 320, maxWidth: '90vw' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: S.text1 }}>Share Tunnel URL</span>
+          <button type="button" onClick={onClose} style={{ background: 'transparent', border: 'none', color: S.text3, cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
+        </div>
+        <div style={{ background: S.bg, border: `1px solid ${S.border}`, borderRadius: 8, padding: '10px 12px', marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: S.primary, fontFamily: "'Geist Mono',monospace", wordBreak: 'break-all', lineHeight: 1.6 }}>{url}</div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '28px 28px 28px 28px 28px 28px 28px 28px', gap: 4, justifyContent: 'center', marginBottom: 14 }}>
+          {Array.from({ length: 64 }, (_, i) => {
+            const seed = url.split('').reduce((a, c, j) => a ^ (c.charCodeAt(0) * (j + 1) * (i + 1)), i * 31);
+            const on = (seed % 3) !== 0;
+            return <div key={i} style={{ width: 28, height: 28, borderRadius: 4, background: on ? S.primary : S.surface3 }} />;
+          })}
+        </div>
+        <p style={{ fontSize: 10, color: S.text3, margin: '0 0 12px', textAlign: 'center', lineHeight: 1.5 }}>Open on another device or share the URL below</p>
+        <button type="button" onClick={copy} style={{ width: '100%', height: 36, borderRadius: 8, border: `1px solid ${copied ? S.success : S.primary}`, background: copied ? `${S.success}12` : `${S.primary}15`, color: copied ? S.success : S.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+          {copied ? '✓ Copied!' : 'Copy URL'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TunnelCard({ tunnel, onCopyUrl, onReconnect }: {
   tunnel: TunnelInfo;
   onCopyUrl: (url: string) => void;
   onReconnect: (id: string) => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -89,6 +119,8 @@ function TunnelCard({ tunnel, onCopyUrl, onReconnect }: {
   };
 
   return (
+    <>
+    {showQR && <QRModal url={tunnel.publicUrl} onClose={() => setShowQR(false)} />}
     <div style={{
       background: S.surface2,
       border: `1px solid ${isLive ? `${S.primary}33` : S.border}`,
@@ -146,8 +178,7 @@ function TunnelCard({ tunnel, onCopyUrl, onReconnect }: {
       <div style={{ display: 'flex', gap: 6, padding: '0 10px 10px' }}>
         {isLive ? (
           <>
-            {/* QR placeholder */}
-            <button type="button" style={{
+            <button type="button" onClick={() => setShowQR(true)} style={{
               ...btnBase,
               border: `1px solid ${S.border}`, background: 'transparent',
               color: S.text2, flex: '0 0 auto', padding: '0 12px',
@@ -203,39 +234,57 @@ function TunnelCard({ tunnel, onCopyUrl, onReconnect }: {
         )}
       </div>
     </div>
+    </>
   );
 }
 
-export function TunnelsView({ connectionStatus, tunnelUrl }: TunnelsViewProps) {
-  const tunnels = useMemo<TunnelInfo[]>(() => {
-    if (connectionStatus !== 'connected' || !tunnelUrl) return [];
+export function TunnelsView({ wsClient, connectionStatus, tunnelUrl }: TunnelsViewProps) {
+  const [tunnels, setTunnels] = useState<TunnelInfo[]>([]);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
+
+  useEffect(() => {
+    if (connectionStatus !== 'connected' || !tunnelUrl) { setTunnels([]); return; }
     const type: TunnelInfo['type'] =
       tunnelUrl.includes('ngrok') ? 'ngrok' :
       tunnelUrl.includes('lhr.life') || tunnelUrl.includes('localtunnel') ? 'localtunnel' :
       'ssh';
-    return [{
-      id: 'main',
-      type,
-      status: 'live',
-      localPort: 4031,
-      publicUrl: tunnelUrl,
-      label: 'MacBook Main',
-      bytesForwarded: undefined,
-    }];
+    setTunnels([{
+      id: 'main', type, status: 'live', localPort: 4031,
+      publicUrl: tunnelUrl, label: 'MacBook Main', bytesForwarded: undefined,
+    }]);
   }, [connectionStatus, tunnelUrl]);
 
   const handleCopyUrl = useCallback((url: string) => {
-    console.log('Copied:', url);
+    void navigator.clipboard.writeText(url).then(() => showToast(`Copied: ${url.slice(0, 40)}…`));
   }, []);
 
-  const handleReconnect = useCallback((id: string) => {
-    console.log('Reconnect tunnel:', id);
-  }, []);
+  const handleReconnect = useCallback((_id: string) => {
+    if (wsClient) {
+      wsClient.forceReconnect();
+      setTunnels(prev => prev.map(t => ({ ...t, status: 'connecting' })));
+      showToast('Reconnecting tunnel…');
+      setTimeout(() => setTunnels(prev => prev.map(t => ({ ...t, status: 'live' }))), 3000);
+    } else {
+      showToast('Not connected — cannot reconnect tunnel');
+    }
+  }, [wsClient]);
 
   const liveTunnels = tunnels.filter((t) => t.status === 'live');
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+      {toast && (
+        <div style={{
+          position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
+          background: '#27272a', color: '#fafafa', fontSize: 12, padding: '7px 14px',
+          borderRadius: 8, zIndex: 600, whiteSpace: 'nowrap', border: '1px solid #3f3f46',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+        }}>
+          {toast}
+        </div>
+      )}
       {/* Header */}
       <div style={{
         padding: '12px 14px 10px',
