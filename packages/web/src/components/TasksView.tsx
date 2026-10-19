@@ -154,6 +154,13 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
   const [filterStatus, setFilterStatus] = useState<'open' | 'all'>('open');
   const [filterAssigned, setFilterAssigned] = useState(false);
   const [filterSearch, setFilterSearch] = useState('');
+  const [filterUnread, setFilterUnread] = useState(false);
+  const [filterChildAgents, setFilterChildAgents] = useState(false);
+  const [filterHideAuto, setFilterHideAuto] = useState(false);
+  const [filterHideCLI, setFilterHideCLI] = useState(false);
+  const [groupBy, setGroupBy] = useState<'status' | 'project' | 'none'>('status');
+  const [compactMode, setCompactMode] = useState(true);
+  const [showSearchBar, setShowSearchBar] = useState(true);
   const [selectedProject, setSelectedProject] = useState('All projects');
   const [ghIssues, setGhIssues] = useState<GhIssue[]>([]);
   const [ghLoading, setGhLoading] = useState(false);
@@ -220,7 +227,7 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
     return true;
   });
 
-  const activeFiltersCount = (filterAssigned ? 1 : 0);
+  const activeFiltersCount = (filterAssigned ? 1 : 0) + (filterUnread ? 1 : 0) + (filterChildAgents ? 1 : 0) + (filterHideAuto ? 1 : 0) + (filterHideCLI ? 1 : 0);
   const machineName = 'MacBook-Pro.local';
 
   return (
@@ -362,47 +369,99 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
           {filterMenuOpen && (
             <div style={{
               position: 'absolute', top: '100%', left: 0, marginTop: 4, zIndex: 60,
-              background: S.surface2, border: `1px solid ${S.border}`,
-              borderRadius: 10, padding: '6px 0', minWidth: 220,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              background: '#1c1c1f', border: `1px solid rgba(255,255,255,0.1)`,
+              borderRadius: 10, padding: '5px 0', minWidth: 240,
+              boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
             }}>
-              {[
-                { label: 'Show assigned to me', key: 'assigned' as const },
-              ].map(item => (
-                <button key={item.label} type="button" onClick={() => {
-                  if (item.key === 'assigned') setFilterAssigned(v => !v);
-                  setFilterMenuOpen(false);
-                }} style={{
-                  width: '100%', height: 34, padding: '0 14px',
+              {/* Filters section header */}
+              <div style={{ padding: '4px 12px 2px', fontSize: 10.5, fontWeight: 600, color: S.text2 }}>Filters</div>
+              {([
+                { label: 'Show unread only',       val: filterUnread,      set: setFilterUnread },
+                { label: 'Show child agents',       val: filterChildAgents, set: setFilterChildAgents },
+                { label: 'Hide automation-created', val: filterHideAuto,    set: setFilterHideAuto },
+                { label: 'Hide CLI-created',        val: filterHideCLI,     set: setFilterHideCLI },
+              ] as const).map(item => (
+                <button key={item.label} type="button" onClick={() => item.set((v: boolean) => !v)} style={{
+                  width: '100%', height: 30, padding: '0 12px',
                   border: 'none', background: 'transparent',
-                  color: S.text2, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                  color: S.text1, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
                   display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" stroke={filterAssigned ? S.primary : 'transparent'} fill="none" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <div style={{
+                    width: 14, height: 14, borderRadius: 3, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: item.val ? S.primary : 'transparent',
+                    border: `1.5px solid ${item.val ? S.primary : 'rgba(255,255,255,0.25)'}`,
+                  }}>
+                    {item.val && <svg width="9" height="9" viewBox="0 0 24 24" stroke="white" fill="none" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </div>
                   {item.label}
                 </button>
               ))}
-              <div style={{ borderTop: `1px solid ${S.border}`, margin: '4px 0' }} />
-              <div style={{ padding: '4px 14px 2px', fontSize: 10, fontWeight: 700, color: S.text3, letterSpacing: 0.5 }}>STATUS</div>
-              {(['open', 'all'] as const).map(s => (
-                <button key={s} type="button" onClick={() => { setFilterStatus(s); setFilterMenuOpen(false); }} style={{
-                  width: '100%', height: 32, padding: '0 14px',
+
+              {/* Projects row */}
+              <div style={{ borderTop: `1px solid rgba(255,255,255,0.07)`, margin: '4px 0' }} />
+              <button type="button" onClick={() => setProjectMenuOpen(v => !v)} style={{
+                width: '100%', height: 30, padding: '0 12px',
+                border: 'none', background: 'transparent',
+                color: S.text1, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <span>Projects</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: S.text3, fontSize: 12 }}>
+                  All projects
+                  <svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </span>
+              </button>
+
+              {/* View section */}
+              <div style={{ borderTop: `1px solid rgba(255,255,255,0.07)`, margin: '4px 0' }} />
+              <div style={{ padding: '4px 12px 2px', fontSize: 10.5, fontWeight: 600, color: S.text2 }}>View</div>
+              <button type="button" onClick={() => setGroupBy(v => v === 'status' ? 'project' : 'status')} style={{
+                width: '100%', height: 30, padding: '0 12px',
+                border: 'none', background: 'transparent',
+                color: S.text1, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <span>Group by</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: S.text3, fontSize: 12 }}>
+                  {groupBy === 'status' ? 'Status' : groupBy === 'project' ? 'Project' : 'None'}
+                  <svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </span>
+              </button>
+
+              {/* Compact + Show search checkboxes */}
+              {([
+                { label: 'Compact mode', val: compactMode, set: setCompactMode },
+                { label: 'Show search',  val: showSearchBar, set: setShowSearchBar },
+              ] as const).map(item => (
+                <button key={item.label} type="button" onClick={() => item.set((v: boolean) => !v)} style={{
+                  width: '100%', height: 30, padding: '0 12px',
                   border: 'none', background: 'transparent',
-                  color: filterStatus === s ? S.primary : S.text2,
-                  fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                  color: S.text1, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
                   display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" stroke={filterStatus === s ? S.primary : 'transparent'} fill="none" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  {s === 'open' ? 'Open only' : 'Show all'}
+                  <div style={{ width: 14, height: 14, borderRadius: 3, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: item.val ? S.primary : 'transparent', border: `1.5px solid ${item.val ? S.primary : 'rgba(255,255,255,0.25)'}` }}>
+                    {item.val && <svg width="9" height="9" viewBox="0 0 24 24" stroke="white" fill="none" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </div>
+                  {item.label}
                 </button>
               ))}
-              <div style={{ borderTop: `1px solid ${S.border}`, margin: '4px 0' }} />
-              <button type="button" onClick={() => { clearFilters(); setFilterMenuOpen(false); }} style={{
-                width: '100%', height: 32, padding: '0 14px',
+
+              {/* Separator + actions */}
+              <div style={{ borderTop: `1px solid rgba(255,255,255,0.07)`, margin: '4px 0' }} />
+              <button type="button" disabled style={{
+                width: '100%', height: 30, padding: '0 12px',
                 border: 'none', background: 'transparent',
-                color: S.text3, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                color: 'rgba(255,255,255,0.25)', fontSize: 12, cursor: 'default', fontFamily: 'inherit', textAlign: 'left',
+              }}>Mark all read</button>
+              <button type="button" onClick={() => { clearFilters(); setFilterMenuOpen(false); }} style={{
+                width: '100%', height: 30, padding: '0 12px',
+                border: 'none', background: 'transparent',
+                color: 'rgba(255,255,255,0.25)', fontSize: 12, cursor: 'default', fontFamily: 'inherit', textAlign: 'left',
+                display: 'flex', alignItems: 'center', gap: 7,
               }}>
-                Clear all filters
+                <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.35 }}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                Clear completed
               </button>
             </div>
           )}

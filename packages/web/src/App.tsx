@@ -913,6 +913,7 @@ export function App() {
               connectionStatus={connectionStatus}
               latencyMs={latencyMs}
               authToken={auth.token}
+              onBack={() => setView('tasks')}
             />
           )}
           {view === 'reconnect' && (

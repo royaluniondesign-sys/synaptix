@@ -22,6 +22,7 @@ export interface SettingsViewProps {
   connectionStatus: ConnectionStatus;
   latencyMs: number | null;
   authToken: string | null;
+  onBack?: () => void;
 }
 
 type SectionId =
@@ -147,15 +148,132 @@ function Placeholder({ label, desc }: { label: string; desc?: string }) {
 // ─── provider logos ───────────────────────────────────────────────────────────
 function Logo({ id, size = 36 }: { id: string; size?: number }) {
   const r = Math.round(size * 0.27);
-  const colors: Record<string, string> = { claude: '#D97757', codex: '#0d0d0d', opencode: '#1e1b4b', qwen: '#5046e5', hermes: '#7c3aed', openclaw: '#be123c', ollama: '#1c1c1e', openai: '#10a37f', openrouter: '#6366f1', grok: '#000', gemini: '#1a73e8' };
-  const bg = colors[id] ?? S.surface3;
-  const label: Record<string, string> = { claude: 'A', codex: '{/}', opencode: 'OC', qwen: 'Q', hermes: 'H', openclaw: 'OC', ollama: '🦙', openai: '◆', openrouter: '⇌', grok: '𝕏', gemini: 'G' };
+  const bg: Record<string, string> = {
+    claude: '#D97757', codex: '#0a0a0a', opencode: '#1e1b4b', qwen: '#1a56c4',
+    hermes: '#7c3aed', openclaw: '#be123c', ollama: '#1c1c1e', openai: '#0d0d0d',
+    openrouter: '#6366f1', grok: '#111', gemini: '#1a73e8', auto: '#6366f1',
+    copilot: '#24292e', aider: '#1a472a', gemma: '#4285f4', mistral: '#ff6b35',
+    deepseek: '#0052cc',
+  };
+  const fill = bg[id] ?? S.surface3;
+
+  const icons: Record<string, React.ReactNode> = {
+    // Claude / Anthropic — their stylized A mark
+    claude: <path fill="white" d="M18 6 L25.5 24 L22.5 24 L20.5 19.5 L15.5 19.5 L13.5 24 L10.5 24 Z M18 11.5 L21 18 L15 18 Z" />,
+
+    // Codex / OpenAI — abstract bloom (hexagonal rotation)
+    codex: (
+      <>
+        {[0,60,120,180,240,300].map(angle => (
+          <ellipse key={angle} cx="18" cy="18" rx="4" ry="9" fill="white" opacity="0.9"
+            transform={`rotate(${angle} 18 18)`} />
+        ))}
+        <circle cx="18" cy="18" r="3.5" fill={fill} />
+      </>
+    ),
+
+    // OpenAI (same as codex but slightly different size)
+    openai: (
+      <>
+        {[0,60,120,180,240,300].map(angle => (
+          <ellipse key={angle} cx="18" cy="18" rx="4" ry="9" fill="white" opacity="0.9"
+            transform={`rotate(${angle} 18 18)`} />
+        ))}
+        <circle cx="18" cy="18" r="3.5" fill={fill} />
+      </>
+    ),
+
+    // Gemini — 4-pointed star (tall vertical, shorter horizontal)
+    gemini: (
+      <path fill="white" d="M18 5 C18 5 20 13 24 18 C20 23 18 31 18 31 C18 31 16 23 12 18 C16 13 18 5 18 5 Z
+        M5 18 C5 18 13 20 18 24 C23 20 31 18 31 18 C31 18 23 16 18 12 C13 16 5 18 5 18 Z" />
+    ),
+
+    // Hermes — lightning bolt / stylized H
+    hermes: <path fill="white" d="M11 8 L11 14 L17 14 L17 8 L20 8 L20 28 L17 28 L17 22 L11 22 L11 28 L8 28 L8 8 Z" />,
+
+    // OpenCode — code brackets
+    opencode: (
+      <>
+        <text x="18" y="23" textAnchor="middle" fill="white" fontSize="13" fontWeight="700" fontFamily="monospace">&lt;/&gt;</text>
+      </>
+    ),
+
+    // Qwen — Q with tail
+    qwen: (
+      <>
+        <circle cx="18" cy="17" r="8" fill="none" stroke="white" strokeWidth="2.5" />
+        <line x1="23" y1="22" x2="27" y2="27" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+      </>
+    ),
+
+    // OpenClaw — claw marks / streaks
+    openclaw: (
+      <>
+        <path fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"
+          d="M12 9 Q10 16 12 23 M18 8 Q18 16 18 24 M24 9 Q26 16 24 23" />
+      </>
+    ),
+
+    // Ollama — simplified llama silhouette
+    ollama: (
+      <>
+        <ellipse cx="18" cy="20" rx="8" ry="7" fill="white" />
+        <ellipse cx="18" cy="10" rx="4.5" ry="5" fill="white" />
+        <rect x="16" y="10" width="4" height="3" fill="white" />
+        {/* ears */}
+        <ellipse cx="14" cy="7" rx="2" ry="3" fill="white" />
+        <ellipse cx="22" cy="7" rx="2" ry="3" fill="white" />
+      </>
+    ),
+
+    // OpenRouter — routing arrows
+    openrouter: (
+      <>
+        <path fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          d="M8 12 L16 12 L16 16 L24 12 L16 8 L16 12" />
+        <path fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          d="M8 24 L16 24 L16 20 L24 24 L16 28 L16 24" />
+      </>
+    ),
+
+    // Grok / xAI — X mark
+    grok: (
+      <>
+        <line x1="10" y1="10" x2="26" y2="26" stroke="white" strokeWidth="3" strokeLinecap="round" />
+        <line x1="26" y1="10" x2="10" y2="26" stroke="white" strokeWidth="3" strokeLinecap="round" />
+      </>
+    ),
+
+    // Auto — sparkle / magic wand
+    auto: (
+      <>
+        <path fill="white" d="M18 6 L19.5 14 L27 12 L21 18 L27 24 L19.5 22 L18 30 L16.5 22 L9 24 L15 18 L9 12 L16.5 14 Z" />
+      </>
+    ),
+
+    // Aider — simple terminal chevron
+    aider: <path fill="white" d="M10 12 L16 18 L10 24 L12 24 L18 18 L12 12 Z M18 23 L26 23 L26 21 L18 21 Z" />,
+
+    // GitHub Copilot
+    copilot: (
+      <>
+        <circle cx="18" cy="14" r="7" fill="none" stroke="white" strokeWidth="2" />
+        <circle cx="13" cy="22" r="3.5" fill="white" />
+        <circle cx="23" cy="22" r="3.5" fill="white" />
+        <rect x="14.5" y="20.5" width="7" height="3" fill="white" />
+      </>
+    ),
+  };
+
   return (
-    <svg width={size} height={size} viewBox="0 0 36 36">
-      <rect width="36" height="36" rx={r} fill={bg} />
-      <text x="18" y="24" textAnchor="middle" fill="white" fontSize={id === 'codex' || id === 'openrouter' ? 11 : 15} fontWeight="700" fontFamily={id === 'codex' ? 'monospace' : 'Arial,sans-serif'}>
-        {label[id] ?? id.slice(0, 2).toUpperCase()}
-      </text>
+    <svg width={size} height={size} viewBox="0 0 36 36" style={{ flexShrink: 0 }}>
+      <rect width="36" height="36" rx={r} fill={fill} />
+      {icons[id] ?? (
+        <text x="18" y="24" textAnchor="middle" fill="white" fontSize="14" fontWeight="700" fontFamily="Arial,sans-serif">
+          {id.slice(0, 2).toUpperCase()}
+        </text>
+      )}
     </svg>
   );
 }
@@ -425,8 +543,87 @@ function ProviderCard({ p }: { p: typeof PROVIDERS[0] }) {
     </Card>
   );
 }
+// CLI-based agent account setup (like Orca's "orca account add --agent X" pattern)
+const CLI_AGENT_ACCOUNTS = [
+  { id: 'opencode', label: 'OpenCode', cmd: 'termora account add --agent opencode', desc: 'Add accounts by running this command in a terminal on the Termora host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
+  { id: 'codex',    label: 'Codex',    cmd: 'termora account add --agent codex',    desc: 'Add accounts by running this command in a terminal on the Termora host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
+  { id: 'gemini',   label: 'Gemini',   cmd: 'termora account add --agent gemini',   desc: 'Add accounts by running this command in a terminal on the Termora host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
+  { id: 'grok',     label: 'Grok',     cmd: 'termora account add --agent grok',     desc: 'Add accounts by running this command in a terminal on the Termora host.' },
+];
+
+function AgentAccountCard({ agent }: { agent: typeof CLI_AGENT_ACCOUNTS[0] }) {
+  const [refreshed, setRefreshed] = useState(false);
+  const refresh = () => { setRefreshed(true); setTimeout(() => setRefreshed(false), 1500); };
+  return (
+    <Card style={{ marginBottom: 14 }}>
+      <div style={{ padding: '12px 14px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Logo id={agent.id} size={32} />
+        <span style={{ fontSize: 14, fontWeight: 600, color: S.text1 }}>{agent.label}</span>
+      </div>
+      <div style={{ borderTop: `1px solid ${S.border}`, padding: '10px 14px' }}>
+        <div style={{ fontSize: 11, color: S.text2, marginBottom: 7, lineHeight: 1.55 }}>{agent.desc}</div>
+        <CodeLine text={agent.cmd} />
+        <div style={{ display: 'flex', gap: 6, marginTop: 7 }}>
+          <CopyBtn text={agent.cmd} />
+          <button type="button" onClick={refresh} style={{ height: 26, padding: '0 9px', borderRadius: 6, border: `1px solid ${S.border}`, background: refreshed ? `${S.success}12` : S.surface3, color: refreshed ? S.success : S.text2, fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{refreshed ? 'Refreshed!' : 'Refresh accounts'}</button>
+        </div>
+        <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 11, color: S.text3 }}>System default</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: S.success }}>Active</span>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function ClaudeAccountCard() {
+  const [accounts] = useState([{ id: 'system', label: 'System default', desc: 'Use your current this device Claude login.', active: true }]);
+  const [addClicked, setAddClicked] = useState(false);
+  return (
+    <Card style={{ marginBottom: 14 }}>
+      <div style={{ padding: '12px 14px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Logo id="claude" size={32} />
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: S.text1 }}>Claude</div>
+          <div style={{ fontSize: 11, color: S.text3, lineHeight: 1.45, marginTop: 2 }}>Optional. Termora can use your normal Claude login; add accounts only if you want quick switching without moving chat sessions.</div>
+        </div>
+      </div>
+      <div style={{ borderTop: `1px solid ${S.border}`, padding: '10px 14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: S.text1 }}>Accounts</div>
+            <div style={{ fontSize: 10, color: S.text3 }}>Showing accounts for this device. New accounts are added there.</div>
+          </div>
+          <button type="button" onClick={() => setAddClicked(v => !v)} style={{ height: 26, padding: '0 9px', borderRadius: 6, border: `1px solid ${S.border}`, background: addClicked ? `${S.primary}15` : S.surface3, color: addClicked ? S.primary : S.text2, fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Account
+          </button>
+        </div>
+        {accounts.map(acc => (
+          <div key={acc.id} style={{ background: S.surface3, border: `1px solid ${S.border}`, borderRadius: 8, padding: '9px 12px', marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: S.text1 }}>{acc.label}</span>
+              {acc.active && <span style={{ fontSize: 8, fontWeight: 700, color: S.success, background: `${S.success}18`, border: `1px solid ${S.success}28`, padding: '1px 5px', borderRadius: 4 }}>Active</span>}
+            </div>
+            <div style={{ fontSize: 11, color: S.text3, marginTop: 3 }}>{acc.desc}</div>
+          </div>
+        ))}
+        <div style={{ fontSize: 10, color: S.text3, lineHeight: 1.55, marginTop: 4 }}>No managed Claude accounts for this device. Termora will use that environment's system default Claude login until you add one here.</div>
+      </div>
+    </Card>
+  );
+}
+
 function ProvidersSection() {
-  return (<><STitle label="AI Provider Accounts" desc="Optional. Termora works with your existing provider logins; add keys only if you want Termora to help switch between them." />{PROVIDERS.map(p => <ProviderCard key={p.id} p={p} />)}</>);
+  return (
+    <>
+      <STitle label="AI Provider Accounts" desc="Optional. Termora works with your existing provider logins; add accounts only if you want Termora to help switch between them." />
+      <ClaudeAccountCard />
+      {CLI_AGENT_ACCOUNTS.map(a => <AgentAccountCard key={a.id} agent={a} />)}
+      <GLabel label="API Keys" />
+      {PROVIDERS.filter(p => p.type !== 'cli').map(p => <ProviderCard key={p.id} p={p} />)}
+    </>
+  );
 }
 
 // ─── Orchestration ────────────────────────────────────────────────────────────
@@ -965,11 +1162,22 @@ function SectionContent({ id, p }: { id: SectionId; p: SettingsViewProps }) {
   }
 }
 
+// ─── project icon colors ──────────────────────────────────────────────────────
+const PROJECT_COLORS: Record<string, { bg: string; fg: string; icon?: string }> = {
+  'RUD-WEB':           { bg: '#e53e3e', fg: '#fff', icon: 'R' },
+  'Termora':           { bg: '#3b82f6', fg: '#fff', icon: 'T' },
+  'excited-bohr':      { bg: '#8b5cf6', fg: '#fff', icon: 'B' },
+  'excited-tesla':     { bg: '#10b981', fg: '#fff', icon: 'T' },
+  'intelligent-galileo': { bg: '#f59e0b', fg: '#fff', icon: 'G' },
+  'serene-raman':      { bg: '#06b6d4', fg: '#fff', icon: 'R' },
+};
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export function SettingsView(props: SettingsViewProps) {
   const [section, setSection] = useState<SectionId>('agents');
   const [query, setQuery] = useState('');
   const [collapsed, setCollapsed] = useState(false);
+  const [usageTipDismissed, setUsageTipDismissed] = useState(false);
 
   const activeLabel = NAV.flatMap(g => g.items).find(i => i.id === section)?.label ?? 'Settings';
   const filtered = query.trim()
@@ -982,6 +1190,15 @@ export function SettingsView(props: SettingsViewProps) {
     <div style={{ height: '100%', display: 'flex', overflow: 'hidden', background: S.bg }}>
       {/* Sidebar */}
       <div style={{ width: collapsed ? 0 : 218, minWidth: collapsed ? 0 : 218, borderRight: `1px solid ${S.border}`, background: S.surface, display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 200ms ease,min-width 200ms ease', flexShrink: 0 }}>
+
+        {/* Back to app */}
+        {props.onBack && (
+          <button type="button" onClick={props.onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 12px 8px', background: 'transparent', border: 'none', borderBottom: `1px solid ${S.border}`, color: S.text2, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', flexShrink: 0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back to app
+          </button>
+        )}
+
         {/* Search */}
         <div style={{ padding: '9px 9px 5px', flexShrink: 0, borderBottom: `1px solid ${S.border}` }}>
           <div style={{ display: 'flex', alignItems: 'center', background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 6, padding: '0 7px', height: 28, gap: 5 }}>
@@ -1007,7 +1224,7 @@ export function SettingsView(props: SettingsViewProps) {
                 return (
                   <button key={item.id} type="button" onClick={() => go(item.id)} style={{ width: '100%', height: 29, display: 'flex', alignItems: 'center', gap: 6, padding: '0 7px', borderRadius: 5, border: 'none', marginBottom: 1, background: active ? `${S.primary}16` : 'transparent', color: active ? S.primary : S.text2, fontSize: 11.5, fontWeight: active ? 600 : 400, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left', transition: 'all 100ms' }}>
                     <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
-                    {item.badge && <span style={{ fontSize: 7.5, fontWeight: 700, color: item.badge === 'Beta' ? S.warning : S.text3, background: item.badge === 'Beta' ? `${S.warning}15` : S.surface3, padding: '1px 4px', borderRadius: 3, border: `1px solid ${item.badge === 'Beta' ? `${S.warning}28` : S.border}`, flexShrink: 0 }}>{item.badge}</span>}
+                    {item.badge && <span style={{ fontSize: 7.5, fontWeight: 700, color: item.badge === 'Beta' ? S.warning : item.badge === 'Optional' ? S.text3 : S.text3, background: item.badge === 'Beta' ? `${S.warning}15` : S.surface3, padding: '1px 4px', borderRadius: 3, border: `1px solid ${item.badge === 'Beta' ? `${S.warning}28` : S.border}`, flexShrink: 0 }}>{item.badge.toUpperCase()}</span>}
                   </button>
                 );
               })}
@@ -1017,20 +1234,49 @@ export function SettingsView(props: SettingsViewProps) {
           {/* Projects */}
           <div>
             <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: 0.8, color: S.text3, textTransform: 'uppercase', padding: '9px 4px 3px' }}>Projects</div>
-            {PROJECTS.map(proj => (
-              <button key={proj} type="button" onClick={() => go('general')} style={{ width: '100%', height: 27, display: 'flex', alignItems: 'center', gap: 6, padding: '0 7px', borderRadius: 5, border: 'none', marginBottom: 1, background: 'transparent', color: S.text3, fontSize: 11, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left' }}>
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: S.surface3, border: `1px solid ${S.border}`, flexShrink: 0 }} />
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{proj}</span>
-              </button>
-            ))}
+            {PROJECTS.map(proj => {
+              const pc = PROJECT_COLORS[proj];
+              return (
+                <button key={proj} type="button" onClick={() => go('general')} style={{ width: '100%', height: 29, display: 'flex', alignItems: 'center', gap: 7, padding: '0 4px', borderRadius: 5, border: 'none', marginBottom: 1, background: 'transparent', color: S.text2, fontSize: 11, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left', transition: 'background 80ms' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = `${S.border}`; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}>
+                  {pc ? (
+                    <div style={{ width: 18, height: 18, borderRadius: 5, background: pc.bg, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 800, color: pc.fg }}>{pc.icon}</div>
+                  ) : (
+                    <div style={{ width: 18, height: 18, borderRadius: 5, background: S.surface3, border: `1px solid ${S.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="9" height="9" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                  )}
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{proj}</span>
+                </button>
+              );
+            })}
           </div>
 
           <div style={{ height: 16 }} />
         </div>
 
+        {/* Agent usage limits popup */}
+        {!usageTipDismissed && (
+          <div style={{ margin: '0 8px 8px', borderRadius: 8, background: S.surface2, border: `1px solid ${S.border}`, padding: '10px 12px', flexShrink: 0, position: 'relative' }}>
+            <button type="button" onClick={() => setUsageTipDismissed(true)} style={{ position: 'absolute', top: 6, right: 8, background: 'transparent', border: 'none', color: S.text3, cursor: 'pointer', padding: 0, fontSize: 12, lineHeight: 1 }}>×</button>
+            <div style={{ fontSize: 11, fontWeight: 600, color: S.text1, marginBottom: 4 }}>Agent usage limits</div>
+            <div style={{ fontSize: 10, color: S.text3, marginBottom: 8, lineHeight: 1.5 }}>Connect your AI provider accounts to see their usage in real time and easily switch between accounts.</div>
+            <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+              {['claude', 'gemini', 'openai', 'codex'].map(id => <Logo key={id} id={id} size={20} />)}
+            </div>
+            <button type="button" onClick={() => go('providers')} style={{ width: '100%', height: 28, borderRadius: 6, border: 'none', background: S.surface3, color: S.text1, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+              Connect an account
+            </button>
+          </div>
+        )}
+
         {/* Footer */}
         <div style={{ padding: '6px 13px', borderTop: `1px solid ${S.border}`, flexShrink: 0 }}>
-          <span style={{ fontSize: 9, color: S.text3 }}>v{__APP_VERSION__} · RUD Lab</span>
+          <button type="button" onClick={() => go('stats')} style={{ background: 'transparent', border: 'none', color: S.text3, cursor: 'pointer', fontSize: 9, fontFamily: 'inherit', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Configure usage tracking
+          </button>
         </div>
       </div>
 
