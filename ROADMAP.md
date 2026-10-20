@@ -1,12 +1,12 @@
-# Termora Roadmap
+# Synaptix Roadmap
 
-Termora is moving from mobile terminal access to a complete installable cockpit for machines, projects, agents, files, Git, and verification gates.
+Synaptix is moving from mobile terminal access to a complete installable cockpit for machines, projects, agents, files, Git, and verification gates.
 
 ## Completed foundation
 
 - [x] CI runs lint, typecheck, build, tests, app scaffold, desktop boundary/smoke/launch, platform readiness, security audit, cockpit dogfood, and web headless dogfood on Node 20/22/24.
-- [x] Unified port config: `TERMORA_PORT` > `PORT`.
-- [x] `TERMORA_MAX_SESSIONS` limit with WebSocket `max_sessions` error.
+- [x] Unified port config: `SYNAPTIX_PORT` > `PORT`.
+- [x] `SYNAPTIX_MAX_SESSIONS` limit with WebSocket `max_sessions` error.
 - [x] Secure QR/bootstrap pairing with JWT session auth and rate-limited auth endpoints.
 - [x] Real PTY sessions with tmux persistence fallback.
 - [x] PWA shell, manifest, icons, and mobile-first terminal cockpit.
@@ -31,7 +31,7 @@ These are first-class product surfaces, not cosmetic labels. Each item must end 
 | SSH Worktrees | Planned | Remote host registry, SSH launch, file editing, git, terminal, reconnect, port forwarding. |
 | Annotate AI Diffs | Planned | Inline comments on generated diffs; send comments to agent; commit from reviewed diff. |
 | Drag Files to Agents | Planned | Drag files/images into prompt; backend stores attachment; agent runner receives safe path/context. |
-| Termora CLI | MVP | Script worktrees, snapshots, browser clicks/fills, agent runs, and gate watches. |
+| Synaptix CLI | MVP | Script worktrees, snapshots, browser clicks/fills, agent runs, and gate watches. |
 | Quick Open | Planned | One search for files, commands, sessions, agents, worktrees, repo docs. |
 | Usage Tracking | Planned | Claude/Codex/OpenCode/Hermes usage, reset timers, provider/account switching. |
 | Rich Repo Previews | Planned | Markdown, images, PDFs, docs, logs, web previews in cockpit panes. |
@@ -99,7 +99,7 @@ These are first-class product surfaces, not cosmetic labels. Each item must end 
 
 - [ ] Run records: objective, plan, commands, diffs, gates, final report.
 - [ ] Verification gates: lint, typecheck, tests, build, security scan, custom commands.
-- [ ] MCP server exposing safe Termora tools.
+- [ ] MCP server exposing safe Synaptix tools.
 - [ ] Webhook API for GitHub/Linear/Telegram/automation triggers.
 - [ ] Scheduled jobs: nightly tests, repo health checks, long-running monitors.
 - [ ] Multi-agent coordinator: lead agent plus isolated worker worktrees.
@@ -121,7 +121,7 @@ A feature is done only when:
 - [ ] Package macOS DMG/ZIP unsigned local build, then signed release.
 - [ ] Package Linux AppImage after native module smoke tests.
 - [ ] Package Windows NSIS after native module rebuild is stable.
-- [ ] Expose the Termora CLI from desktop installers.
+- [ ] Expose the Synaptix CLI from desktop installers.
 - [ ] Keep PWA as mobile baseline; add Expo shell for push/deep links/upload.
 - [ ] Add relay/push only after local pairing and mobile shell are stable.
 

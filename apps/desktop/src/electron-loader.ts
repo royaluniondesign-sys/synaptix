@@ -1,4 +1,4 @@
-// Termora desktop Electron runtime loader (dev shell only).
+// Synaptix desktop Electron runtime loader (dev shell only).
 //
 // Resolves the Electron main-process and preload primitives through an injected
 // importer whose default is a computed `import(specifier)`. Nothing here binds

@@ -34,14 +34,14 @@ describe('parseListeningPorts', () => {
 });
 
 describe('GET /api/cockpit/ports', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'termora-cockpit-ports-'));
+  const dir = mkdtempSync(join(tmpdir(), 'synaptix-cockpit-ports-'));
   const dbPath = join(dir, 'test.db');
   let baseUrl = '';
   let authHeader = '';
   let close: () => Promise<void>;
 
   beforeAll(async () => {
-    process.env.TERMORA_AGENTS_FILE = join(dir, 'agents.json');
+    process.env.SYNAPTIX_AGENTS_FILE = join(dir, 'agents.json');
     const { createAppServer } = await import('../server.js');
     const { initDatabase } = await import('../db.js');
     const { createSessionJWT } = await import('../auth.js');
@@ -67,7 +67,7 @@ describe('GET /api/cockpit/ports', () => {
 
   afterAll(async () => {
     await close();
-    delete process.env.TERMORA_AGENTS_FILE;
+    delete process.env.SYNAPTIX_AGENTS_FILE;
     rmSync(dir, { recursive: true, force: true });
   });
 

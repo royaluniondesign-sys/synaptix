@@ -2,7 +2,7 @@
  * Pre-scripted terminal sequences for the shell and tmux panes.
  *
  * These scripts drive the demo mode animation that plays when no
- * backend is reachable, giving visitors a realistic preview of termora.
+ * backend is reachable, giving visitors a realistic preview of synaptix.
  */
 
 import type { DemoScript } from './demo-engine';

@@ -19,7 +19,7 @@ GitHub Pages is free for public repositories. This repository is public.
 
 Merge a change to the site into `main`. The `Publish site (GitHub Pages)` workflow starts on its own,
 and when its `Deploy to GitHub Pages` job finishes, the summary shows the URL. For this repository it
-is `https://royaluniondesign-sys.github.io/termora/`.
+is `https://royaluniondesign-sys.github.io/synaptix/`.
 
 To publish without changing the site, open **Actions > Publish site (GitHub Pages) > Run workflow**
 on `main`. Take the site down from **Settings > Pages**.
@@ -30,8 +30,8 @@ Pages supports a custom domain in **Settings > Pages > Custom domain**, with a `
 that points to `royaluniondesign-sys.github.io`. GitHub issues the HTTPS certificate. A domain is
 the only part that is not free: registering a stable one costs a small yearly fee.
 
-The site and the demo use relative paths, so they work both under `/termora/` and on a custom
-domain. This was checked by hand in Chromium under a `/termora/` prefix; there is no automated
+The site and the demo use relative paths, so they work both under `/synaptix/` and on a custom
+domain. This was checked by hand in Chromium under a `/synaptix/` prefix; there is no automated
 sub-path check yet. `scripts/__tests__/site.test.mjs` does check the page for remote requests.
 
 ## What the site must not claim

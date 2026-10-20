@@ -1,12 +1,12 @@
-# Contributing to termora
+# Contributing to synaptix
 
-Thanks for your interest in contributing to termora! This guide will help you get set up and understand how we work.
+Thanks for your interest in contributing to synaptix! This guide will help you get set up and understand how we work.
 
 ## Development Setup
 
 ```bash
-git clone https://github.com/royaluniondesign-sys/termora
-cd termora
+git clone https://github.com/royaluniondesign-sys/synaptix
+cd synaptix
 cp .env.example .env          # Add your NGROK_AUTHTOKEN
 npm install                    # Installs all workspace deps + compiles node-pty
 npm run dev                    # Starts agent + web in parallel via Turborepo
@@ -17,15 +17,13 @@ The agent runs on `http://localhost:4030` and the web frontend on `http://localh
 ## Project Structure
 
 ```
-termora/
+synaptix/
 ├── packages/
 │   ├── agent/      # Backend — PTY manager, WebSocket server, auth, ngrok tunnel
 │   ├── web/        # Frontend — React + xterm.js + MacBook Pro UI
 │   └── cli/        # CLI wrapper — bootstraps and manages the agent
 ├── apps/
-│   ├── desktop/    # Electron shell (own package-lock.json)
-│   └── mobile/     # Expo scaffold, contracts and tests only
-├── site/           # Public site, published to GitHub Pages when it changes on main
+│   └── landing/    # Landing page at synaptix.dev (static HTML)
 ├── turbo.json      # Turborepo task configuration
 └── package.json    # Root workspace config
 ```
@@ -97,7 +95,7 @@ docs: add ngrok setup instructions to README
 
 ## Reporting Bugs
 
-Open a [GitHub issue](https://github.com/royaluniondesign-sys/termora/issues/new?template=bug_report.yml) with:
+Open a [GitHub issue](https://github.com/royaluniondesign-sys/synaptix/issues/new?template=bug_report.yml) with:
 
 - Your environment (OS, Node version, browser)
 - Steps to reproduce
@@ -106,7 +104,7 @@ Open a [GitHub issue](https://github.com/royaluniondesign-sys/termora/issues/new
 
 ## Requesting Features
 
-Open a [GitHub issue](https://github.com/royaluniondesign-sys/termora/issues/new?template=feature_request.yml) describing:
+Open a [GitHub issue](https://github.com/royaluniondesign-sys/synaptix/issues/new?template=feature_request.yml) describing:
 
 - The problem you're trying to solve
 - Your proposed solution
@@ -119,7 +117,7 @@ Open a [GitHub issue](https://github.com/royaluniondesign-sys/termora/issues/new
 
 ## Sponsorship
 
-If you find termora useful, consider supporting the project:
+If you find synaptix useful, consider supporting the project:
 
 - [Buy me a coffee](https://buymeacoffee.com/rudlab)
 - [Sponsor on GitHub](https://github.com/sponsors/royaluniondesign-sys)

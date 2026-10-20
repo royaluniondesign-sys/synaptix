@@ -1,17 +1,17 @@
-// Termora desktop agent-host adapter.
+// Synaptix desktop agent-host adapter.
 // Describes how the shell should start the local agent without actually
 // spawning anything. This keeps the launch contract testable and lets the
 // future Electron main process swap in a real startAgent() call once the
-// programmatic API exists in @termora/agent.
+// programmatic API exists in @synaptix/agent.
 
 import type { AgentEntryStrategy, DesktopRuntimePlan } from './runtime-plan.js'
 
 /**
- * Programmatic agent entrypoint in `@termora/agent`. The `exports` map of
+ * Programmatic agent entrypoint in `@synaptix/agent`. The `exports` map of
  * `packages/agent/package.json` exposes `./runtime` → `dist/runtime.js`, which
  * exports `startAgent()`.
  */
-export const AGENT_RUNTIME_MODULE = '@termora/agent/runtime'
+export const AGENT_RUNTIME_MODULE = '@synaptix/agent/runtime'
 export const AGENT_RUNTIME_SYMBOL = 'startAgent'
 
 /** Module-qualified reference the Electron main process will import. */
@@ -55,7 +55,7 @@ export function describeAgentLaunch(
     target,
     args: [],
     env: {
-      TERMORA_DESKTOP_SHELL: '1',
+      SYNAPTIX_DESKTOP_SHELL: '1',
       ...overrides.env,
     },
     entrypoint:

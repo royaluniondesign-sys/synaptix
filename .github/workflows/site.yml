@@ -53,7 +53,7 @@ jobs:
         run: node --test scripts/__tests__/site.test.mjs
 
       - name: Build the demo
-        run: npm run build:demo -w @termora/web
+        run: npm run build:demo -w @synaptix/web
 
       - name: Assemble the site
         run: node scripts/build-site.mjs
@@ -61,7 +61,7 @@ jobs:
       - name: Upload site
         uses: actions/upload-artifact@v7
         with:
-          name: termora-site
+          name: synaptix-site
           path: site-dist
           retention-days: 7
           if-no-files-found: error

@@ -38,10 +38,10 @@ const ENTRY_FILES = [
 
 // Exact IPC channel names the preload bridge and main process must agree on.
 const REQUIRED_CHANNELS = {
-  getStatus: 'termora:shell-status:get',
-  status: 'termora:shell-status',
-  start: 'termora:shell:start',
-  stop: 'termora:shell:stop',
+  getStatus: 'synaptix:shell-status:get',
+  status: 'synaptix:shell-status',
+  start: 'synaptix:shell:start',
+  stop: 'synaptix:shell:stop',
 }
 
 const problems = []
@@ -68,7 +68,7 @@ if (existsSync('apps/desktop/package.json')) {
     fail(`could not read apps/desktop/package.json: ${error.message}`)
   }
   if (desktopPkg) {
-    if (desktopPkg.name !== '@termora/desktop-app')
+    if (desktopPkg.name !== '@synaptix/desktop-app')
       fail(`unexpected desktop package name: ${desktopPkg.name}`)
     if (desktopPkg.type !== 'module') fail('desktop package must stay an ES module')
     if (desktopPkg.private !== true) fail('desktop package must remain private')
@@ -132,9 +132,9 @@ if (existsSync('apps/desktop/src/ipc-contract.ts')) {
     ipc,
     [
       'export const DESKTOP_IPC_CHANNELS',
-      "TERMORA_PRELOAD_KEY = 'termora'",
-      'export function createTermoraPreloadApi',
-      'export function exposeTermoraPreload',
+      "SYNAPTIX_PRELOAD_KEY = 'synaptix'",
+      'export function createSynaptixPreloadApi',
+      'export function exposeSynaptixPreload',
     ],
     'ipc-contract.ts',
   )
@@ -143,11 +143,11 @@ if (existsSync('apps/desktop/src/ipc-contract.ts')) {
       fail(`ipc-contract.ts missing channel mapping: ${key} -> ${channel}`)
   }
 
-  const channels = [...norm(ipc).matchAll(/'(termora:[^']+)'/g)].map((match) => match[1])
+  const channels = [...norm(ipc).matchAll(/'(synaptix:[^']+)'/g)].map((match) => match[1])
   const unique = new Set(channels)
   if (unique.size !== channels.length) fail('ipc-contract.ts declares duplicate IPC channel names')
   for (const channel of unique) {
-    if (!channel.startsWith('termora:')) fail(`IPC channel must be namespaced: ${channel}`)
+    if (!channel.startsWith('synaptix:')) fail(`IPC channel must be namespaced: ${channel}`)
   }
   const expected = new Set(Object.values(REQUIRED_CHANNELS))
   for (const channel of expected) {
@@ -309,7 +309,7 @@ if (existsSync('apps/desktop/src/preload.ts')) {
   const preload = read('apps/desktop/src/preload.ts')
   checkSnippets(
     preload,
-    ['export async function bootstrapTermoraPreload', 'exposeTermoraPreload(', 'loadElectronPreload'],
+    ['export async function bootstrapSynaptixPreload', 'exposeSynaptixPreload(', 'loadElectronPreload'],
     'preload.ts',
   )
 }

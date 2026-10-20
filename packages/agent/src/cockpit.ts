@@ -188,7 +188,7 @@ async function launchWorktreeFanout(body: WorktreeLaunchBody) {
   const count = Math.min(Math.max(Number(body.count ?? 2), 1), 5);
   const promptSlug = slugify(prompt);
   const worktrees = await createFanoutWorktrees(repoRoot, count, promptSlug);
-  const runAgents = body.runAgents === true && process.env.TERMORA_ENABLE_AGENT_SPAWN === '1';
+  const runAgents = body.runAgents === true && process.env.SYNAPTIX_ENABLE_AGENT_SPAWN === '1';
   const agentId = String(body.agentId ?? '').trim();
   const profile = agentId ? getAgentRegistry().get(agentId) : undefined;
   if (agentId && !profile) throw new Error(`Unknown agent: ${agentId}`);
@@ -202,7 +202,7 @@ async function launchWorktreeFanout(body: WorktreeLaunchBody) {
       worktrees,
       agentJobs,
       agentSpawn: 'disabled',
-      note: 'Set TERMORA_ENABLE_AGENT_SPAWN=1 to execute external agent commands from this endpoint.',
+      note: 'Set SYNAPTIX_ENABLE_AGENT_SPAWN=1 to execute external agent commands from this endpoint.',
     };
   }
 
@@ -437,7 +437,7 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
 
   // ── AI chat proxy ──────────────────────────────────────────────────────────
   // POST { provider, model?, messages?, prompt, apiKey?, ollamaUrl? } → server-sent events (see chat.ts).
-  // Input is validated in chat.ts. The claude CLI is an external agent, so it stays behind TERMORA_ENABLE_AGENT_SPAWN=1.
+  // Input is validated in chat.ts. The claude CLI is an external agent, so it stays behind SYNAPTIX_ENABLE_AGENT_SPAWN=1.
   app.post('/api/cockpit/chat', async (req, res) => {
     const auth = await requireAuth(req, res);
     if (!auth) return;
@@ -447,8 +447,8 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
       res.status(400).json({ error: parsed.error });
       return;
     }
-    if (parsed.value.provider === 'claude-cli' && process.env.TERMORA_ENABLE_AGENT_SPAWN !== '1') {
-      res.status(403).json({ error: 'Set TERMORA_ENABLE_AGENT_SPAWN=1 to run the claude CLI from the chat.' });
+    if (parsed.value.provider === 'claude-cli' && process.env.SYNAPTIX_ENABLE_AGENT_SPAWN !== '1') {
+      res.status(403).json({ error: 'Set SYNAPTIX_ENABLE_AGENT_SPAWN=1 to run the claude CLI from the chat.' });
       return;
     }
     streamChat(res, parsed.value);

@@ -1,6 +1,6 @@
-# Termora Agent Cockpit Capabilities
+# Synaptix Agent Cockpit Capabilities
 
-Termora's target surface is a real multi-device cockpit for terminal agents, not a static dashboard. This document tracks the capability set being integrated into the app.
+Synaptix's target surface is a real multi-device cockpit for terminal agents, not a static dashboard. This document tracks the capability set being integrated into the app.
 
 ## Core capabilities
 
@@ -14,7 +14,7 @@ Fan one prompt across multiple isolated git worktrees, compare results, then mer
 
 ### Terminal Splits
 
-Termora already runs real PTYs, supports persistence via tmux, and has a controlled split-layout/multi-pane rendering foundation. The target is saved resizeable layouts, long scrollback search, and terminal layout recovery across restart.
+Synaptix already runs real PTYs, supports persistence via tmux, and has a controlled split-layout/multi-pane rendering foundation. The target is saved resizeable layouts, long scrollback search, and terminal layout recovery across restart.
 
 ### Design Mode
 
@@ -22,7 +22,7 @@ Target workflow: click any UI element in a real Chromium window, capture its DOM
 
 ### GitHub & task workflows
 
-Termora should browse PRs/issues/project boards, launch worktrees from tasks, and support review without leaving the cockpit. GitHub CI verification is already part of the development workflow.
+Synaptix should browse PRs/issues/project boards, launch worktrees from tasks, and support review without leaving the cockpit. GitHub CI verification is already part of the development workflow.
 
 The current slice (backend, live) reports local `gh` availability, auth state, detected repo (name + default branch), recent branch hints, and open-PR hints through `GET /api/cockpit/github` and the `github-status` cockpit action. It runs only whitelisted, read-only commands via the safe runner, redacts `GITHUB_TOKEN`/`GH_TOKEN` from any captured output, and never requires static credentials in code — remote repo/PR calls are skipped when `gh` is unauthenticated. The web dashboard surfaces this in a compact "GitHub workflow" pane. Auth bonuses, PR task mapping, and webhook-driven boards remain future (`feature-platform-map` backend OAuth/webhooks).
 
@@ -38,9 +38,9 @@ Review AI-generated diffs with inline comments, send those comments back to the 
 
 Drag files, screenshots, images, or repo docs directly into an agent prompt. Safe file listing and file preview endpoints are the first foundation; prompt attachment transport remains to be implemented.
 
-### Termora CLI
+### Synaptix CLI
 
-The MVP commands are `termora help`, `termora version`, `termora status`, and `termora file <path>`. Target commands still include `termora worktree create`, `termora snapshot`, `termora click`, `termora fill`, `termora agent run`, and `termora gates watch`.
+The MVP commands are `synaptix help`, `synaptix version`, `synaptix status`, and `synaptix file <path>`. Target commands still include `synaptix worktree create`, `synaptix snapshot`, `synaptix click`, `synaptix fill`, `synaptix agent run`, and `synaptix gates watch`.
 
 ## Also in the box
 
@@ -52,7 +52,7 @@ The MVP commands are `termora help`, `termora version`, `termora status`, and `t
 
 ## Supported agents
 
-Termora should support any CLI agent. Current/target examples include Claude Code, Codex, Grok, Cursor/Copilot-style CLIs, DeepSeek Harness, Qwen Code, Kimi/Kiro-style CLIs, OpenCode, Hermes Agent, Devin/Goose/Cline/Continue/Aider-style tools, and any custom command configured by the user.
+Synaptix should support any CLI agent. Current/target examples include Claude Code, Codex, Grok, Cursor/Copilot-style CLIs, DeepSeek Harness, Qwen Code, Kimi/Kiro-style CLIs, OpenCode, Hermes Agent, Devin/Goose/Cline/Continue/Aider-style tools, and any custom command configured by the user.
 
 ## Implementation rule
 

@@ -11,6 +11,10 @@ import { PortsView } from './components/PortsView';
 import { AgentsView } from './components/AgentsView';
 import { QuickOpen } from './components/QuickOpen';
 import { ChatView } from './components/ChatView';
+import { UpdateNotification } from './components/UpdateNotification';
+import { TasksView } from './components/TasksView';
+import { AutomationsView } from './components/AutomationsView';
+import { MobileView } from './components/MobileView';
 import { useAuth } from './hooks/useAuth';
 import { useSessionManager } from './hooks/useSessionManager';
 import { useSkin } from './hooks/useSkin';
@@ -86,6 +90,19 @@ const TAB_CONFIG = [
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'agents' as const,
+    label: 'Agents',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="8" width="14" height="10" rx="3" />
+        <path d="M12 4v4" />
+        <circle cx="9" cy="13" r="1" />
+        <circle cx="15" cy="13" r="1" />
+        <path d="M9 17h6" />
       </svg>
     ),
   },
@@ -231,130 +248,264 @@ function FABButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function DesktopSidebar({ current, onChange, onNewSession, sessionBadge, unreadBadge, connectionStatus }: {
+const PROJECTS = ['RUD-WEB', 'Synaptix', 'excited-bohr', 'excited-tesla', 'intelligent-galileo', 'serene-raman'];
+
+function NavItem({ label, icon, active, badge, badgeColor, onClick }: {
+  label: string;
+  icon: React.ReactNode;
+  active: boolean; badge?: string | null; badgeColor?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        width: '100%', height: 32, display: 'flex', alignItems: 'center',
+        gap: 8, padding: '0 10px', borderRadius: 6, border: 'none',
+        marginBottom: 1,
+        background: active ? `${S.primary}16` : 'transparent',
+        color: active ? S.primary : S.text2,
+        fontSize: 12.5, fontWeight: active ? 600 : 400,
+        fontFamily: 'inherit', cursor: 'pointer',
+        transition: 'background 100ms, color 100ms',
+        textAlign: 'left', flexShrink: 0,
+      }}
+    >
+      <span style={{ color: active ? S.primary : S.text3, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>
+      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+      {badge != null && (
+        <span style={{
+          fontSize: 9, fontWeight: 700, minWidth: 16, textAlign: 'center',
+          background: badgeColor ? `${badgeColor}25` : S.surface3,
+          color: badgeColor ?? S.text3,
+          padding: '1px 5px', borderRadius: 8,
+        }}>{badge}</span>
+      )}
+    </button>
+  );
+}
+
+function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionBadge, unreadBadge, connectionStatus }: {
   current: View;
   onChange: (v: View) => void;
   onNewSession: () => void;
+  onQuickOpen: () => void;
   sessionBadge: string | null;
   unreadBadge: string | null;
   connectionStatus: ConnectionStatus;
 }) {
+  const [search, setSearch] = useState('');
+  const [projectFilter, setProjectFilter] = useState('');
   const isConnected = connectionStatus === 'connected';
   const statusColor = isConnected ? S.success : connectionStatus === 'reconnecting' ? S.warning : S.error;
 
+  const filteredProjects = PROJECTS.filter(p =>
+    projectFilter === '' || p.toLowerCase().includes(projectFilter.toLowerCase())
+  );
+
+  // SVG icons matching Orca's sidebar icons
+  const icons = {
+    search: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+    checklist: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
+    tasks: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+    automations: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+    dashboard: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>,
+    mobile: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>,
+    terminal: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>,
+    tunnels: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+    chat: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+    bell: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+    settings: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  };
+
   return (
     <div style={{
-      width: 200,
+      width: 220,
       background: S.surface,
       borderRight: `1px solid ${S.border}`,
       display: 'flex',
       flexDirection: 'column',
       flexShrink: 0,
+      overflow: 'hidden',
     }}>
-      <div style={{ padding: '18px 14px 14px', borderBottom: `1px solid ${S.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <img src={`${import.meta.env.BASE_URL}termora-logo.svg`} alt="" style={{ width: 22, height: 22 }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: S.text1, letterSpacing: -0.4, flex: 1 }}>termora</span>
+      {/* App header */}
+      <div style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${S.border}`, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="20" height="20" viewBox="0 0 36 36">
+            <rect width="36" height="36" rx="8" fill={S.primary}/>
+            <text x="18" y="25" textAnchor="middle" fill="white" fontSize="18" fontWeight="700" fontFamily="Arial,sans-serif">T</text>
+          </svg>
+          <span style={{ fontSize: 13, fontWeight: 700, color: S.text1, letterSpacing: -0.4, flex: 1 }}>Synaptix</span>
           <span style={{
             width: 7, height: 7, borderRadius: '50%', background: statusColor,
             animation: isConnected ? 'pulse-dot 2s ease-in-out infinite' : 'none',
+            flexShrink: 0,
           }} />
         </div>
-        <button
-          type="button"
-          onClick={onNewSession}
-          style={{
-            width: '100%', height: 32, borderRadius: 7,
-            border: 'none', background: S.primary, color: S.bg,
-            fontSize: 11, fontWeight: 600, fontFamily: 'inherit',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-            cursor: 'pointer', touchAction: 'manipulation', letterSpacing: -0.1,
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          New Session
-        </button>
       </div>
 
-      <nav style={{ padding: '6px 6px', flex: 1 }}>
-        {TAB_CONFIG.map((tab) => {
-          const active = current === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onChange(tab.id)}
-              style={{
-                width: '100%', height: 34, display: 'flex',
-                alignItems: 'center', gap: 8, padding: '0 8px',
-                borderRadius: 7, border: 'none', marginBottom: 1,
-                background: active ? `${S.primary}14` : 'transparent',
-                color: active ? S.primary : S.text2,
-                fontSize: 12, fontWeight: active ? 600 : 400,
-                fontFamily: 'inherit',
-                cursor: 'pointer', touchAction: 'manipulation',
-                transition: 'all 120ms ease-out',
-                textAlign: 'left',
-              }}
-            >
-              {tab.icon}
-              <span style={{ flex: 1 }}>{tab.label}</span>
-              {tab.id === 'terminal' && sessionBadge !== null && (
-                <span style={{
-                  fontSize: 9, fontWeight: 700,
-                  background: active ? `${S.primary}25` : S.surface3,
-                  color: active ? S.primary : S.text3,
-                  padding: '1px 6px', borderRadius: 8,
-                }}>
-                  {sessionBadge}
-                </span>
-              )}
-              {tab.id === 'notifications' && unreadBadge !== null && (
-                <span style={{
-                  fontSize: 9, fontWeight: 700,
-                  background: S.error,
-                  color: '#fff',
-                  padding: '1px 6px', borderRadius: 8,
-                }}>
-                  {unreadBadge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </nav>
+      {/* Search */}
+      <div style={{ padding: '8px 10px 6px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 6, padding: '0 8px', height: 28 }}>
+          {icons.search}
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search"
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: S.text1, fontSize: 12, fontFamily: 'inherit' }}
+          />
+        </div>
+      </div>
 
-      <div style={{ padding: '8px 10px', borderTop: `1px solid ${S.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-          <span style={{ fontSize: 9, color: S.text3, flex: 1 }}>v{__APP_VERSION__} — RUD Lab</span>
-          <button
-            type="button"
-            title="Keyboard shortcuts: ⌘K Quick Open · ⌘N New Session"
+      {/* Primary navigation — matches Orca exactly */}
+      <div style={{ padding: '0 6px', flexShrink: 0 }}>
+        {/* Onboarding checklist */}
+        <NavItem label="Onboarding checklist" icon={icons.checklist}
+          active={false} onClick={() => onChange('settings')} />
+
+        {/* Tasks */}
+        <NavItem label="Tasks" icon={icons.tasks}
+          active={current === 'tasks'}
+          badge={sessionBadge} badgeColor={S.primary}
+          onClick={() => onChange('tasks')} />
+
+        {/* Automations */}
+        <NavItem label="Automations" icon={icons.automations}
+          active={current === 'automations'}
+          onClick={() => onChange('automations')} />
+
+        {/* Agent Dashboard */}
+        <NavItem label="Agent Dashboard" icon={icons.dashboard}
+          active={current === 'dashboard'}
+          onClick={() => onChange('dashboard')} />
+
+        {/* Synaptix Mobile */}
+        <NavItem label="Synaptix Mobile" icon={icons.mobile}
+          active={current === 'mobile'}
+          onClick={() => onChange('mobile')} />
+      </div>
+
+      <div style={{ borderTop: `1px solid ${S.border}`, margin: '4px 10px' }} />
+
+      {/* Secondary navigation */}
+      <div style={{ padding: '0 6px', flexShrink: 0 }}>
+        <NavItem label="Terminals" icon={icons.terminal}
+          active={current === 'terminal'}
+          badge={sessionBadge} badgeColor={S.text3}
+          onClick={() => onChange('terminal')} />
+        <NavItem label="Tunnels" icon={icons.tunnels}
+          active={current === 'tunnels'}
+          onClick={() => onChange('tunnels')} />
+        <NavItem label="Chat" icon={icons.chat}
+          active={current === 'chat'}
+          onClick={() => onChange('chat')} />
+        <NavItem label="Notifications" icon={icons.bell}
+          active={current === 'notifications'}
+          badge={unreadBadge} badgeColor={S.error}
+          onClick={() => onChange('notifications')} />
+      </div>
+
+      <div style={{ borderTop: `1px solid ${S.border}`, margin: '4px 10px' }} />
+
+      {/* Projects section */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '4px 14px 2px', flexShrink: 0 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: S.text2, flex: 1 }}>Projects</span>
+          <button type="button" onClick={onNewSession} title="New session" style={{
+            background: 'transparent', border: 'none', color: S.text3, cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center',
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+
+        {/* Project filter input */}
+        <div style={{ padding: '2px 8px 4px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 5, padding: '0 7px', height: 24 }}>
+            {icons.search}
+            <input
+              type="text"
+              value={projectFilter}
+              onChange={e => setProjectFilter(e.target.value)}
+              placeholder="Filter…"
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: S.text1, fontSize: 11, fontFamily: 'inherit' }}
+            />
+          </div>
+        </div>
+
+        {/* Project list */}
+        <div style={{ flex: 1, overflow: 'auto', padding: '0 6px' }}>
+          {filteredProjects.length > 0 ? (
+            filteredProjects.map(proj => (
+              <button key={proj} type="button" onClick={() => onChange('tasks')} style={{
+                width: '100%', height: 29, display: 'flex', alignItems: 'center',
+                gap: 8, padding: '0 8px', borderRadius: 5,
+                border: 'none', marginBottom: 1,
+                background: 'transparent', color: S.text2,
+                fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
+                transition: 'background 100ms',
+              }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = S.surface2; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+              >
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: S.surface3, border: `1px solid ${S.border}`, flexShrink: 0 }} />
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{proj}</span>
+              </button>
+            ))
+          ) : (
+            <p style={{ fontSize: 11, color: S.text3, padding: '6px 8px', lineHeight: 1.5, margin: 0 }}>
+              No agent activity matches these filters.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom: settings + profile */}
+      <div style={{ borderTop: `1px solid ${S.border}`, padding: '8px 10px 10px', flexShrink: 0 }}>
+        {/* Settings + ⌘K row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 8 }}>
+          <button type="button" onClick={() => onChange('settings')} title="Settings (⌘,)"
             style={{
-              background: 'transparent', border: `1px solid ${S.border}`,
-              borderRadius: 4, padding: '2px 5px', cursor: 'pointer',
-              color: S.text3, fontSize: 9, fontFamily: 'inherit',
-            }}
-          >
+              flex: 1, height: 30, borderRadius: 6, border: `1px solid ${S.border}`,
+              background: current === 'settings' ? `${S.primary}14` : 'transparent',
+              color: current === 'settings' ? S.primary : S.text3,
+              fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', gap: 6, padding: '0 8px',
+            }}>
+            {icons.settings}
+            <span>Settings</span>
+          </button>
+          <button type="button" onClick={onQuickOpen} title="Quick Open (⌘K)"
+            style={{
+              width: 30, height: 30, borderRadius: 6, border: `1px solid ${S.border}`,
+              background: 'transparent', color: S.text3,
+              fontSize: 9, cursor: 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
             ⌘K
           </button>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {[
-            { keys: '⌘K', label: 'Quick Open' },
-            { keys: '⌘N', label: 'New Session' },
-          ].map(({ keys, label }) => (
-            <div key={keys} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 9, color: S.text3 }}>{label}</span>
-              <kbd style={{
-                fontSize: 8, color: S.text3,
-                background: S.surface3, border: `1px solid ${S.border}`,
-                borderRadius: 3, padding: '1px 4px', fontFamily: 'inherit',
-              }}>{keys}</kbd>
+
+        {/* Profile row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            width: 26, height: 26, borderRadius: '50%',
+            background: `linear-gradient(135deg, ${S.primary}, #a78bfa)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
+          }}>W</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: S.text1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              whitemelonis11
             </div>
-          ))}
+            <div style={{ fontSize: 9, color: S.text3 }}>v{__APP_VERSION__}</div>
+          </div>
+          <span style={{
+            fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+            background: `${S.primary}20`, border: `1px solid ${S.primary}40`,
+            color: S.primary, flexShrink: 0,
+          }}>Max</span>
         </div>
       </div>
     </div>
@@ -542,7 +693,7 @@ export function App() {
   const { isDone: onboardingDone, complete: completeOnboarding } = useOnboarding();
   const { ports, loading: portsLoading, error: portsError, refresh: refreshPorts } = usePorts(connectionStatus, auth.token);
 
-  const [view, setView] = useState<View>('dashboard');
+  const [view, setView] = useState<View>(import.meta.env.VITE_DEMO === '1' ? 'dashboard' : 'tasks');
   const [quickOpenVisible, setQuickOpenVisible] = useState(false);
   const [tunnelUrl, setTunnelUrl] = useState<string | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -680,8 +831,10 @@ export function App() {
     );
   }
 
-  const { showSidebar, showTabBar, showFab, sessionBadge, unreadBadge } =
-    surface.kind === 'shell' ? surface.nav : { showSidebar: false, showTabBar: false, showFab: false, sessionBadge: null, unreadBadge: null };
+  const { showTabBar, showFab, sessionBadge, unreadBadge } =
+    surface.kind === 'shell' ? surface.nav : { showTabBar: false, showFab: false, sessionBadge: null, unreadBadge: null };
+  // Always show sidebar on desktop for shell views (matches Orca behavior)
+  const showSidebar = isDesktop && surface.kind === 'shell';
 
   return (
     <div style={{
@@ -697,6 +850,7 @@ export function App() {
           current={view}
           onChange={handleTabChange}
           onNewSession={handleCreateSession}
+          onQuickOpen={() => setQuickOpenVisible(true)}
           sessionBadge={sessionBadge}
           unreadBadge={unreadBadge}
           connectionStatus={connectionStatus}
@@ -759,6 +913,7 @@ export function App() {
               connectionStatus={connectionStatus}
               latencyMs={latencyMs}
               authToken={auth.token}
+              onBack={() => setView('tasks')}
             />
           )}
           {view === 'reconnect' && (
@@ -794,6 +949,23 @@ export function App() {
               connectionStatus={connectionStatus}
             />
           )}
+          {view === 'tasks' && (
+            <TasksView
+              sessions={sessions}
+              connectionStatus={connectionStatus}
+              onSessionSelect={handleSessionSelect}
+              onCreateSession={handleCreateSession}
+              authToken={auth.token}
+            />
+          )}
+          {view === 'automations' && <AutomationsView />}
+          {view === 'mobile' && (
+            <MobileView
+              connectionStatus={connectionStatus}
+              tunnelUrl={tunnelUrl}
+              authToken={auth.token}
+            />
+          )}
         </div>
 
         {showTabBar && (
@@ -818,6 +990,7 @@ export function App() {
         />
       )}
 
+      <UpdateNotification currentVersion={__APP_VERSION__} />
     </div>
   );
 }

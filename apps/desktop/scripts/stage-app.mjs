@@ -7,9 +7,9 @@
 // Layout produced (mirrors the relative lookups in packages/agent/src/server.ts):
 //   stage/package.json                      app manifest (main -> desktop/dist/electron-main.js)
 //   stage/desktop/dist/                     compiled Electron main + preload
-//   stage/vendor/termora-agent/             compiled agent (installed as @termora/agent)
-//   stage/vendor/termora-web/dist/          built web cockpit (installed as @termora/web)
-//   stage/node_modules/@termora/{agent,web} copies made by `npm install --install-links`
+//   stage/vendor/synaptix-agent/             compiled agent (installed as @synaptix/agent)
+//   stage/vendor/synaptix-web/dist/          built web cockpit (installed as @synaptix/web)
+//   stage/node_modules/@synaptix/{agent,web} copies made by `npm install --install-links`
 //   stage/cli/                              compiled CLI (copied to resources by the builder config)
 //
 // electron-builder only packages dependencies declared in the app's package.json,
@@ -53,8 +53,8 @@ mkdirSync(stage, { recursive: true })
 // Vendored local packages. The agent keeps no dependencies of its own here: its
 // third-party dependencies are declared once, in the app manifest below.
 const vendor = join(stage, 'vendor')
-const agentVendor = join(vendor, 'termora-agent')
-const webVendor = join(vendor, 'termora-web')
+const agentVendor = join(vendor, 'synaptix-agent')
+const webVendor = join(vendor, 'synaptix-web')
 mkdirSync(agentVendor, { recursive: true })
 mkdirSync(webVendor, { recursive: true })
 cpSync(sources.agentDist, join(agentVendor, 'dist'), { recursive: true })
@@ -63,15 +63,15 @@ writeFileSync(join(agentVendor, 'package.json'), `${JSON.stringify(agentManifest
 cpSync(sources.webDist, join(webVendor, 'dist'), { recursive: true })
 writeFileSync(
   join(webVendor, 'package.json'),
-  `${JSON.stringify({ name: '@termora/web', version: rootPkg.version, private: true }, null, 2)}\n`,
+  `${JSON.stringify({ name: '@synaptix/web', version: rootPkg.version, private: true }, null, 2)}\n`,
 )
 
 const manifest = {
-  name: 'termora',
-  productName: 'Termora',
+  name: 'synaptix',
+  productName: 'Synaptix',
   version: rootPkg.version,
   description: rootPkg.description,
-  author: { name: 'Termora contributors', email: 'noreply@termora.dev' },
+  author: { name: 'Synaptix contributors', email: 'noreply@synaptix.dev' },
   homepage: rootPkg.homepage,
   license: rootPkg.license,
   type: 'module',
@@ -80,8 +80,8 @@ const manifest = {
   // native ones (better-sqlite3, node-pty) against Electron's ABI.
   dependencies: {
     ...agentPkg.dependencies,
-    '@termora/agent': 'file:vendor/termora-agent',
-    '@termora/web': 'file:vendor/termora-web',
+    '@synaptix/agent': 'file:vendor/synaptix-agent',
+    '@synaptix/web': 'file:vendor/synaptix-web',
   },
 }
 writeFileSync(join(stage, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`)
@@ -109,4 +109,4 @@ if (process.platform !== 'win32') {
 cpSync(sources.desktopDist, join(stage, 'desktop', 'dist'), { recursive: true })
 cpSync(sources.cliDist, join(stage, 'cli'), { recursive: true })
 
-console.log(`stage-app: staged Termora ${rootPkg.version} at ${stage}`)
+console.log(`stage-app: staged Synaptix ${rootPkg.version} at ${stage}`)

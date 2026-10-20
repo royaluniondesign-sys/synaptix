@@ -1,8 +1,8 @@
-# Termora Mobile Companion Scaffold
+# Synaptix Mobile Companion Scaffold
 
 This directory is the future native mobile companion boundary.
 
-Current status: **scaffold + phase-1 contracts only**. Termora's installable PWA remains the
+Current status: **scaffold + phase-1 contracts only**. Synaptix's installable PWA remains the
 active mobile client until native push/deep links/camera/share-sheet justify an Expo app.
 Native builds and store publishing are intentionally **gated**; see
 [`docs/platform-readiness-checklist.md`](../../docs/platform-readiness-checklist.md).
@@ -23,7 +23,7 @@ while builds stay gated.
 
 | Module                | Contract                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------- |
-| `pairing.ts`          | Parses `https://host/?token=…` and `termora://pair?url=…&token=…` into a descriptor; never returns a raw token from logs. |
+| `pairing.ts`          | Parses `https://host/?token=…` and `synaptix://pair?url=…&token=…` into a descriptor; never returns a raw token from logs. |
 | `secure-storage.ts`   | `SecureStorage` interface (get/set/delete/keys) plus an in-memory implementation for tests. Real Keychain/Keystore wiring is gated. |
 | `push.ts`             | `PushPermissionState` model: undetermined/granted/denied, device-token registration, and an honest `describePushReadiness`. |
 

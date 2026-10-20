@@ -1,6 +1,6 @@
 # Security Policy
 
-Termora provides authenticated access to real terminals. Treat every deployment as sensitive infrastructure.
+Synaptix provides authenticated access to real terminals. Treat every deployment as sensitive infrastructure.
 
 ## Supported versions
 

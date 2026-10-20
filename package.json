@@ -1,18 +1,18 @@
 {
-  "name": "termora",
+  "name": "synaptix",
   "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Installable mobile and web cockpit for real terminals, SSH/SFTP, multi-machine access, and agent workflows",
   "license": "MIT",
-  "author": "termora contributors",
-  "homepage": "https://royaluniondesign-sys.github.io/termora/",
+  "author": "synaptix contributors",
+  "homepage": "https://synaptix.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/royaluniondesign-sys/termora.git"
+    "url": "https://github.com/royaluniondesign-sys/synaptix.git"
   },
   "bugs": {
-    "url": "https://github.com/royaluniondesign-sys/termora/issues"
+    "url": "https://github.com/royaluniondesign-sys/synaptix/issues"
   },
   "keywords": [
     "terminal",
@@ -36,7 +36,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --filter=@termora/agent --filter=@termora/web --parallel --log-prefix=none --log-order=stream --verbosity=0",
+    "dev": "turbo run dev --filter=@synaptix/agent --filter=@synaptix/web --parallel --log-prefix=none --log-order=stream --verbosity=0",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

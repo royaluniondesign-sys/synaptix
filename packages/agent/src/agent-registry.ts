@@ -3,7 +3,7 @@ import { homedir } from 'node:os';
 import { delimiter, dirname, isAbsolute, join } from 'node:path';
 
 /**
- * Registry of CLI agents Termora can launch, plus a heuristic status parser.
+ * Registry of CLI agents Synaptix can launch, plus a heuristic status parser.
  *
  * A profile is data, not code: an executable plus an argv template. Commands
  * are never run through a shell, so a template can only ever inject a prompt as
@@ -185,7 +185,7 @@ export interface AgentView extends AgentProfile {
 export class AgentRegistry {
   private custom = new Map<string, AgentProfile>();
 
-  constructor(private readonly filePath: string = join(homedir(), '.termora', 'agents.json')) {
+  constructor(private readonly filePath: string = join(homedir(), '.synaptix', 'agents.json')) {
     this.load();
   }
 

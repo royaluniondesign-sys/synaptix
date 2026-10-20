@@ -81,7 +81,7 @@ export async function createSessionJWT(
     .setIssuedAt()
     .setExpirationTime('7d')
     .setJti(jti)
-    .setIssuer('termora-agent')
+    .setIssuer('synaptix-agent')
     .setSubject(claims.email ?? 'local')
     .sign(secretKey);
 
@@ -103,7 +103,7 @@ export async function verifyJWT(
   const secretKey = new TextEncoder().encode(secret);
 
   const { payload } = await jwtVerify(token, secretKey, {
-    issuer: 'termora-agent',
+    issuer: 'synaptix-agent',
     algorithms: ['HS256'],
   });
 

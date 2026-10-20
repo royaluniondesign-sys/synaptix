@@ -1,4 +1,4 @@
-// Termora desktop window adapter (dev shell only).
+// Synaptix desktop window adapter (dev shell only).
 //
 // Maps Electron's `BrowserWindow` onto the shell's `ShellWindow` contract while
 // keeping the Electron-free, dependency-free pattern of the rest of the shell.
@@ -14,7 +14,7 @@ export interface WindowOptions {
   width?: number
   height?: number
   title?: string
-  /** Absolute path to the preload bundle exposing `window[TERMORA_PRELOAD_KEY]`. */
+  /** Absolute path to the preload bundle exposing `window[SYNAPTIX_PRELOAD_KEY]`. */
   preload?: string
   /** Show the window once the page is ready to paint (default true). */
   show?: boolean
@@ -101,7 +101,7 @@ export async function createBrowserWindow(
   const win = new electron.BrowserWindow({
     width: options.width ?? DEFAULT_WINDOW_WIDTH,
     height: options.height ?? DEFAULT_WINDOW_HEIGHT,
-    title: options.title ?? 'Termora',
+    title: options.title ?? 'Synaptix',
     show: false,
     webPreferences: {
       preload: options.preload,

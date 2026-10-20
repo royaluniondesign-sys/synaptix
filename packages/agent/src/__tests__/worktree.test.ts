@@ -44,7 +44,7 @@ describe('git worktree operations', () => {
   beforeAll(async () => {
     // macOS symlinks /var -> /private/var; git resolves the canonical path,
     // so tests need to compare against that same canonical form too.
-    parentDir = await realpath(await mkdtemp(join(tmpdir(), 'termora-worktree-')));
+    parentDir = await realpath(await mkdtemp(join(tmpdir(), 'synaptix-worktree-')));
     repoRoot = join(parentDir, 'sample-repo');
     await mkdir(repoRoot);
     await execFileAsync('git', ['-C', repoRoot, 'init', '-q']);

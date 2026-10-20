@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a reproducible Termora problem
+about: Report a reproducible Synaptix problem
 title: '[Bug] '
 labels: bug
 assignees: ''

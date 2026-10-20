@@ -86,7 +86,7 @@ describe('NotificationStore (in-memory unread model)', () => {
 });
 
 describe('notifications HTTP API', () => {
-  const dbPath = join(tmpdir(), `termora-notifications-${randomBytes(6).toString('hex')}.db`);
+  const dbPath = join(tmpdir(), `synaptix-notifications-${randomBytes(6).toString('hex')}.db`);
   const config = makeConfig(dbPath);
   const store = new NotificationStore();
   const { db, statements } = initDatabase(dbPath);

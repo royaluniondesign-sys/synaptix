@@ -91,7 +91,7 @@ describe('parseAgentStatus', () => {
 
 describe('isCommandAvailable', () => {
   let dir = '';
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'termora-agents-')); });
+  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'synaptix-agents-')); });
   afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
   it('finds executables on a given PATH and ignores non-executables', () => {
@@ -110,7 +110,7 @@ describe('isCommandAvailable', () => {
 describe('AgentRegistry', () => {
   let dir = '';
   let file = '';
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'termora-registry-')); file = join(dir, 'nested', 'agents.json'); });
+  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'synaptix-registry-')); file = join(dir, 'nested', 'agents.json'); });
   afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
   it('lists built-ins and persists custom agents across instances', () => {

@@ -1,4 +1,4 @@
-# Termora Desktop App Scaffold
+# Synaptix Desktop App Scaffold
 
 This directory is the desktop packaging boundary.
 

@@ -1,10 +1,10 @@
-// Termora desktop Electron main-process entry (dev shell only, unsigned).
+// Synaptix desktop Electron main-process entry (dev shell only, unsigned).
 //
 // This is the module Electron executes as the app's main process. It resolves
 // the Electron runtime through the computed loader, loads the programmatic
-// startAgent() from @termora/agent, and hands both to `createDesktopMain`, which
+// startAgent() from @synaptix/agent, and hands both to `createDesktopMain`, which
 // owns the shell lifecycle plus the status/lifecycle IPC bridge. The preload
-// entry (`preload.ts`) exposes the renderer API under `window.termora`.
+// entry (`preload.ts`) exposes the renderer API under `window.synaptix`.
 //
 // Nothing here packages, signs, or installs anything, and there is no static
 // `electron` import: everything Electron-specific is injected through
@@ -24,7 +24,7 @@ import { loadAgentStartFn } from './shell.js'
 import { loadElectron, type ElectronLoader } from './window.js'
 
 export interface StartDesktopAppOptions {
-  /** Programmatic agent entrypoint. Defaults to @termora/agent's startAgent(). */
+  /** Programmatic agent entrypoint. Defaults to @synaptix/agent's startAgent(). */
   startAgent?: StartAgentFn
   /** Injected Electron importer (tests pass a fake; production computes it). */
   importer?: ElectronImporter
@@ -93,7 +93,7 @@ const electronRuntime = (process.versions as unknown as Record<string, string | 
 if (electronRuntime) {
   void startDesktopApp().catch((cause: unknown) => {
     const detail = cause instanceof Error ? cause.message : String(cause)
-    console.error(`[termora-desktop] electron main failed: ${detail}`)
+    console.error(`[synaptix-desktop] electron main failed: ${detail}`)
     // exitCode alone would leave Electron running windowless; fail fast instead.
     process.exit(1)
   })

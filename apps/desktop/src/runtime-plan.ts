@@ -1,4 +1,4 @@
-// Termora desktop runtime plan.
+// Synaptix desktop runtime plan.
 // Pure data module: no Electron, no Node APIs, no side effects.
 // This is the single source of truth for how the desktop shell is wired to
 // the existing agent/web/cli build outputs. The Electron main process (added
@@ -17,13 +17,13 @@ export type DesktopRuntimePlan = {
   phase: DesktopShellPhase;
   /** Load the built web cockpit (packages/web/dist) into the shell window. */
   loadWebDist: boolean;
-  /** Start the local Termora agent when the shell launches. */
+  /** Start the local Synaptix agent when the shell launches. */
   startLocalAgent: boolean;
   /** Expose the packaged CLI binary to the shell/user. */
   exposeCli: boolean;
   /**
    * How the shell starts the agent. `programmatic` requires an exported
-   * `startAgent()` from @termora/agent; until it exists the shell must not
+   * `startAgent()` from @synaptix/agent; until it exists the shell must not
    * claim it can start the agent in-process.
    */
   agentEntry: AgentEntryStrategy;

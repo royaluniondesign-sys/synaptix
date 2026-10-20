@@ -34,7 +34,7 @@ function makeConfig(dbPath: string): AgentConfig {
 }
 
 describe('auth rate limiting behind a tunnel', () => {
-  const dbPath = join(tmpdir(), `termora-trust-proxy-${randomBytes(6).toString('hex')}.db`);
+  const dbPath = join(tmpdir(), `synaptix-trust-proxy-${randomBytes(6).toString('hex')}.db`);
   const { db, statements } = initDatabase(dbPath);
   const { app, httpServer } = createAppServer(makeConfig(dbPath), statements);
   let baseUrl = '';

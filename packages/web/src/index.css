@@ -32,22 +32,22 @@
   --color-obsidian-warning: #7170ff;
 
   /* Legacy aliases — keeping these so existing components don't break */
-  --color-termora-orange: #7170ff;
-  --color-termora-orange-dim: #7170ff;
-  --color-termora-orange-bright: #828fff;
-  --color-termora-bg: #09090b;
-  --color-termora-surface: #0c0c0f;
-  --color-termora-surface-2: #0f1011;
-  --color-termora-surface-3: #27272a;
-  --color-termora-border: #27272a;
-  --color-termora-border-light: #3f3f46;
-  --color-termora-light: #fafafa;
-  --color-termora-light-gray: #e4e4e7;
-  --color-termora-mid: #a1a1aa;
-  --color-termora-text-muted: #71717a;
-  --color-termora-green: #10b981;
-  --color-termora-blue: #7170ff;
-  --color-termora-gold: #7170ff;
+  --color-synaptix-orange: #7170ff;
+  --color-synaptix-orange-dim: #7170ff;
+  --color-synaptix-orange-bright: #828fff;
+  --color-synaptix-bg: #09090b;
+  --color-synaptix-surface: #0c0c0f;
+  --color-synaptix-surface-2: #0f1011;
+  --color-synaptix-surface-3: #27272a;
+  --color-synaptix-border: #27272a;
+  --color-synaptix-border-light: #3f3f46;
+  --color-synaptix-light: #fafafa;
+  --color-synaptix-light-gray: #e4e4e7;
+  --color-synaptix-mid: #a1a1aa;
+  --color-synaptix-text-muted: #71717a;
+  --color-synaptix-green: #10b981;
+  --color-synaptix-blue: #7170ff;
+  --color-synaptix-gold: #7170ff;
 }
 
 @keyframes notch-pulse {
@@ -242,7 +242,7 @@ body {
 ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #7170ff; }
 
-/* ── Termora Cockpit shell redesign ───────────────────────────────────── */
+/* ── Synaptix Cockpit shell redesign ───────────────────────────────────── */
 :root {
   --tm-bg: #08090a;
   --tm-shell: #08090a;
@@ -341,7 +341,7 @@ body { background: var(--tm-bg); }
 @media (max-width: 760px) { .tm-cockpit-shell{display:block; overflow:auto} .tm-cockpit-sidebar{display:none} .tm-cockpit-main{min-height:100%} .tm-topbar{position:sticky; top:0; z-index:10; align-items:flex-start; padding:12px; min-height:auto} .tm-topbar h1{font-size:18px} .tm-top-actions{gap:5px} .tm-cockpit-scroll{padding:10px 10px 86px} .tm-metrics-grid{grid-template-columns:1fr 1fr} .tm-metrics-grid .tm-metric-card:nth-child(3){grid-column:1 / -1} .tm-content-grid{grid-template-columns:1fr} .tm-board{display:flex; overflow:auto; padding-bottom:4px; scroll-snap-type:x mandatory} .tm-board-col{min-width:230px; scroll-snap-align:start} .tm-session-head{grid-template-columns:18px minmax(0,1fr) auto 24px} }
 @media (max-width: 420px) { .tm-metrics-grid{grid-template-columns:1fr} .tm-status-pill{font-size:8px; padding:0 6px} .tm-terminal-preview{height:82px} }
 
-/* ── Termora Orca-style multi-pane workspace ───────────────────────────── */
+/* ── Synaptix Orca-style multi-pane workspace ───────────────────────────── */
 :root {
   --oct-bg: #0b0b0c;
   --oct-window: #111113;
@@ -503,7 +503,7 @@ body { background: var(--tm-bg); }
   .tm-oct-phone { border-radius:26px; margin:12px 10px 44px; max-width:none; }
 }
 
-/* ── Termora operational utility layer ───────────────────────────────── */
+/* ── Synaptix operational utility layer ───────────────────────────────── */
 .tm-oct-command-strip {
   height: 34px;
   display:flex;
@@ -703,7 +703,7 @@ body { background: var(--tm-bg); }
 .tm-oct-github-note { margin:0; padding:8px 10px; color:#8a8f98; font-size:9px; }
 
 
-/* ── Termora final visual unification: Linear-like dark cockpit ─────────── */
+/* ── Synaptix final visual unification: Linear-like dark cockpit ─────────── */
 :root {
   --tm-bg: #08090a;
   --tm-shell: #0f1011;

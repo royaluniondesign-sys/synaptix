@@ -1,16 +1,16 @@
 {
-  "name": "@termora/web",
+  "name": "@synaptix/web",
   "version": "0.2.0",
-  "description": "Installable Termora web cockpit for terminals, sessions, machines, and developer workflows",
+  "description": "Installable Synaptix web cockpit for terminals, sessions, machines, and developer workflows",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/royaluniondesign-sys/termora.git",
+    "url": "https://github.com/royaluniondesign-sys/synaptix.git",
     "directory": "packages/web"
   },
-  "homepage": "https://royaluniondesign-sys.github.io/termora/",
+  "homepage": "https://synaptix.dev",
   "bugs": {
-    "url": "https://github.com/royaluniondesign-sys/termora/issues"
+    "url": "https://github.com/royaluniondesign-sys/synaptix/issues"
   },
   "type": "module",
   "scripts": {

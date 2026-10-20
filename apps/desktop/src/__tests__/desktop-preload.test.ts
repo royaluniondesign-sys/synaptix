@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   DESKTOP_IPC_CHANNELS,
-  TERMORA_PRELOAD_KEY,
+  SYNAPTIX_PRELOAD_KEY,
   type ContextBridgeLike,
   type IpcRendererLike,
 } from '../ipc-contract.js'
 import { loadElectronPreload, type ElectronImporter } from '../electron-loader.js'
-import { bootstrapTermoraPreload } from '../preload.js'
+import { bootstrapSynaptixPreload } from '../preload.js'
 
 function fakeContextBridge(): {
   bridge: ContextBridgeLike
@@ -49,16 +49,16 @@ describe('loadElectronPreload', () => {
   })
 })
 
-describe('bootstrapTermoraPreload', () => {
-  it('exposes the Termora API on the configured global key and forwards status calls', async () => {
+describe('bootstrapSynaptixPreload', () => {
+  it('exposes the Synaptix API on the configured global key and forwards status calls', async () => {
     const { bridge, exposeInMainWorld } = fakeContextBridge()
     const ipcRenderer = fakeIpcRenderer()
     const importer: ElectronImporter = () =>
       Promise.resolve({ contextBridge: bridge, ipcRenderer })
 
-    const api = await bootstrapTermoraPreload(importer)
+    const api = await bootstrapSynaptixPreload(importer)
 
-    expect(exposeInMainWorld).toHaveBeenCalledWith(TERMORA_PRELOAD_KEY, expect.any(Object))
+    expect(exposeInMainWorld).toHaveBeenCalledWith(SYNAPTIX_PRELOAD_KEY, expect.any(Object))
     await api.getStatus()
     expect(ipcRenderer.invoke).toHaveBeenCalledWith(DESKTOP_IPC_CHANNELS.getStatus)
   })

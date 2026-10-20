@@ -35,7 +35,7 @@ describe('run', () => {
     const { io, out } = makeIo()
     const code = await run([], { version: '9.9.9', env: {}, io })
     expect(code).toBe(0)
-    expect(out.join('\n')).toContain('termora — remote cockpit CLI')
+    expect(out.join('\n')).toContain('synaptix — remote cockpit CLI')
   })
 
   it('prints the version', async () => {
@@ -58,7 +58,7 @@ describe('run', () => {
     const code = await run(['status'], { version: '1.0.0', env: {}, io })
     expect(code).toBe(0)
     expect(out.join('\n')).toContain('local mode')
-    expect(out.join('\n')).toContain('TERMORA_URL and TERMORA_TOKEN')
+    expect(out.join('\n')).toContain('SYNAPTIX_URL and SYNAPTIX_TOKEN')
   })
 
   it('refuses file without env, without contacting anything', async () => {
@@ -89,7 +89,7 @@ describe('run', () => {
 
     const code = await run(['status'], {
       version: '1.0.0',
-      env: { TERMORA_URL: 'http://x', TERMORA_TOKEN: 't' },
+      env: { SYNAPTIX_URL: 'http://x', SYNAPTIX_TOKEN: 't' },
       io,
       createClient,
     })
@@ -106,7 +106,7 @@ describe('run', () => {
 
     const code = await run(['file', 'a.txt'], {
       version: '1.0.0',
-      env: { TERMORA_URL: 'http://x', TERMORA_TOKEN: 't' },
+      env: { SYNAPTIX_URL: 'http://x', SYNAPTIX_TOKEN: 't' },
       io,
       createClient,
     })
@@ -132,7 +132,7 @@ describe('run', () => {
 
     const code = await run(['file', 'logo.png'], {
       version: '1.0.0',
-      env: { TERMORA_URL: 'http://x', TERMORA_TOKEN: 't' },
+      env: { SYNAPTIX_URL: 'http://x', SYNAPTIX_TOKEN: 't' },
       io,
       createClient,
     })
@@ -153,7 +153,7 @@ describe('run', () => {
 
     const code = await run(['status'], {
       version: '1.0.0',
-      env: { TERMORA_URL: 'http://x', TERMORA_TOKEN: 't' },
+      env: { SYNAPTIX_URL: 'http://x', SYNAPTIX_TOKEN: 't' },
       io,
       createClient,
     })

@@ -35,7 +35,7 @@ function makeConfig(dbPath: string): AgentConfig {
 }
 
 describe('WebSocket authorization respects device revocation', () => {
-  const dbPath = join(tmpdir(), `termora-revoke-${randomBytes(6).toString('hex')}.db`);
+  const dbPath = join(tmpdir(), `synaptix-revoke-${randomBytes(6).toString('hex')}.db`);
   const config = makeConfig(dbPath);
   const { db, statements } = initDatabase(dbPath);
   const { httpServer, wss } = createAppServer(config, statements);

@@ -1,4 +1,4 @@
-// @termora/agent runtime — programmatic lifecycle API.
+// @synaptix/agent runtime — programmatic lifecycle API.
 //
 // `index.ts` is a CLI entry point: importing it starts the server, opens a
 // tunnel, prints a QR code, and installs signal handlers. Desktop shells need
@@ -69,7 +69,7 @@ export async function startAgent(options: StartAgentOptions = {}): Promise<Agent
   let tmuxEnabled = false;
   let tmuxConfPath: string | null = null;
   if (config.tmuxDisabled) {
-    if (log) console.log('  Session persistence disabled (TERMORA_NO_TMUX=1)');
+    if (log) console.log('  Session persistence disabled (SYNAPTIX_NO_TMUX=1)');
   } else if (!isTmuxAvailable()) {
     if (log) console.log('  Sessions are ephemeral (tmux not found — install tmux for session persistence)');
   } else {

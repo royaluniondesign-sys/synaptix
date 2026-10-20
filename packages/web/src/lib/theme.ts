@@ -19,11 +19,11 @@ export const TERMINAL_THEMES: Record<string, ITheme> = {
 
 export function getTerminalTheme(): ITheme {
   try {
-    const key = localStorage.getItem('termora_theme') ?? 'obsidian';
+    const key = localStorage.getItem('synaptix_theme') ?? 'obsidian';
     return TERMINAL_THEMES[key] ?? TERMINAL_THEMES.obsidian;
   } catch {
     return TERMINAL_THEMES.obsidian;
   }
 }
 
-export const TERMORA_THEME: ITheme = TERMINAL_THEMES.obsidian;
+export const SYNAPTIX_THEME: ITheme = TERMINAL_THEMES.obsidian;

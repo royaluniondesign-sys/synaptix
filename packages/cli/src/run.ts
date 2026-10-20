@@ -5,11 +5,11 @@
 import { parseArgs } from './args.js'
 import {
   readEnv,
-  TermoraClient,
-  TermoraError,
+  SynaptixClient,
+  SynaptixError,
   type CockpitStatus,
   type FilePreview,
-  type TermoraEnv,
+  type SynaptixEnv,
 } from './client.js'
 
 export interface CliIo {
@@ -17,7 +17,7 @@ export interface CliIo {
   err: (line: string) => void
 }
 
-/** The subset of TermoraClient the CLI uses; easy to stub in tests. */
+/** The subset of SynaptixClient the CLI uses; easy to stub in tests. */
 export interface CockpitClient {
   getStatus(): Promise<CockpitStatus>
   getFile(path: string, maxBytes?: number): Promise<FilePreview>
@@ -27,23 +27,23 @@ export interface RunDeps {
   version: string
   env?: NodeJS.ProcessEnv
   io?: CliIo
-  createClient?: (env: TermoraEnv) => CockpitClient
+  createClient?: (env: SynaptixEnv) => CockpitClient
 }
 
-export const HELP = `termora — remote cockpit CLI
+export const HELP = `synaptix — remote cockpit CLI
 
 Usage:
-  termora help                 Show this help
-  termora version              Show the CLI version
-  termora status               Show status (remote cockpit, or a local fallback)
-  termora file <path>          Preview a repo file served by the agent
+  synaptix help                 Show this help
+  synaptix version              Show the CLI version
+  synaptix status               Show status (remote cockpit, or a local fallback)
+  synaptix file <path>          Preview a repo file served by the agent
          [--max-bytes <n>]     Cap preview bytes (agent caps at 256 KiB)
 
 Environment:
-  TERMORA_URL     Base URL of a running agent, e.g. http://127.0.0.1:4030
-  TERMORA_TOKEN   Bootstrap or static token for that agent
+  SYNAPTIX_URL     Base URL of a running agent, e.g. http://127.0.0.1:4030
+  SYNAPTIX_TOKEN   Bootstrap or static token for that agent
 
-With TERMORA_URL and TERMORA_TOKEN set, "status" and "file" query the agent.
+With SYNAPTIX_URL and SYNAPTIX_TOKEN set, "status" and "file" query the agent.
 Without them, "status" prints local CLI info and makes no network calls.`
 
 const defaultIo: CliIo = {
@@ -56,13 +56,13 @@ const defaultIo: CliIo = {
 }
 
 function printLocalStatus(io: CliIo, version: string): number {
-  io.out('termora CLI (local mode — no agent configured)')
+  io.out('synaptix CLI (local mode — no agent configured)')
   io.out(`  version:  ${version}`)
   io.out(`  node:     ${process.version}`)
   io.out(`  platform: ${process.platform} ${process.arch}`)
   io.out(`  cwd:      ${process.cwd()}`)
   io.out('')
-  io.out('Set TERMORA_URL and TERMORA_TOKEN to query a running agent.')
+  io.out('Set SYNAPTIX_URL and SYNAPTIX_TOKEN to query a running agent.')
   return 0
 }
 
@@ -108,13 +108,13 @@ export async function run(argv: readonly string[], deps: RunDeps): Promise<numbe
   const env = readEnv(deps.env)
   if (env === null) {
     if (command.kind === 'status') return printLocalStatus(io, deps.version)
-    io.err('TERMORA_URL and TERMORA_TOKEN must both be set for "termora file".')
+    io.err('SYNAPTIX_URL and SYNAPTIX_TOKEN must both be set for "synaptix file".')
     io.out(HELP)
     return 1
   }
 
   const client = (
-    deps.createClient ?? ((value: TermoraEnv): CockpitClient => new TermoraClient(value))
+    deps.createClient ?? ((value: SynaptixEnv): CockpitClient => new SynaptixClient(value))
   )(env)
   try {
     if (command.kind === 'status') {
@@ -125,7 +125,7 @@ export async function run(argv: readonly string[], deps: RunDeps): Promise<numbe
     return 0
   } catch (error) {
     io.err(
-      error instanceof TermoraError || error instanceof Error ? error.message : 'Unexpected error',
+      error instanceof SynaptixError || error instanceof Error ? error.message : 'Unexpected error',
     )
     return 1
   }

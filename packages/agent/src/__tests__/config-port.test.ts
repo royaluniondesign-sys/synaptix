@@ -5,27 +5,27 @@ import { resolveAgentPort, DEFAULT_PORT } from '../config.js';
 import { resolveTunnelPort } from '../server.js';
 
 /**
- * README and .env.example document the agent port as TERMORA_PORT, but the
+ * README and .env.example document the agent port as SYNAPTIX_PORT, but the
  * loader only read PORT — so a documented .env silently fell back to 4030 while
  * WEB_PORT was still honoured, publishing a tunnel to a port nothing served.
  */
 
 describe('resolveAgentPort', () => {
-  it('honours TERMORA_PORT, the documented variable', () => {
-    expect(resolveAgentPort({ TERMORA_PORT: '4055' })).toBe(4055);
+  it('honours SYNAPTIX_PORT, the documented variable', () => {
+    expect(resolveAgentPort({ SYNAPTIX_PORT: '4055' })).toBe(4055);
   });
 
   it('still honours PORT for backwards compatibility', () => {
     expect(resolveAgentPort({ PORT: '4066' })).toBe(4066);
   });
 
-  it('prefers TERMORA_PORT when both are set', () => {
-    expect(resolveAgentPort({ TERMORA_PORT: '4055', PORT: '4066' })).toBe(4055);
+  it('prefers SYNAPTIX_PORT when both are set', () => {
+    expect(resolveAgentPort({ SYNAPTIX_PORT: '4055', PORT: '4066' })).toBe(4055);
   });
 
   it('falls back to the default when unset or unparseable', () => {
     expect(resolveAgentPort({})).toBe(DEFAULT_PORT);
-    expect(resolveAgentPort({ TERMORA_PORT: 'nonsense' })).toBe(DEFAULT_PORT);
+    expect(resolveAgentPort({ SYNAPTIX_PORT: 'nonsense' })).toBe(DEFAULT_PORT);
   });
 });
 

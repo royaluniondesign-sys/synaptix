@@ -29,7 +29,7 @@ describe('agent launch descriptor', () => {
       module: AGENT_RUNTIME_MODULE,
       symbol: AGENT_RUNTIME_SYMBOL,
     })
-    expect(AGENT_RUNTIME_MODULE).toBe('@termora/agent/runtime')
+    expect(AGENT_RUNTIME_MODULE).toBe('@synaptix/agent/runtime')
   })
 
   it('supports a subprocess fallback strategy', () => {
@@ -40,9 +40,9 @@ describe('agent launch descriptor', () => {
   })
 
   it('marks desktop-originated launches in the environment', () => {
-    const descriptor = describeAgentLaunch(desktopRuntimePlan, { env: { TERMORA_PORT: '4031' } })
-    expect(descriptor.env.TERMORA_DESKTOP_SHELL).toBe('1')
-    expect(descriptor.env.TERMORA_PORT).toBe('4031')
+    const descriptor = describeAgentLaunch(desktopRuntimePlan, { env: { SYNAPTIX_PORT: '4031' } })
+    expect(descriptor.env.SYNAPTIX_DESKTOP_SHELL).toBe('1')
+    expect(descriptor.env.SYNAPTIX_PORT).toBe('4031')
   })
 })
 

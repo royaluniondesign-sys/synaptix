@@ -57,7 +57,7 @@ describe('buildPaneViews', () => {
   });
 
   it('maps assigned sessions to real metadata and focuses the active one', () => {
-    const sessions = [session('sess-a', { name: 'termora', cwd: '/home/rud/termora', shell: 'tmux' }), session('sess-b')];
+    const sessions = [session('sess-a', { name: 'synaptix', cwd: '/home/rud/synaptix', shell: 'tmux' }), session('sess-b')];
     let layout = createLayout('columns');
     layout = assignPane(layout, 'pane-1', 'sess-a');
     layout = assignPane(layout, 'pane-2', 'sess-b');
@@ -65,8 +65,8 @@ describe('buildPaneViews', () => {
     const views = buildPaneViews(layout, sessions, 'sess-b');
 
     expect(views).toHaveLength(2);
-    expect(views[0].title).toBe('termora');
-    expect(views[0].subtitle).toBe('tmux · /home/rud/termora');
+    expect(views[0].title).toBe('synaptix');
+    expect(views[0].subtitle).toBe('tmux · /home/rud/synaptix');
     expect(views[0].session).toBe(sessions[0]);
     expect(views[0].isActive).toBe(false);
     expect(views[0].isEmpty).toBe(false);

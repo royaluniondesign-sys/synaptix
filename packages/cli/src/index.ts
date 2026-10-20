@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// termora CLI — query and manage a running termora agent from the terminal.
+// synaptix CLI — query and manage a running synaptix agent from the terminal.
 
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'

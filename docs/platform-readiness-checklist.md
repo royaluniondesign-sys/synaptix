@@ -1,8 +1,8 @@
-# Termora platform readiness checklist
+# Synaptix platform readiness checklist
 
 This document tracks what is actually ready to ship to real users across Electron desktop,
 PWA, Expo native mobile, and GitHub Releases. It is a status tracker and contract, **not** a
-compliance certification. Termora is **not** store-ready, notarized, or signed for distribution.
+compliance certification. Synaptix is **not** store-ready, notarized, or signed for distribution.
 
 The checklist is machine-checked by `npm run check:platform-readiness`
 (`scripts/check-platform-readiness.mjs`). The checker verifies required docs/config placeholders
@@ -126,7 +126,7 @@ This table is intentionally mirrored from `docs/release-evidence-manifest.json`;
 | Linux `.deb` | missing | Package installs and starts after AppImage is stable | manual: run Linux unsigned artifact workflow after AppImage smoke passes | GitHub Release contains .deb plus install/start smoke log | false | false |
 | Android `.apk` | missing | Expo build on GitHub Releases with device smoke test | manual: add Expo/EAS toolchain, then build APK and physical-device smoke (pending) | GitHub Release contains APK plus physical-device install smoke log | false | false |
 | iOS App Store build | missing | APNs entitlement flow automated; TestFlight build verified | manual: add Expo/EAS + APNs entitlement flow, then run TestFlight device smoke (pending) | TestFlight build launches on a physical device with pairing flow smoke log | false | false |
-| CLI binary | missing | Bundled by installers and runnable as termora | manual: build installer artifact, then run bundled termora --help (pending) | Installed app exposes bundled termora --help output | false | false |
+| CLI binary | missing | Bundled by installers and runnable as synaptix | manual: build installer artifact, then run bundled synaptix --help (pending) | Installed app exposes bundled synaptix --help output | false | false |
 
 
 ## What `npm run check:platform-readiness` enforces

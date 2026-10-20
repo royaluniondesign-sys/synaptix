@@ -26,8 +26,8 @@ function execTmuxAsync(args: string[], encoding?: 'utf-8'): Promise<string | voi
   });
 }
 
-/** Socket name for termora's isolated tmux server (avoids conflicts with user's tmux). */
-export const TMUX_SOCKET = 'termora';
+/** Socket name for synaptix's isolated tmux server (avoids conflicts with user's tmux). */
+export const TMUX_SOCKET = 'synaptix';
 
 /** Invisible tmux config — no status bar, no prefix, passthrough for OSC 7. */
 const TMUX_CONF = `set -g status off
@@ -41,8 +41,8 @@ set -g escape-time 0
 set -ga terminal-overrides ",xterm-256color:Tc"
 `;
 
-/** Prefix used for all termora-managed tmux sessions. */
-const SESSION_PREFIX = 'termora-';
+/** Prefix used for all synaptix-managed tmux sessions. */
+const SESSION_PREFIX = 'synaptix-';
 
 /**
  * Checks if tmux is available on the system.
@@ -57,21 +57,21 @@ export function isTmuxAvailable(): boolean {
 }
 
 /**
- * Writes the invisible tmux config to ~/.termora/tmux.conf and returns its path.
+ * Writes the invisible tmux config to ~/.synaptix/tmux.conf and returns its path.
  */
 export function ensureTmuxConfig(): string {
-  const termoraDir = join(homedir(), '.termora');
-  const confPath = join(termoraDir, 'tmux.conf');
-  mkdirSync(termoraDir, { recursive: true });
+  const synaptixDir = join(homedir(), '.synaptix');
+  const confPath = join(synaptixDir, 'tmux.conf');
+  mkdirSync(synaptixDir, { recursive: true });
   writeFileSync(confPath, TMUX_CONF, { mode: 0o644 });
   return confPath;
 }
 
 /**
- * Lists all tmux sessions matching the termora- prefix.
- * Returns an array of session names (e.g. ["termora-abc123", "termora-def456"]).
+ * Lists all tmux sessions matching the synaptix- prefix.
+ * Returns an array of session names (e.g. ["synaptix-abc123", "synaptix-def456"]).
  */
-export function listTermoraTmuxSessions(): string[] {
+export function listSynaptixTmuxSessions(): string[] {
   try {
     const output = execFileSync('tmux', ['-L', TMUX_SOCKET, 'list-sessions', '-F', '#{session_name}'], {
       encoding: 'utf-8',
@@ -111,10 +111,10 @@ export function killTmuxSession(name: string): void {
 }
 
 /**
- * Kills all termora-prefixed tmux sessions.
+ * Kills all synaptix-prefixed tmux sessions.
  */
-export function killAllTermoraTmuxSessions(): void {
-  for (const name of listTermoraTmuxSessions()) {
+export function killAllSynaptixTmuxSessions(): void {
+  for (const name of listSynaptixTmuxSessions()) {
     killTmuxSession(name);
   }
 }
@@ -140,9 +140,9 @@ export function capturePaneContent(tmuxName: string): string {
 // ---- Async versions (non-blocking) ----
 
 /**
- * Async version of listTermoraTmuxSessions. Does not block the event loop.
+ * Async version of listSynaptixTmuxSessions. Does not block the event loop.
  */
-export async function listTermoraTmuxSessionsAsync(): Promise<string[]> {
+export async function listSynaptixTmuxSessionsAsync(): Promise<string[]> {
   try {
     const output = await execTmuxAsync(
       ['-L', TMUX_SOCKET, 'list-sessions', '-F', '#{session_name}'],

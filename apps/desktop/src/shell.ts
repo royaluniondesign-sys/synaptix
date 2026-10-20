@@ -1,4 +1,4 @@
-// Termora desktop shell contract (dev shell only).
+// Synaptix desktop shell contract (dev shell only).
 //
 // Electron-free and runtime-agnostic: the window host and agent entry are
 // injected, so the exact same launch sequence runs under a unit test, the
@@ -59,10 +59,10 @@ export function buildAgentWebUrl(port: number, host: string = DEFAULT_SHELL_HOST
 }
 
 /**
- * Resolves the programmatic `startAgent()` from `@termora/agent/runtime`.
+ * Resolves the programmatic `startAgent()` from `@synaptix/agent/runtime`.
  *
  * Uses a computed specifier so this module keeps no build-time dependency on
- * `@termora/agent` (not installed until the desktop app joins the workspaces).
+ * `@synaptix/agent` (not installed until the desktop app joins the workspaces).
  * The Electron main process calls this once at boot; tests inject an importer.
  */
 export async function loadAgentStartFn(
@@ -76,7 +76,7 @@ export async function loadAgentStartFn(
   } catch (cause) {
     const detail = cause instanceof Error ? cause.message : String(cause)
     throw new Error(
-      `desktop dev shell could not load ${entrypoint.module}; build @termora/agent first (${detail})`,
+      `desktop dev shell could not load ${entrypoint.module}; build @synaptix/agent first (${detail})`,
     )
   }
 

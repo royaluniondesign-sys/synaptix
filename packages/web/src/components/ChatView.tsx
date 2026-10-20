@@ -97,8 +97,8 @@ const PROVIDER_FREE: Record<ChatProvider, boolean> = {
   'openrouter': true,
 };
 
-const CONFIG_KEY = 'termora_chat_config';
-const HISTORY_KEY = 'termora_chat_history';
+const CONFIG_KEY = 'synaptix_chat_config';
+const HISTORY_KEY = 'synaptix_chat_history';
 
 function loadConfig(): ProviderConfig {
   try {
@@ -755,7 +755,7 @@ function ConfigPanel({ draft, onChange, onSave, onClose }: {
               autoComplete="off"
             />
             <p style={{ fontSize: 9, color: S.text3, margin: '4px 0 0' }}>
-              Saved in this browser and sent with each message to the Termora agent, which forwards it to the provider. Over a public tunnel it also passes through the tunnel provider; start Termora with TUNNEL=local to avoid that.
+              Stored locally in browser only — never sent to Synaptix servers.
               {draft.provider === 'openrouter' && ' Free models available at openrouter.ai.'}
             </p>
           </div>
@@ -773,7 +773,7 @@ function ConfigPanel({ draft, onChange, onSave, onClose }: {
               style={inputStyle}
             />
             <p style={{ fontSize: 9, color: S.text3, margin: '4px 0 0' }}>
-              Ollama must be running on the machine that runs Termora; only localhost addresses are accepted. Pull models with: <code style={{ color: S.primary }}>ollama pull llama3.1</code>
+              Ollama must be running locally. Pull models with: <code style={{ color: S.primary }}>ollama pull llama3.1</code>
             </p>
           </div>
         )}
@@ -785,7 +785,7 @@ function ConfigPanel({ draft, onChange, onSave, onClose }: {
         }}>
           {draft.provider === 'claude-cli' && (
             <p style={{ fontSize: 10, color: S.text2, margin: 0, lineHeight: 1.5 }}>
-              Runs the <code style={{ color: S.primary }}>claude</code> CLI installed on the machine that runs Termora, with that CLI's own sign-in. Off unless Termora was started with <code style={{ color: S.primary }}>TERMORA_ENABLE_AGENT_SPAWN=1</code>.
+              Uses your <strong style={{ color: S.primary }}>Claude Max subscription</strong> via the installed <code style={{ color: S.primary }}>claude</code> CLI. No extra cost.
             </p>
           )}
           {draft.provider === 'ollama' && (

@@ -46,7 +46,7 @@ function makeConfig(dbPath: string): AgentConfig {
 vi.setConfig({ testTimeout: 20_000, hookTimeout: 20_000 });
 
 describe('worktree fan-out over a real WebSocket', () => {
-  const dbPath = join(tmpdir(), `termora-fanout-${randomBytes(6).toString('hex')}.db`);
+  const dbPath = join(tmpdir(), `synaptix-fanout-${randomBytes(6).toString('hex')}.db`);
   const config = makeConfig(dbPath);
   const { db, statements } = initDatabase(dbPath);
   const { httpServer, wss } = createAppServer(config, statements);
@@ -63,7 +63,7 @@ describe('worktree fan-out over a real WebSocket', () => {
     const { port } = httpServer.address() as AddressInfo;
     wsUrl = `ws://127.0.0.1:${port}`;
 
-    parentDir = await realpath(await mkdtemp(join(tmpdir(), 'termora-fanout-repo-')));
+    parentDir = await realpath(await mkdtemp(join(tmpdir(), 'synaptix-fanout-repo-')));
     repoRoot = join(parentDir, 'sample-repo');
     await mkdir(repoRoot);
     await execFileAsync('git', ['-C', repoRoot, 'init', '-q']);
@@ -170,11 +170,11 @@ describe('worktree fan-out over a real WebSocket', () => {
   });
 
   it('honours a full command template, not just a bare CLI name', async () => {
-    // Termora targets any agentic CLI, not specifically Claude/OpenCode —
+    // Synaptix targets any agentic CLI, not specifically Claude/OpenCode —
     // different tools take their prompt differently (`claude -p`,
     // `opencode run`, `aider --message`, a bare trailing argument, ...), so
     // the agent field is a full command template with a {prompt}
-    // placeholder, substituted verbatim rather than Termora assuming a flag.
+    // placeholder, substituted verbatim rather than Synaptix assuming a flag.
     const originalHome = process.env.HOME;
     process.env.HOME = repoRoot;
     const ws = await connectAuthenticated();
@@ -307,7 +307,7 @@ describe('worktree fan-out over a real WebSocket', () => {
   it('rejects a fan-out request from outside a git repo', async () => {
     const ws = await connectAuthenticated();
 
-    const nonRepoDir = await mkdtemp(join(tmpdir(), 'termora-not-a-repo-'));
+    const nonRepoDir = await mkdtemp(join(tmpdir(), 'synaptix-not-a-repo-'));
     const originalHomeLocal = process.env.HOME;
     process.env.HOME = nonRepoDir;
     try {

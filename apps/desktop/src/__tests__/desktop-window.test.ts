@@ -106,7 +106,7 @@ describe('createBrowserWindow', () => {
     await createBrowserWindow('http://u', {
       width: 800,
       height: 600,
-      title: 'Termora Test',
+      title: 'Synaptix Test',
       preload: '/preload.js',
       webPreferences: { nodeIntegration: true, contextIsolation: false },
       loader: stubLoader(module),
@@ -114,7 +114,7 @@ describe('createBrowserWindow', () => {
 
     expect(record.options?.width).toBe(800)
     expect(record.options?.height).toBe(600)
-    expect(record.options?.title).toBe('Termora Test')
+    expect(record.options?.title).toBe('Synaptix Test')
     const prefs = record.options?.webPreferences as Record<string, unknown>
     expect(prefs.preload).toBe('/preload.js')
     expect(prefs.nodeIntegration).toBe(true)

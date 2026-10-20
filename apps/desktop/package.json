@@ -1,8 +1,8 @@
 {
-  "name": "@termora/desktop-app",
+  "name": "@synaptix/desktop-app",
   "version": "0.0.0",
   "private": true,
-  "description": "Desktop packaging scaffold for the Termora cockpit app.",
+  "description": "Desktop packaging scaffold for the Synaptix cockpit app.",
   "type": "module",
   "main": "dist/electron-main.js",
   "scripts": {

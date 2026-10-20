@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // scripts/check-cockpit.mjs
-// Live dogfood check for a running Termora agent's cockpit API.
+// Live dogfood check for a running Synaptix agent's cockpit API.
 //
-// Set TERMORA_URL (e.g. http://127.0.0.1:4030) and TERMORA_TOKEN (a static or
+// Set SYNAPTIX_URL (e.g. http://127.0.0.1:4030) and SYNAPTIX_TOKEN (a static or
 // bootstrap token) to exercise a real agent. When either variable is missing
 // the check prints a skip notice and exits 0, so it is safe in CI and on
 // machines without a live agent.
@@ -79,8 +79,8 @@ export function normalizeBaseUrl(url) {
 
 /** Returns { url, token } when both env vars are present, otherwise null (skip). */
 export function readCockpitEnv(env = process.env) {
-  const url = env.TERMORA_URL?.trim()
-  const token = env.TERMORA_TOKEN?.trim()
+  const url = env.SYNAPTIX_URL?.trim()
+  const token = env.SYNAPTIX_TOKEN?.trim()
   if (!url || !token) return null
   return { url, token }
 }
@@ -179,7 +179,7 @@ async function main() {
   const env = readCockpitEnv()
   if (env === null) {
     console.log(
-      'check:cockpit — skipped: set TERMORA_URL and TERMORA_TOKEN to dogfood a live agent',
+      'check:cockpit — skipped: set SYNAPTIX_URL and SYNAPTIX_TOKEN to dogfood a live agent',
     )
     return 0
   }

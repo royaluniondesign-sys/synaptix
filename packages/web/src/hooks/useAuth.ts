@@ -15,7 +15,7 @@ interface AuthReturn {
   handleUnauthorized: () => void;
 }
 
-const SESSION_KEY = 'termora_jwt';
+const SESSION_KEY = 'synaptix_jwt';
 const STORAGE = localStorage; // persists across PWA close/reopen (sessionStorage did not)
 
 const INITIAL_STATE: AuthState = {

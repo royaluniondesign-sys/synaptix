@@ -1,4 +1,4 @@
-// Termora desktop IPC + preload contract (dev shell only).
+// Synaptix desktop IPC + preload contract (dev shell only).
 //
 // Shared channel names and payload shapes between the Electron main process and
 // the preload bridge. This is the "preload skeleton": it declares the exact
@@ -9,13 +9,13 @@
 /** Channel names used by the desktop shell main <-> renderer bridge. */
 export const DESKTOP_IPC_CHANNELS = {
   /** Renderer -> main: fetch the current shell status once. */
-  getStatus: 'termora:shell-status:get',
+  getStatus: 'synaptix:shell-status:get',
   /** Main -> renderer: push shell status updates. */
-  status: 'termora:shell-status',
+  status: 'synaptix:shell-status',
   /** Renderer -> main: start the agent and open the shell window. */
-  start: 'termora:shell:start',
+  start: 'synaptix:shell:start',
   /** Renderer -> main: close the window and stop the agent. */
-  stop: 'termora:shell:stop',
+  stop: 'synaptix:shell:stop',
 } as const
 
 /** Lifecycle state of the desktop dev shell. */
@@ -50,8 +50,8 @@ export interface IpcMainLike {
   removeHandler(channel: string): void
 }
 
-/** API surface the preload exposes to the renderer as `window.termora`. */
-export interface TermoraPreloadApi {
+/** API surface the preload exposes to the renderer as `window.synaptix`. */
+export interface SynaptixPreloadApi {
   getStatus(): Promise<DesktopShellStatus | null>
   /** Subscribes to status pushes; returns an unsubscribe function. */
   onStatus(listener: (status: DesktopShellStatus) => void): () => void
@@ -62,13 +62,13 @@ export interface TermoraPreloadApi {
 }
 
 /** Global key the preload bridge exposes the API under. */
-export const TERMORA_PRELOAD_KEY = 'termora'
+export const SYNAPTIX_PRELOAD_KEY = 'synaptix'
 
 /**
  * Builds the renderer-facing API from a raw `ipcRenderer`. Pure and injectable
  * so it can be exercised without Electron.
  */
-export function createTermoraPreloadApi(ipc: IpcRendererLike): TermoraPreloadApi {
+export function createSynaptixPreloadApi(ipc: IpcRendererLike): SynaptixPreloadApi {
   return {
     async getStatus(): Promise<DesktopShellStatus | null> {
       const status = await ipc.invoke(DESKTOP_IPC_CHANNELS.getStatus)
@@ -96,13 +96,13 @@ export function createTermoraPreloadApi(ipc: IpcRendererLike): TermoraPreloadApi
 
 /**
  * The exact call the real preload entry makes: expose the API on
- * `window[TERMORA_PRELOAD_KEY]` via Electron's `contextBridge`.
+ * `window[SYNAPTIX_PRELOAD_KEY]` via Electron's `contextBridge`.
  */
-export function exposeTermoraPreload(
+export function exposeSynaptixPreload(
   contextBridge: ContextBridgeLike,
   ipc: IpcRendererLike,
-): TermoraPreloadApi {
-  const api = createTermoraPreloadApi(ipc)
-  contextBridge.exposeInMainWorld(TERMORA_PRELOAD_KEY, api)
+): SynaptixPreloadApi {
+  const api = createSynaptixPreloadApi(ipc)
+  contextBridge.exposeInMainWorld(SYNAPTIX_PRELOAD_KEY, api)
   return api
 }

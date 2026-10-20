@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 
-const ONBOARDING_KEY = 'termora_onboarding_done';
-const TIPS_KEY = 'termora_seen_tips';
+const ONBOARDING_KEY = 'synaptix_onboarding_done';
+const TIPS_KEY = 'synaptix_seen_tips';
 
 export function useOnboarding() {
   const [isDone, setIsDone] = useState<boolean>(() => {

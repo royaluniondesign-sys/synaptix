@@ -1,14 +1,14 @@
-// Minimal HTTP client for a running Termora agent's cockpit API.
+// Minimal HTTP client for a running Synaptix agent's cockpit API.
 //
 // Auth mirrors the web app: a static/bootstrap token is exchanged once for a
 // session JWT via POST /api/auth/bootstrap. Tokens that already look like a JWT
-// are used directly, so TERMORA_TOKEN can be either kind. Reading the two env
+// are used directly, so SYNAPTIX_TOKEN can be either kind. Reading the two env
 // vars lives here (rather than the entry point) so the contract is unit-testable
 // without spawning a process.
 
 export type FetchLike = typeof fetch
 
-export interface TermoraEnv {
+export interface SynaptixEnv {
   url: string
   token: string
 }
@@ -45,20 +45,20 @@ export interface FilePreview {
   content: string
 }
 
-export class TermoraError extends Error {
+export class SynaptixError extends Error {
   constructor(
     message: string,
     readonly status?: number,
   ) {
     super(message)
-    this.name = 'TermoraError'
+    this.name = 'SynaptixError'
   }
 }
 
 /** Reads the two env vars the CLI needs; returns null unless both are set. */
-export function readEnv(env: NodeJS.ProcessEnv = process.env): TermoraEnv | null {
-  const url = env.TERMORA_URL?.trim()
-  const token = env.TERMORA_TOKEN?.trim()
+export function readEnv(env: NodeJS.ProcessEnv = process.env): SynaptixEnv | null {
+  const url = env.SYNAPTIX_URL?.trim()
+  const token = env.SYNAPTIX_TOKEN?.trim()
   if (!url || !token) return null
   return { url, token }
 }
@@ -83,13 +83,13 @@ async function readErrorMessage(res: Response): Promise<string> {
   return `Request failed with status ${String(res.status)}`
 }
 
-export class TermoraClient {
+export class SynaptixClient {
   private readonly baseUrl: string
   private readonly token: string
   private readonly fetchImpl: FetchLike
   private authHeader: string | null = null
 
-  constructor(env: TermoraEnv, fetchImpl: FetchLike = fetch) {
+  constructor(env: SynaptixEnv, fetchImpl: FetchLike = fetch) {
     this.baseUrl = normalizeBaseUrl(env.url)
     this.token = env.token
     this.fetchImpl = fetchImpl
@@ -108,11 +108,11 @@ export class TermoraClient {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ token: this.token }),
     })
-    if (!res.ok) throw new TermoraError(await readErrorMessage(res), res.status)
+    if (!res.ok) throw new SynaptixError(await readErrorMessage(res), res.status)
 
     const data = (await res.json()) as { token?: unknown }
     if (typeof data.token !== 'string' || data.token.length === 0) {
-      throw new TermoraError('Authentication response did not include a token', res.status)
+      throw new SynaptixError('Authentication response did not include a token', res.status)
     }
     return `Bearer ${data.token}`
   }
@@ -131,7 +131,7 @@ export class TermoraClient {
     const res = await this.fetchImpl(`${this.baseUrl}${pathname}`, {
       headers: { authorization: await this.authHeaderValue() },
     })
-    if (!res.ok) throw new TermoraError(await readErrorMessage(res), res.status)
+    if (!res.ok) throw new SynaptixError(await readErrorMessage(res), res.status)
     return (await res.json()) as T
   }
 }

@@ -47,7 +47,7 @@ jobs:
         run: npm ci
 
       - name: Build the demo
-        run: npm run build:demo -w @termora/web
+        run: npm run build:demo -w @synaptix/web
 
       # Not saved to package.json or the lockfile: only this check needs it.
       - name: Install Playwright and Chromium

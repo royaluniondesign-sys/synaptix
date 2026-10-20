@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Assembles the static public site into site-dist/: site/index.html plus the
-// browser-only demo (packages/web/dist-demo, built by `npm run build:demo -w @termora/web`).
+// browser-only demo (packages/web/dist-demo, built by `npm run build:demo -w @synaptix/web`).
 // It builds files only; it never deploys or uploads anything.
 
 import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs'
@@ -23,7 +23,7 @@ const FONTS = [
 ]
 
 if (!existsSync(resolve(demo, 'index.html'))) {
-  console.error('build-site: packages/web/dist-demo is missing; run `npm run build:demo -w @termora/web` first')
+  console.error('build-site: packages/web/dist-demo is missing; run `npm run build:demo -w @synaptix/web` first')
   process.exit(2)
 }
 
@@ -34,7 +34,7 @@ cpSync(demo, resolve(out, 'demo'), { recursive: true })
 // Screenshots of the demo build, used as device mockups on the page.
 cpSync(resolve('site/img'), resolve(out, 'img'), { recursive: true })
 // The project logo, copied unchanged from assets/.
-cpSync(resolve('assets/termora-logo.svg'), resolve(out, 'termora-logo.svg'))
+cpSync(resolve('assets/synaptix-logo.svg'), resolve(out, 'synaptix-logo.svg'))
 mkdirSync(resolve(out, 'fonts'), { recursive: true })
 for (const [pkg, file] of FONTS) {
   const source = resolve('node_modules/@fontsource', pkg, 'files', file)

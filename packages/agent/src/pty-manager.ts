@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 import { basename } from 'node:path';
 import type { ShellType } from './types.js';
 import type { DbStatements } from './db.js';
-import { tmuxSessionExists, killTmuxSession, listTermoraTmuxSessions, capturePaneContent, TMUX_SOCKET } from './tmux.js';
+import { tmuxSessionExists, killTmuxSession, listSynaptixTmuxSessions, capturePaneContent, TMUX_SOCKET } from './tmux.js';
 import { ControlModeLineBuffer, buildSendKeysCommands } from './control-mode-parser.js';
 
 /** Maximum number of buffer entries retained per session for reconnection replay. */
@@ -259,7 +259,7 @@ export class PTYManager {
     const id = randomUUID();
     const initialCwd = homedir();
     const wrap = this.shouldWrapInTmux(shell);
-    const tmuxName = wrap ? `termora-${id}` : null;
+    const tmuxName = wrap ? `synaptix-${id}` : null;
 
     let cmd: string;
     let args: string[];
@@ -431,7 +431,7 @@ export class PTYManager {
     }
 
     // Kill zombie tmux sessions (exist in tmux but not in DB)
-    const liveTmuxSessions = listTermoraTmuxSessions();
+    const liveTmuxSessions = listSynaptixTmuxSessions();
     for (const tmuxName of liveTmuxSessions) {
       if (!dbTmuxNames.has(tmuxName)) {
         killTmuxSession(tmuxName);

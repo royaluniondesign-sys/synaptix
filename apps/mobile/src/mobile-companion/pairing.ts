@@ -1,12 +1,12 @@
-// Termora mobile companion — phase 1 pairing contract.
+// Synaptix mobile companion — phase 1 pairing contract.
 //
 // Pure TypeScript: this module imports no React Native, Expo, or native module.
 // It defines how the future companion parses a pairing link into a normalized
 // descriptor and how the embedded bootstrap token must be handled. Native builds
 // stay gated; this only hardens the contract so a shipped shell cannot drift.
 
-/** Custom scheme reserved for Termora pairing deep links. */
-export const PAIRING_SCHEME = 'termora'
+/** Custom scheme reserved for Synaptix pairing deep links. */
+export const PAIRING_SCHEME = 'synaptix'
 
 /** Deep-link host that marks a URL as a pairing payload. */
 export const PAIRING_HOST = 'pair'
@@ -58,10 +58,10 @@ function normalizeBaseUrl(raw: string): string | null {
 }
 
 /**
- * Parses either form of Termora pairing link:
+ * Parses either form of Synaptix pairing link:
  *
  * - `https://host/?token=<bootstrap>` — the URL the agent already prints/QR-encodes.
- * - `termora://pair?url=<encoded>&token=<bootstrap>&label=<label>` — native deep link.
+ * - `synaptix://pair?url=<encoded>&token=<bootstrap>&label=<label>` — native deep link.
  *
  * Never throws: malformed input returns a typed failure reason.
  */
