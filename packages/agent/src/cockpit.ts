@@ -9,6 +9,7 @@ import { collectGithubStatus } from './github.js';
 import { notificationStore } from './event-bus.js';
 import { AGENT_STATES, AgentProfileError, AgentRegistry, expandArgs, parseAgentStatus } from './agent-registry.js';
 import { listListeningPorts } from './ports.js';
+import { parseChatRequest, streamChat } from './chat.js';
 
 type JobStatus = 'running' | 'success' | 'failed';
 
@@ -42,7 +43,7 @@ const jobs = new Map<string, CockpitJob>();
 let agentRegistry: AgentRegistry | undefined;
 
 function getAgentRegistry(): AgentRegistry {
-  agentRegistry ??= new AgentRegistry(process.env.SYNAPTIX_AGENTS_FILE || undefined);
+  agentRegistry ??= new AgentRegistry(process.env.TERMORA_AGENTS_FILE || undefined);
   return agentRegistry;
 }
 const MAX_OUTPUT = 32_000;
@@ -434,202 +435,22 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
     res.json({ job });
   });
 
-  // ── AI Chat proxy ──────────────────────────────────────────────────────────
-  // Accepts POST with { provider, model, messages, prompt, apiKey?, ollamaUrl? }
-  // Streams Server-Sent Events: data: {"delta":"..."}\n\n  then  data: [DONE]\n\n
+  // ── AI chat proxy ──────────────────────────────────────────────────────────
+  // POST { provider, model?, messages?, prompt, apiKey?, ollamaUrl? } → server-sent events (see chat.ts).
+  // Input is validated in chat.ts. The claude CLI is an external agent, so it stays behind SYNAPTIX_ENABLE_AGENT_SPAWN=1.
   app.post('/api/cockpit/chat', async (req, res) => {
     const auth = await requireAuth(req, res);
     if (!auth) return;
 
-    const { provider, model, messages, prompt, apiKey, ollamaUrl } = req.body ?? {};
-
-    if (typeof prompt !== 'string' || !prompt.trim()) {
-      res.status(400).json({ error: 'prompt is required' });
+    const parsed = parseChatRequest(req.body);
+    if ('error' in parsed) {
+      res.status(400).json({ error: parsed.error });
       return;
     }
-    if (!['claude-cli', 'ollama', 'openai', 'openrouter'].includes(provider)) {
-      res.status(400).json({ error: 'invalid provider' });
+    if (parsed.value.provider === 'claude-cli' && process.env.SYNAPTIX_ENABLE_AGENT_SPAWN !== '1') {
+      res.status(403).json({ error: 'Set SYNAPTIX_ENABLE_AGENT_SPAWN=1 to run the claude CLI from the chat.' });
       return;
     }
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-
-    const send = (delta: string) => {
-      res.write(`data: ${JSON.stringify({ delta })}\n\n`);
-    };
-    const done = () => {
-      res.write('data: [DONE]\n\n');
-      res.end();
-    };
-    const fail = (msg: string) => {
-      res.write(`data: ${JSON.stringify({ delta: `\n\nError: ${msg}` })}\n\n`);
-      res.write('data: [DONE]\n\n');
-      res.end();
-    };
-
-    req.on('close', () => { /* client disconnected */ });
-
-    if (provider === 'claude-cli') {
-      // Build conversation context for claude CLI
-      const history = Array.isArray(messages)
-        ? (messages as Array<{ role: string; content: string }>)
-            .map((m) => `${m.role === 'user' ? 'Human' : 'Assistant'}: ${m.content}`)
-            .join('\n')
-        : '';
-      const fullPrompt = history ? `${history}\nHuman: ${prompt}` : prompt;
-
-      // Use claude --print for non-interactive output
-      const claudeArgs = ['--print', '--no-stream'];
-      const claude = spawn('claude', claudeArgs, {
-        env: { ...process.env },
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
-
-      claude.stdin.write(fullPrompt);
-      claude.stdin.end();
-
-      let output = '';
-      claude.stdout.on('data', (chunk: Buffer) => {
-        const text = chunk.toString();
-        output += text;
-        send(text);
-      });
-
-      claude.stderr.on('data', (chunk: Buffer) => {
-        const text = chunk.toString();
-        if (text.trim() && !text.includes('Loaded MCP') && !text.includes('Human turn')) {
-          // Only forward non-verbose stderr as errors
-        }
-      });
-
-      claude.on('error', (err) => fail(err.message));
-      claude.on('close', (code) => {
-        if (code !== 0 && !output) {
-          fail(`claude exited with code ${code}. Is claude CLI installed and authenticated?`);
-        } else {
-          done();
-        }
-      });
-      return;
-    }
-
-    if (provider === 'ollama') {
-      const baseUrl = (typeof ollamaUrl === 'string' && ollamaUrl.trim()) ? ollamaUrl.trim() : 'http://localhost:11434';
-      const chatMessages = [
-        ...(Array.isArray(messages) ? messages : []),
-        { role: 'user', content: prompt },
-      ];
-
-      try {
-        const { default: http } = await import('node:http');
-        const { default: https } = await import('node:https');
-
-        const url = new URL(`${baseUrl}/api/chat`);
-        const body = JSON.stringify({ model: model ?? 'llama3.1', messages: chatMessages, stream: true });
-        const transport = url.protocol === 'https:' ? https : http;
-
-        const ollamaReq = transport.request(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
-        }, (ollamaRes) => {
-          let buf = '';
-          ollamaRes.on('data', (chunk: Buffer) => {
-            buf += chunk.toString();
-            const lines = buf.split('\n');
-            buf = lines.pop() ?? '';
-            for (const line of lines) {
-              if (!line.trim()) continue;
-              try {
-                const parsed = JSON.parse(line) as { message?: { content?: string }; done?: boolean };
-                const delta = parsed.message?.content ?? '';
-                if (delta) send(delta);
-                if (parsed.done) done();
-              } catch { /* partial */ }
-            }
-          });
-          ollamaRes.on('end', () => done());
-          ollamaRes.on('error', (err) => fail(err.message));
-        });
-
-        ollamaReq.on('error', (err) => fail(`Ollama connection failed: ${err.message}. Is Ollama running at ${baseUrl}?`));
-        ollamaReq.write(body);
-        ollamaReq.end();
-      } catch (err) {
-        fail(err instanceof Error ? err.message : String(err));
-      }
-      return;
-    }
-
-    // OpenAI-compatible (openai or openrouter)
-    if (provider === 'openai' || provider === 'openrouter') {
-      if (!apiKey || typeof apiKey !== 'string') {
-        fail('API key required for this provider');
-        return;
-      }
-
-      const baseUrl = provider === 'openrouter'
-        ? 'https://openrouter.ai/api/v1/chat/completions'
-        : 'https://api.openai.com/v1/chat/completions';
-
-      const chatMessages = [
-        ...(Array.isArray(messages) ? messages : []),
-        { role: 'user', content: prompt },
-      ];
-
-      const body = JSON.stringify({
-        model: model ?? (provider === 'openai' ? 'gpt-4o-mini' : 'meta-llama/llama-3.1-8b-instruct:free'),
-        messages: chatMessages,
-        stream: true,
-      });
-
-      try {
-        const { default: https } = await import('node:https');
-        const url = new URL(baseUrl);
-        const extraHeaders: Record<string, string> = provider === 'openrouter'
-          ? { 'HTTP-Referer': 'https://synaptix.app', 'X-Title': 'Synaptix' }
-          : {};
-
-        const apiReq = https.request(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Length': Buffer.byteLength(body),
-            ...extraHeaders,
-          },
-        }, (apiRes) => {
-          let buf = '';
-          apiRes.on('data', (chunk: Buffer) => {
-            buf += chunk.toString();
-            const lines = buf.split('\n');
-            buf = lines.pop() ?? '';
-            for (const line of lines) {
-              if (!line.startsWith('data: ')) continue;
-              const data = line.slice(6).trim();
-              if (data === '[DONE]') { done(); return; }
-              try {
-                const parsed = JSON.parse(data) as { choices?: Array<{ delta?: { content?: string } }> };
-                const delta = parsed.choices?.[0]?.delta?.content ?? '';
-                if (delta) send(delta);
-              } catch { /* partial */ }
-            }
-          });
-          apiRes.on('end', () => done());
-          apiRes.on('error', (err) => fail(err.message));
-        });
-
-        apiReq.on('error', (err) => fail(err.message));
-        apiReq.write(body);
-        apiReq.end();
-      } catch (err) {
-        fail(err instanceof Error ? err.message : String(err));
-      }
-      return;
-    }
-
-    fail('unsupported provider');
+    streamChat(res, parsed.value);
   });
 }
