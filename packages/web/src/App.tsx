@@ -693,7 +693,7 @@ export function App() {
   const { isDone: onboardingDone, complete: completeOnboarding } = useOnboarding();
   const { ports, loading: portsLoading, error: portsError, refresh: refreshPorts } = usePorts(connectionStatus, auth.token);
 
-  const [view, setView] = useState<View>('tasks');
+  const [view, setView] = useState<View>(import.meta.env.VITE_DEMO === '1' ? 'dashboard' : 'tasks');
   const [quickOpenVisible, setQuickOpenVisible] = useState(false);
   const [tunnelUrl, setTunnelUrl] = useState<string | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
