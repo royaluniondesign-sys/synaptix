@@ -95,7 +95,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: termora-linux-appimage-unsigned
+          name: synaptix-linux-appimage-unsigned
           path: |
             apps/desktop/release/desktop/*.AppImage
             apps/desktop/release/desktop/SHA256SUMS

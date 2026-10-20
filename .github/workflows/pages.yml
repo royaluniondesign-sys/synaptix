@@ -15,7 +15,7 @@ on:
     paths:
       - 'site/**'
       - 'scripts/build-site.mjs'
-      - 'assets/termora-logo.svg'
+      - 'assets/synaptix-logo.svg'
       - '.github/workflows/pages.yml'
 
 concurrency:
@@ -48,7 +48,7 @@ jobs:
         run: node --test scripts/__tests__/site.test.mjs
 
       - name: Build the demo
-        run: npm run build:demo -w @termora/web
+        run: npm run build:demo -w @synaptix/web
 
       - name: Assemble the site
         run: node scripts/build-site.mjs

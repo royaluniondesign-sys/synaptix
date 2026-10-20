@@ -51,14 +51,14 @@ jobs:
           - label: macOS arm64 (unsigned)
             os: macos-latest
             target: mac
-            artifact: termora-macos-arm64-unsigned
+            artifact: synaptix-macos-arm64-unsigned
             files: |
               apps/desktop/release/desktop/*.dmg
               apps/desktop/release/desktop/*.zip
           - label: Windows x64 (unsigned)
             os: windows-latest
             target: win
-            artifact: termora-windows-x64-unsigned
+            artifact: synaptix-windows-x64-unsigned
             files: |
               apps/desktop/release/desktop/*.exe
               !apps/desktop/release/desktop/win-unpacked/**
@@ -106,10 +106,10 @@ jobs:
         shell: pwsh
         run: |
           Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=(Get-Date).AddMinutes(-15)} -ErrorAction SilentlyContinue |
-            Where-Object { $_.Message -match 'Termora' } |
+            Where-Object { $_.Message -match 'Synaptix' } |
             Select-Object -First 5 | ForEach-Object { $_.Message }
           $root = "apps/desktop/release/desktop/win-unpacked"
-          $exe = Join-Path (Get-Location) "$root/Termora.exe"
+          $exe = Join-Path (Get-Location) "$root/Synaptix.exe"
           Write-Host "== A: Electron binary as plain Node =="
           $env:ELECTRON_RUN_AS_NODE = '1'
           & $exe -e "console.log('electron', process.versions.electron, 'node', process.versions.node)"
@@ -122,7 +122,7 @@ jobs:
           $proc = Start-Process -FilePath $exe -PassThru
           Start-Sleep -Seconds 6
           if ($proc.HasExited) { Write-Host "exited code=$($proc.ExitCode)" } else { Write-Host "still running"; Stop-Process -Id $proc.Id -Force }
-          Get-AuthenticodeSignature apps/desktop/release/desktop/win-unpacked/Termora.exe, apps/desktop/release/desktop/Termora-0.2.0-win-x64.exe |
+          Get-AuthenticodeSignature apps/desktop/release/desktop/win-unpacked/Synaptix.exe, apps/desktop/release/desktop/Synaptix-0.2.0-win-x64.exe |
             Format-List Path, Status, SignerCertificate
 
       - name: Record checksums
