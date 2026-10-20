@@ -66,7 +66,7 @@ export function AuthScreen({ auth, onBootstrapSubmit }: AuthScreenProps) {
           {/* Branding */}
           <div className="mb-8 text-center">
             <h1 className="text-2xl font-bold tracking-tight text-white">
-              synaptix
+              Synaptix
             </h1>
             <p className="mt-2 text-sm text-neutral-500">
               Paste the token shown in your terminal

@@ -27,7 +27,7 @@ export function MenuBar() {
         <div className="flex items-center gap-3">
           {/* Apple logo */}
           <span className="text-xs text-neutral-300"></span>
-          <span className="font-semibold text-neutral-300">synaptix</span>
+          <span className="font-semibold text-neutral-300">Synaptix</span>
           <span>File</span>
           <span>Edit</span>
           <span>View</span>

@@ -4,7 +4,7 @@ interface ConnectionOverlayProps {
 
 const LABELS: Record<ConnectionOverlayProps['mode'], string> = {
   detecting: 'Detecting environment...',
-  connecting: 'Connecting to synaptix...',
+  connecting: 'Connecting to Synaptix...',
 };
 
 /**

@@ -267,14 +267,14 @@ function MultiMachineSection() {
         borderRadius: 10, padding: '12px 14px', marginBottom: 8,
       }}>
         <div style={{ fontSize: 12, color: C.text2, marginBottom: 10, lineHeight: 1.5 }}>
-          Each machine runs its own synaptix agent. Connect from any device — browser, phone, tablet — by opening that machine&apos;s URL.
+          Each machine runs its own Synaptix agent. Connect from any device — browser, phone, tablet — by opening that machine&apos;s URL.
         </div>
 
         {/* Steps */}
         {[
           {
             n: 1,
-            title: 'Install synaptix on the other machine',
+            title: 'Install Synaptix on the other machine',
             content: (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
                 <code style={{ flex: 1, fontFamily: "'Fira Code', monospace", fontSize: 10, color: C.orange, background: C.bg, padding: '6px 8px', borderRadius: 6, border: `1px solid ${C.border}`, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', display: 'block' }}>

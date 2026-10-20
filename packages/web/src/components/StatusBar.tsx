@@ -145,7 +145,7 @@ export function StatusBar({
 
       {/* Version */}
       <Segment>
-        <span>synaptix v0.2.0</span>
+        <span>Synaptix v0.2.0</span>
       </Segment>
     </div>
   );

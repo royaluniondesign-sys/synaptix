@@ -169,7 +169,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         fontSize: 28, fontWeight: 700, color: S.text1,
         letterSpacing: -0.8, margin: '0 0 10px', textAlign: 'center',
       }}>
-        Welcome to synaptix
+        Welcome to Synaptix
       </h1>
       <p style={{
         fontSize: 14, color: S.text2, textAlign: 'center',
@@ -240,7 +240,7 @@ function StepHowItWorks({ onNext, onBack }: { onNext: () => void; onBack: () => 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '28px 24px' }}>
-      <StepHeader step={1} title="Install on your server" subtitle="synaptix runs a tiny agent on your Mac/Linux server that your phone connects to." />
+      <StepHeader step={1} title="Install on your server" subtitle="Synaptix runs a tiny agent on your Mac/Linux server that your phone connects to." />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, marginTop: 24 }}>
         <StepCard num="1" title="Open Terminal on your server">
@@ -544,7 +544,7 @@ function StepDone({ onComplete }: { onComplete: () => void }) {
           letterSpacing: -0.2,
         }}
       >
-        Open synaptix →
+        Open Synaptix →
       </button>
     </div>
   );

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Node centers: main hub (24,24), four outer nodes -->
+  <!-- Connections / synaptic links -->
+  <line x1="24" y1="24" x2="10" y2="10" stroke="#7170ff" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="24" y1="24" x2="38" y2="10" stroke="#7170ff" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="24" y1="24" x2="10" y2="38" stroke="#7170ff" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="24" y1="24" x2="38" y2="38" stroke="#7170ff" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>
+  <line x1="24" y1="24" x2="24" y2="7"  stroke="#7170ff" stroke-width="1.6" stroke-linecap="round" opacity="0.35"/>
+  <line x1="24" y1="24" x2="24" y2="41" stroke="#7170ff" stroke-width="1.6" stroke-linecap="round" opacity="0.35"/>
+  <line x1="24" y1="24" x2="7"  y2="24" stroke="#7170ff" stroke-width="1.6" stroke-linecap="round" opacity="0.35"/>
+  <line x1="24" y1="24" x2="41" y2="24" stroke="#7170ff" stroke-width="1.6" stroke-linecap="round" opacity="0.35"/>
+  <!-- Cross-links between outer nodes -->
+  <line x1="10" y1="10" x2="38" y2="10" stroke="#a78bfa" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <line x1="10" y1="10" x2="10" y2="38" stroke="#a78bfa" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <line x1="38" y1="38" x2="10" y2="38" stroke="#a78bfa" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <line x1="38" y1="38" x2="38" y2="10" stroke="#a78bfa" stroke-width="1" stroke-linecap="round" opacity="0.25"/>
+  <!-- Outer nodes -->
+  <circle cx="10" cy="10" r="3.5" fill="#a78bfa" opacity="0.85"/>
+  <circle cx="38" cy="10" r="3.5" fill="#7170ff" opacity="0.85"/>
+  <circle cx="10" cy="38" r="3.5" fill="#7170ff" opacity="0.85"/>
+  <circle cx="38" cy="38" r="3.5" fill="#a78bfa" opacity="0.85"/>
+  <!-- Mid-edge nodes (smaller) -->
+  <circle cx="24" cy="7"  r="2" fill="#6366f1" opacity="0.6"/>
+  <circle cx="24" cy="41" r="2" fill="#6366f1" opacity="0.6"/>
+  <circle cx="7"  cy="24" r="2" fill="#6366f1" opacity="0.6"/>
+  <circle cx="41" cy="24" r="2" fill="#6366f1" opacity="0.6"/>
+  <!-- Central hub — glowing core -->
+  <circle cx="24" cy="24" r="7.5" fill="url(#hubGlow)" />
+  <circle cx="24" cy="24" r="5"   fill="#7170ff"/>
+  <circle cx="24" cy="24" r="2.5" fill="#c4b5fd"/>
+  <defs>
+    <radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#7170ff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#7170ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>
