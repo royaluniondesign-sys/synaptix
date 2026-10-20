@@ -1,4 +1,4 @@
-// Termora mobile companion — phase 1 public surface.
+// Synaptix mobile companion — phase 1 public surface.
 //
 // Import from here in the future Expo shell. Everything is pure TypeScript with
 // no native runtime dependency, so the contract can be typechecked and tested

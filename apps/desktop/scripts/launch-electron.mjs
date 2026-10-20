@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Deterministic Electron launcher helper for the Termora desktop app.
+// Deterministic Electron launcher helper for the Synaptix desktop app.
 //
 // Electron cannot be installed in root CI (apps/desktop is intentionally
 // outside root workspaces), and a GUI cannot be smoke-tested headlessly, so this
@@ -47,7 +47,7 @@ const mainBuilt = existsSync(join(appDir, MAIN_ENTRY))
 const preloadBuilt = existsSync(join(appDir, PRELOAD_ENTRY))
 const launchCommand = ['electron', MAIN_ENTRY]
 
-console.log('Termora desktop unsigned launcher (dry-run unless --run is passed).')
+console.log('Synaptix desktop unsigned launcher (dry-run unless --run is passed).')
 console.log('No signing, notarization, publishing, secrets, or store claims.\n')
 console.log(`  app dir:        ${appDir}`)
 console.log(`  main entry:     ${MAIN_ENTRY}${mainBuilt ? ' (built)' : ' (missing)'}`)

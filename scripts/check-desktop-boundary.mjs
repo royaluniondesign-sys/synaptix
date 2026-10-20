@@ -61,7 +61,7 @@ try {
 }
 
 if (desktopPkg) {
-  if (desktopPkg.name !== '@termora/desktop-app')
+  if (desktopPkg.name !== '@synaptix/desktop-app')
     fail(`unexpected desktop package name: ${desktopPkg.name}`)
   if (desktopPkg.private !== true) fail('desktop package must remain private')
   for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
@@ -112,8 +112,8 @@ if (existsSync('apps/desktop/src/agent-host.ts')) {
     'export function describeAgentLaunch',
     "target = strategy === 'programmatic' ? AGENT_RUNTIME_SYMBOL",
     "AGENT_RUNTIME_SYMBOL = 'startAgent'",
-    "AGENT_RUNTIME_MODULE = '@termora/agent/runtime'",
-    "TERMORA_DESKTOP_SHELL: '1'",
+    "AGENT_RUNTIME_MODULE = '@synaptix/agent/runtime'",
+    "SYNAPTIX_DESKTOP_SHELL: '1'",
     'entrypoint:',
   ]
   checkSnippets(host, requiredSnippets, 'agent-host.ts')
@@ -140,7 +140,7 @@ if (existsSync('apps/desktop/src/main.ts')) {
   )
   checkSnippets(
     main,
-    ['createDesktopShell', 'loadAgentStartFn', 'exposeTermoraPreload'],
+    ['createDesktopShell', 'loadAgentStartFn', 'exposeSynaptixPreload'],
     'main.ts re-exports',
   )
 }
@@ -151,15 +151,15 @@ if (existsSync('apps/desktop/src/ipc-contract.ts')) {
     ipc,
     [
       'export const DESKTOP_IPC_CHANNELS',
-      "getStatus: 'termora:shell-status:get'",
-      "status: 'termora:shell-status'",
-      "start: 'termora:shell:start'",
-      "stop: 'termora:shell:stop'",
+      "getStatus: 'synaptix:shell-status:get'",
+      "status: 'synaptix:shell-status'",
+      "start: 'synaptix:shell:start'",
+      "stop: 'synaptix:shell:stop'",
       'export interface DesktopShellStatus',
       'export interface IpcMainLike',
-      'export function createTermoraPreloadApi',
-      'export function exposeTermoraPreload',
-      "TERMORA_PRELOAD_KEY = 'termora'",
+      'export function createSynaptixPreloadApi',
+      'export function exposeSynaptixPreload',
+      "SYNAPTIX_PRELOAD_KEY = 'synaptix'",
     ],
     'ipc-contract.ts',
   )
@@ -265,8 +265,8 @@ if (existsSync('apps/desktop/src/preload.ts')) {
   checkSnippets(
     preload,
     [
-      'export async function bootstrapTermoraPreload',
-      'exposeTermoraPreload(',
+      'export async function bootstrapSynaptixPreload',
+      'exposeSynaptixPreload(',
       'loadElectronPreload',
     ],
     'preload.ts',

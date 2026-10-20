@@ -4,7 +4,7 @@
 
 ### Fixed
 - **Tunnel published a dead URL in production** — `WEB_PORT` (dev-only, points at the Vite dev server) was used unconditionally as the tunnel target; production `.env` files inherited it from `.env.example` and the public URL 404'd on every request while the agent itself was healthy. `resolveTunnelPort()` now falls back to the agent's own port unless something is actually serving `WEB_PORT`.
-- **`TERMORA_PORT` (the documented variable) was silently ignored** — the loader only read `PORT`. Both are honoured now, `TERMORA_PORT` taking precedence.
+- **`SYNAPTIX_PORT` (the documented variable) was silently ignored** — the loader only read `PORT`. Both are honoured now, `SYNAPTIX_PORT` taking precedence.
 - **Auth rate limit was bypassable** — `trust proxy: true` let a client's own `X-Forwarded-For` header override its real IP, so rotating that header gave every auth attempt a fresh rate-limit bucket. Now trusts only `loopback` (the tunnel process).
 - **`Access-Control-Allow-Origin: '*'` on every response** — including `/api/info`, which embeds the persistent auth token — with no legitimate cross-origin caller to justify it (the SPA is always same-origin). Removed; added `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` as baseline hardening instead.
 - **WebSocket client gave up reconnecting after ~5.5 minutes** — contradicted its own "no hard cap" docstring. A phone that stays foregrounded through a longer outage now keeps retrying indefinitely at a 30s-capped backoff.
@@ -19,7 +19,7 @@
 
 ### Docs
 - README screenshots replaced with real captures of the current app (the gallery was still showing the pre-redesign UI); added a short GIF tour and a real Claude Code session demo.
-- Added a termora-vs-Termux comparison section.
+- Added a synaptix-vs-Termux comparison section.
 - Quickstart rewritten as a beginner-friendly walkthrough.
 
 ## 0.1.0 (2026-06-30)
@@ -58,7 +58,7 @@
 ## 0.0.1 (2026-04-04)
 
 ### Features
-- Initial termora release (fork of clsh with production optimizations)
+- Initial synaptix release (fork of clsh with production optimizations)
 - Async tmux operations (non-blocking event loop)
 - WebSocket backpressure detection (64KB threshold)
 - Reconnect progress tracking with attempt counter

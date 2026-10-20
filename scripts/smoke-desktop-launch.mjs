@@ -36,7 +36,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const DESKTOP_DIR = join(ROOT, 'apps', 'desktop')
 const WEB_DIST = join(ROOT, 'packages', 'web', 'dist')
 const ELECTRON_PACKAGE = 'electron'
-const READY_MARKER = 'termora-electron-ready'
+const READY_MARKER = 'synaptix-electron-ready'
 const DEFAULT_TIMEOUT_MS = 20_000
 
 const args = process.argv.slice(2)
@@ -262,7 +262,7 @@ if (!runGuiRequested) {
     `app.whenReady().then(() => { console.log('${READY_MARKER}'); app.quit() })`,
     '',
   ].join('\n')
-  const smokeFile = join(tmpdir(), `termora-electron-ready-${process.pid}.cjs`)
+  const smokeFile = join(tmpdir(), `synaptix-electron-ready-${process.pid}.cjs`)
   try {
     writeFileSync(smokeFile, smokeScript)
     const result = spawnSync(electron.binary, [smokeFile, '--no-sandbox'], {

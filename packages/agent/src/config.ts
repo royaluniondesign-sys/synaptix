@@ -12,7 +12,7 @@ export interface AgentConfig {
   webPort: number;
   jwtSecret: string;
   /** Persistent static token for zero-friction access.
-   *  Generated once at ~/.termora/static_token, never expires.
+   *  Generated once at ~/.synaptix/static_token, never expires.
    *  Embed in URL for one-click auth without bootstrap TTL. */
   staticToken: string;
   ngrokAuthtoken: string | undefined;
@@ -25,7 +25,7 @@ export interface AgentConfig {
   tunnelMethod: 'cloudflared' | 'ngrok' | 'ssh' | 'local' | undefined;
   resendApiKey: string | undefined;
   dbPath: string;
-  /** Set TERMORA_NO_TMUX=1 to disable tmux session persistence even when tmux is available. */
+  /** Set SYNAPTIX_NO_TMUX=1 to disable tmux session persistence even when tmux is available. */
   tmuxDisabled: boolean;
 }
 
@@ -75,12 +75,12 @@ function getEnv(key: string): string | undefined {
 }
 
 /**
- * Returns a persistent static access token stored at ~/.termora/static_token.
+ * Returns a persistent static access token stored at ~/.synaptix/static_token.
  * Generated once on first run; reused forever. Never expires.
  * This token bypasses the 5-minute bootstrap TTL for frictionless access.
  */
-function getOrCreateStaticToken(termoraDir: string): string {
-  const tokenPath = join(termoraDir, 'static_token');
+function getOrCreateStaticToken(synaptixDir: string): string {
+  const tokenPath = join(synaptixDir, 'static_token');
   if (existsSync(tokenPath)) {
     try {
       const stored = readFileSync(tokenPath, 'utf-8').trim();
@@ -89,20 +89,20 @@ function getOrCreateStaticToken(termoraDir: string): string {
   }
   const token = randomBytes(32).toString('base64url');
   try {
-    mkdirSync(termoraDir, { recursive: true });
+    mkdirSync(synaptixDir, { recursive: true });
     writeFileSync(tokenPath, token, { mode: 0o600 });
   } catch { /* ignore write errors */ }
   return token;
 }
 
 /**
- * Returns a persistent JWT secret stored at ~/.termora/jwt_secret.
+ * Returns a persistent JWT secret stored at ~/.synaptix/jwt_secret.
  * Generated once on first run; reused on every subsequent restart so
  * the phone's stored JWT stays valid across `npm run dev` restarts.
  * Override with JWT_SECRET env var if needed.
  */
-function getOrCreateJwtSecret(termoraDir: string): string {
-  const secretPath = join(termoraDir, 'jwt_secret');
+function getOrCreateJwtSecret(synaptixDir: string): string {
+  const secretPath = join(synaptixDir, 'jwt_secret');
   if (existsSync(secretPath)) {
     try {
       const stored = readFileSync(secretPath, 'utf-8').trim();
@@ -111,7 +111,7 @@ function getOrCreateJwtSecret(termoraDir: string): string {
   }
   const secret = randomBytes(32).toString('base64url');
   try {
-    mkdirSync(termoraDir, { recursive: true });
+    mkdirSync(synaptixDir, { recursive: true });
     writeFileSync(secretPath, secret, { mode: 0o600 }); // owner-readable only
   } catch { /* ignore write errors */ }
   return secret;
@@ -122,11 +122,11 @@ export const DEFAULT_PORT = 4030;
 /**
  * Resolves the port the agent listens on.
  *
- * TERMORA_PORT is the documented name (README, .env.example); PORT stays
+ * SYNAPTIX_PORT is the documented name (README, .env.example); PORT stays
  * supported for existing setups. Call after loadDotEnv() so .env is visible.
  */
 export function resolveAgentPort(env: NodeJS.ProcessEnv = process.env): number {
-  const raw = env.TERMORA_PORT ?? env.PORT;
+  const raw = env.SYNAPTIX_PORT ?? env.PORT;
   const parsed = parseInt(raw ?? '', 10);
   return Number.isNaN(parsed) ? DEFAULT_PORT : parsed;
 }
@@ -135,20 +135,20 @@ export function loadConfig(): AgentConfig {
   // Load .env before reading any env vars
   loadDotEnv();
 
-  const termoraDir = join(homedir(), '.termora');
-  const defaultDbPath = join(termoraDir, 'termora.db');
+  const synaptixDir = join(homedir(), '.synaptix');
+  const defaultDbPath = join(synaptixDir, 'synaptix.db');
   const port = resolveAgentPort();
 
   return {
     port,
     webPort: parseInt(getEnv('WEB_PORT') ?? String(port), 10),
-    jwtSecret: getEnv('JWT_SECRET') ?? getOrCreateJwtSecret(termoraDir),
-    staticToken: getOrCreateStaticToken(termoraDir),
+    jwtSecret: getEnv('JWT_SECRET') ?? getOrCreateJwtSecret(synaptixDir),
+    staticToken: getOrCreateStaticToken(synaptixDir),
     tunnelMethod: getEnv('TUNNEL') as AgentConfig['tunnelMethod'],
     ngrokAuthtoken: getEnv('NGROK_AUTHTOKEN'),
     ngrokStaticDomain: getEnv('NGROK_STATIC_DOMAIN'),
     resendApiKey: getEnv('RESEND_API_KEY'),
     dbPath: getEnv('DB_PATH') ?? defaultDbPath,
-    tmuxDisabled: getEnv('TERMORA_NO_TMUX') === '1',
+    tmuxDisabled: getEnv('SYNAPTIX_NO_TMUX') === '1',
   };
 }

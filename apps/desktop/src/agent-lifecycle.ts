@@ -1,7 +1,7 @@
-// Termora desktop agent lifecycle adapter.
+// Synaptix desktop agent lifecycle adapter.
 //
 // Dependency-free and runtime-agnostic: the Electron main process injects the
-// real `startAgent` from `@termora/agent/runtime`, so this module never imports
+// real `startAgent` from `@synaptix/agent/runtime`, so this module never imports
 // Electron or the agent package. That keeps the desktop boundary typecheckable
 // and testable before either dependency is installed, while giving the shell a
 // concrete lifecycle (start once, report the port, stop cleanly) to call.
@@ -9,7 +9,7 @@
 import type { AgentLaunchDescriptor } from './agent-host.js'
 
 /**
- * Structural subset of `@termora/agent/runtime`'s `AgentHandle` that the
+ * Structural subset of `@synaptix/agent/runtime`'s `AgentHandle` that the
  * shell depends on. Declared locally to avoid importing the agent package.
  */
 export interface AgentHandleLike {
@@ -17,13 +17,13 @@ export interface AgentHandleLike {
   close(): Promise<void>
 }
 
-/** Structural subset of `@termora/agent/runtime`'s `StartAgentOptions`. */
+/** Structural subset of `@synaptix/agent/runtime`'s `StartAgentOptions`. */
 export interface StartAgentOptionsLike {
   log?: boolean
   recoverSessions?: boolean
 }
 
-/** Structural signature of `@termora/agent/runtime`'s `startAgent`. */
+/** Structural signature of `@synaptix/agent/runtime`'s `startAgent`. */
 export type StartAgentFn = (options?: StartAgentOptionsLike) => Promise<AgentHandleLike>
 
 export interface AgentLifecycle {

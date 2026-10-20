@@ -1,6 +1,6 @@
 # Unsigned desktop packaging (local only)
 
-Termora desktop artifacts are **unsigned** and **not notarized**, and nothing here publishes or
+Synaptix desktop artifacts are **unsigned** and **not notarized**, and nothing here publishes or
 uploads anything. This document describes how to produce unsigned local artifacts for smoke
 testing only, using `scripts/package-desktop-unsigned.mjs`.
 
@@ -31,7 +31,7 @@ npm --prefix apps/desktop run preflight:artifact:strict   # --strict: missing pr
 ```
 
 It verifies the host platform maps to a supported target, `apps/desktop/package-lock.json` exists
-and names `@termora/desktop-app`, `electron` and `electron-builder` resolve under `apps/desktop`,
+and names `@synaptix/desktop-app`, `electron` and `electron-builder` resolve under `apps/desktop`,
 `release/` is git-ignored, and no signing/publish credentials are present. Without `--strict`,
 missing prerequisites are reported as blockers and the command stays CI-safe; with `--strict` they
 are fatal. Signing/publish credentials in the environment always fail (exit `2`).

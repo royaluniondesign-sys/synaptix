@@ -1,10 +1,41 @@
 <div align="center">
 
-<img src="assets/termora-banner.png" alt="termora: Your machine, in your hands." width="100%" />
+<!-- Synaptix logo mark -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="72" height="72" fill="none">
+  <line x1="48" y1="48" x2="20" y2="20" stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+  <line x1="48" y1="48" x2="76" y2="20" stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+  <line x1="48" y1="48" x2="20" y2="76" stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+  <line x1="48" y1="48" x2="76" y2="76" stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+  <line x1="48" y1="48" x2="48" y2="10"  stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
+  <line x1="48" y1="48" x2="48" y2="86"  stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
+  <line x1="48" y1="48" x2="10" y2="48"  stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
+  <line x1="48" y1="48" x2="86" y2="48"  stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
+  <circle cx="20" cy="20" r="6"  fill="#a78bfa" opacity="0.85"/>
+  <circle cx="76" cy="20" r="6"  fill="#7170ff" opacity="0.85"/>
+  <circle cx="20" cy="76" r="6"  fill="#7170ff" opacity="0.85"/>
+  <circle cx="76" cy="76" r="6"  fill="#a78bfa" opacity="0.85"/>
+  <circle cx="48" cy="10" r="3.5" fill="#6366f1" opacity="0.6"/>
+  <circle cx="48" cy="86" r="3.5" fill="#6366f1" opacity="0.6"/>
+  <circle cx="10" cy="48" r="3.5" fill="#6366f1" opacity="0.6"/>
+  <circle cx="86" cy="48" r="3.5" fill="#6366f1" opacity="0.6"/>
+  <circle cx="48" cy="48" r="15" fill="url(#rg)"/>
+  <circle cx="48" cy="48" r="10" fill="#7170ff"/>
+  <circle cx="48" cy="48" r="5"  fill="#c4b5fd"/>
+  <defs>
+    <radialGradient id="rg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#7170ff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#7170ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>
 
-<br /><br />
+# Synaptix
 
-[![CI](https://img.shields.io/github/actions/workflow/status/royaluniondesign-sys/termora/ci.yml?branch=main&style=flat-square&label=CI&labelColor=09090b)](https://github.com/royaluniondesign-sys/termora/actions/workflows/ci.yml)
+**AI agent orchestration. Real terminals. Your machine.**
+
+<br />
+
+[![CI](https://img.shields.io/github/actions/workflow/status/royaluniondesign-sys/synaptix/ci.yml?branch=main&style=flat-square&label=CI&labelColor=09090b)](https://github.com/royaluniondesign-sys/synaptix/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-7170ff?style=flat-square&logo=typescript&logoColor=white&labelColor=09090b)](https://typescriptlang.org)
 [![Node.js](https://img.shields.io/badge/Node.js-20%20%7C%2022%20%7C%2024-7170ff?style=flat-square&logo=node.js&logoColor=white&labelColor=09090b)](https://nodejs.org)
 [![PWA](https://img.shields.io/badge/Mobile-PWA%20installable-7170ff?style=flat-square&logo=pwa&logoColor=white&labelColor=09090b)](#quickstart)
@@ -23,7 +54,7 @@
 
 A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-session terminal control, secure QR onboarding, tunnel status, persistent sessions, and a roadmap toward full SSH/SFTP, multi-machine, Git, worktree, and agent orchestration.
 
-[**Website & live demo**](https://royaluniondesign-sys.github.io/termora/) · [Quickstart](#quickstart) · [Features](#features) · [How it works](#how-it-works) · [Multi-machine](#multi-machine) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
+[**Website & live demo**](https://royaluniondesign-sys.github.io/synaptix/) · [Quickstart](#quickstart) · [Features](#features) · [How it works](#how-it-works) · [Multi-machine](#multi-machine) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -31,7 +62,7 @@ A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-sess
 
 <div align="center">
 
-![Termora cockpit walkthrough](docs/images/cockpit-tour-v2.gif)
+![Synaptix cockpit walkthrough](docs/images/cockpit-tour-v2.gif)
 
 <table>
 <tr>
@@ -46,19 +77,19 @@ A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-sess
 
 ---
 
-## Why Termora
+## Why Synaptix
 
-Termora is built for developers who run serious work on real machines but want control from anywhere.
+Synaptix is built for developers who run serious work on real machines but want control from anywhere.
 
-Compared with classic mobile SSH clients, Termora gives you a full browser/PWA interface, multi-session previews, custom terminal keyboards, QR pairing, session persistence, and a shareable authenticated URL.
+Compared with classic mobile SSH clients, Synaptix gives you a full browser/PWA interface, multi-session previews, custom terminal keyboards, QR pairing, session persistence, and a shareable authenticated URL.
 
-Compared with cloud IDEs, Termora keeps the work on your own Mac/Linux/server. No hosted workspace lock-in, no fake shell, no remote filesystem copy. It streams your real PTY and local agent processes.
+Compared with cloud IDEs, Synaptix keeps the work on your own Mac/Linux/server. No hosted workspace lock-in, no fake shell, no remote filesystem copy. It streams your real PTY and local agent processes.
 
-Compared with single-agent dashboards, Termora is designed to become the machine cockpit: terminals first today, then files, SSH/SFTP, Git, agents, worktrees, browser previews, notifications, and verification gates in one installable app.
+Compared with single-agent dashboards, Synaptix is designed to become the machine cockpit: terminals first today, then files, SSH/SFTP, Git, agents, worktrees, browser previews, notifications, and verification gates in one installable app.
 
 ## What works now
 
-Termora now has a verified local-first cockpit foundation. The current repo state is intentionally split between **implemented**, **guarded**, and **roadmap** so the project page does not pretend platform work is finished before artifacts exist.
+Synaptix now has a verified local-first cockpit foundation. The current repo state is intentionally split between **implemented**, **guarded**, and **roadmap** so the project page does not pretend platform work is finished before artifacts exist.
 
 ### Implemented and verified
 
@@ -69,7 +100,7 @@ Termora now has a verified local-first cockpit foundation. The current repo stat
 - **Session persistence** — tmux control mode when available, with fallback to raw PTY.
 - **Agent cockpit backend** — protected cockpit status, file listing, safe file preview, whitelisted actions, job status, fan-out/list/delete worktree routes, read-only GitHub status, events, and unread notification model.
 - **Cockpit UI slices** — file inspector, GitHub workflow status, notifications/unread panel, controlled split layout, and multi-pane terminal rendering foundations.
-- **CLI MVP** — `termora help`, `version`, `status`, and `file <path>` with local fallback or authenticated remote API mode.
+- **CLI MVP** — `synaptix help`, `version`, `status`, and `file <path>` with local fallback or authenticated remote API mode.
 - **Desktop app boundary** — Electron main/preload/launcher contracts, dynamic Electron loader, desktop lifecycle tests, desktop smoke and launch-smoke contracts.
 - **Dogfood and release gates** — `check:cockpit`, `check:web-headless`, `check:desktop-boundary`, `check:desktop-smoke`, `check:desktop-launch`, `check:desktop-artifact-preflight`, `check:platform-readiness`, and `check:security-audit` run locally/CI.
 - **Security hygiene** — production audit gate is clean; desktop out-of-workspace audit is separately checked before release work.
@@ -83,9 +114,9 @@ Termora now has a verified local-first cockpit foundation. The current repo stat
 
 ## Where it is going
 
-Termora is evolving into an installable, multi-device developer cockpit. The target is not just a terminal skin: it is a real utility layer for agents, worktrees, files, Git, mobile control, previews, notifications, and verification.
+Synaptix is evolving into an installable, multi-device developer cockpit. The target is not just a terminal skin: it is a real utility layer for agents, worktrees, files, Git, mobile control, previews, notifications, and verification.
 
-| Capability | Status | Termora target |
+| Capability | Status | Synaptix target |
 | --- | --- | --- |
 | Mobile companion | **Live PWA / native scaffold** | Monitor sessions from phone, resume work, steer agents, and receive finish/needs-input notifications. Native wrappers/APK/App Store builds are roadmap. |
 | Parallel worktrees | **Backend foundation + UI actions** | Fan one prompt across isolated git worktrees, compare outputs, and merge the winner. Worktree tests/fan-out exist; full compare/winner UI is in progress. |
@@ -95,7 +126,7 @@ Termora is evolving into an installable, multi-device developer cockpit. The tar
 | SSH worktrees | **Ops-proven, product pending** | Run agents on a remote box with file editing, git, terminals, reconnect, and port forwarding. Product host registry/UI is pending. |
 | Annotate AI diffs | **Roadmap** | Comment on generated diff lines and send review notes back to the agent before commit. |
 | Drag files/images to agents | **Roadmap** | Attach repo files, screenshots, and images directly to agent prompts. |
-| Termora CLI | **MVP** | Current commands cover help/version/status/file. Worktree/snapshot/click/fill/agent/gates commands remain roadmap. |
+| Synaptix CLI | **MVP** | Current commands cover help/version/status/file. Worktree/snapshot/click/fill/agent/gates commands remain roadmap. |
 | Quick open | **Roadmap** | Search across worktrees, files, agents, commands, and repo context. |
 | Usage tracking | **Roadmap** | Track Claude/Codex/OpenCode/Hermes usage, rate-limit resets, and account/provider switching. |
 | Rich repo previews | **File preview foundation** | Preview Markdown, images, PDFs, docs, browser panes, and logs in the workspace. |
@@ -120,7 +151,7 @@ See:
 | SSH worktrees | **Roadmap** | Run agents on a beefy remote box with file editing, git, terminals, reconnect, and port forwarding. |
 | Annotate AI diffs | **Roadmap** | Comment on generated diff lines and send review notes back to the agent before commit. |
 | Drag files/images to agents | **Roadmap** | Attach repo files, screenshots, and images directly to agent prompts. |
-| Termora CLI | **Roadmap** | Script workflows such as `termora worktree create`, `termora snapshot`, `termora click`, and `termora fill`. |
+| Synaptix CLI | **Roadmap** | Script workflows such as `synaptix worktree create`, `synaptix snapshot`, `synaptix click`, and `synaptix fill`. |
 | Quick open | **Roadmap** | Search across worktrees, files, agents, commands, and repo context. |
 | Usage tracking | **Roadmap** | Track Claude/Codex/OpenCode/Hermes usage, rate-limit resets, and account/provider switching. |
 | Rich repo previews | **Roadmap** | Preview Markdown, images, PDFs, docs, browser panes, and logs in the workspace. |
@@ -141,18 +172,18 @@ See:
 > Requires Node.js 20+ and macOS or Linux.
 
 ```bash
-git clone https://github.com/royaluniondesign-sys/termora.git
-cd termora
+git clone https://github.com/royaluniondesign-sys/synaptix.git
+cd synaptix
 npm install
 npm run dev
 ```
 
-Scan the QR code printed in the terminal. Termora opens a real terminal session from your phone or browser.
+Scan the QR code printed in the terminal. Synaptix opens a real terminal session from your phone or browser.
 
 Already installed:
 
 ```bash
-cd termora
+cd synaptix
 npm run dev
 ```
 
@@ -162,7 +193,7 @@ Stop it with `Ctrl+C` in the terminal where `npm run dev` is running.
 
 ## How it works
 
-Termora is a local agent plus a mobile/browser cockpit. Your phone never talks to a fake shell: it streams authenticated input/output to real PTYs running on your machine.
+Synaptix is a local agent plus a mobile/browser cockpit. Your phone never talks to a fake shell: it streams authenticated input/output to real PTYs running on your machine.
 
 <div align="center">
 
@@ -189,7 +220,7 @@ Termora is a local agent plus a mobile/browser cockpit. Your phone never talks t
   <p><code>events</code></p>
 </td>
 <td align="center" width="30%">
-  <h3>termora agent</h3>
+  <h3>synaptix agent</h3>
   <p><code>real PTYs</code> · <code>tmux control</code><br /><code>SSH/SFTP routes</code> · <code>auth</code><br /><code>up to 8 live sessions</code></p>
   <sub>Your machine stays the runtime: shells, repos, agents, and files remain local.</sub>
 </td>
@@ -225,7 +256,7 @@ Termora is a local agent plus a mobile/browser cockpit. Your phone never talks t
 
 ### Product capability map
 
-Termora tracks the full agent-cockpit surface explicitly so public docs do not pretend unfinished features are done.
+Synaptix tracks the full agent-cockpit surface explicitly so public docs do not pretend unfinished features are done.
 
 | Feature | Current implementation | Next backend/UI work |
 | --- | --- | --- |
@@ -237,16 +268,16 @@ Termora tracks the full agent-cockpit surface explicitly so public docs do not p
 | **SSH Worktrees** | Remote Linux orchestration proven operationally over Tailscale SSH. | Product host registry, SSH worktree spawn, reconnect, file editing, port-forward UI. |
 | **Annotate AI Diffs** | Git status/diff direction documented. | Inline diff comments shipped back to the active agent. |
 | **Drag Files to Agents** | Safe file listing and preview backend. | Drag/drop files/images into prompts and persist attachments per run. |
-| **Termora CLI** | `help`, `version`, `status`, `file` with local and authenticated remote modes. | Worktree, snapshot, browser action, agent run, and gate-watch commands. |
+| **Synaptix CLI** | `help`, `version`, `status`, `file` with local and authenticated remote modes. | Worktree, snapshot, browser action, agent run, and gate-watch commands. |
 | **Quick Open** | Roadmap. | Global search across commands/files/sessions/agents/worktrees. |
 | **Usage Tracking** | Provider/model constraints documented for operations. | In-app usage/rate-limit reset display and account switcher. |
 | **Rich Repo Previews** | Safe text/image file preview foundation. | Markdown/image/PDF/doc previews inside the cockpit. |
-| **Computer Use** | Hermes/browser automation used during development. | Safe visible-UI control as a Termora workflow. |
+| **Computer Use** | Hermes/browser automation used during development. | Safe visible-UI control as a Synaptix workflow. |
 | **Notifications** | Event bus, SSE stream, unread model, notifications tab. | Push notifications and richer task/session unread markers. |
 
 ### Supported agent model
 
-Termora is designed around a simple rule: if an agent runs as a CLI in a terminal, Termora should be able to host, supervise, and resume it.
+Synaptix is designed around a simple rule: if an agent runs as a CLI in a terminal, Synaptix should be able to host, supervise, and resume it.
 
 Current/target agent families include: Claude Code, Codex, Grok, Cursor/Copilot-style CLIs, DeepSeek/Qwen/Kimi/Mistral code CLIs, OpenCode, Hermes Agent, Goose, Cline, Continue, Aider-style tools, and any custom CLI agent configured by command template.
 
@@ -295,11 +326,11 @@ Current/target agent families include: Claude Code, Codex, Grok, Cursor/Copilot-
 
 ## Multi-machine
 
-Run Termora on every machine you want to control.
+Run Synaptix on every machine you want to control.
 
 ```bash
-git clone https://github.com/royaluniondesign-sys/termora.git
-cd termora
+git clone https://github.com/royaluniondesign-sys/synaptix.git
+cd synaptix
 npm install
 npm run dev
 ```
@@ -325,13 +356,13 @@ Create `.env` in the project root. All fields are optional.
 ```bash
 NGROK_AUTHTOKEN=your_token
 NGROK_STATIC_DOMAIN=your.ngrok-free.dev
-TERMORA_PORT=4030
-TERMORA_MAX_SESSIONS=8
-TERMORA_NO_TMUX=1
+SYNAPTIX_PORT=4030
+SYNAPTIX_MAX_SESSIONS=8
+SYNAPTIX_NO_TMUX=1
 TUNNEL=ssh
 ```
 
-`TERMORA_PORT` takes precedence over `PORT`.
+`SYNAPTIX_PORT` takes precedence over `PORT`.
 
 ---
 
@@ -347,7 +378,7 @@ npm run check:cockpit  # exercise a live agent's cockpit API (skips without env)
 ```
 
 `npm run check:cockpit` is the dogfood check for a live agent. With
-`TERMORA_URL` (e.g. `http://127.0.0.1:4030`) and `TERMORA_TOKEN` set it
+`SYNAPTIX_URL` (e.g. `http://127.0.0.1:4030`) and `SYNAPTIX_TOKEN` set it
 exercises the health, status, files, README preview, github and events
 endpoints; without them it prints a skip notice and exits 0. It never prints
 tokens — keep them in your env, not your logs.

@@ -7,8 +7,8 @@ import { useState, useEffect, useCallback } from 'react';
 import type { SkinId, PerKeyColors } from '../lib/types';
 import { DEFAULT_CUSTOM_COLORS, GAMER_RGB_HUES } from '../lib/skins';
 
-const SKIN_KEY = 'termora_skin';
-const PER_KEY_KEY = 'termora_per_key';
+const SKIN_KEY = 'synaptix_skin';
+const PER_KEY_KEY = 'synaptix_per_key';
 
 function loadSkin(): SkinId {
   try {

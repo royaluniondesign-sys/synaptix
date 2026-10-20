@@ -1,5 +1,5 @@
 /**
- * Shared types used across the termora mobile UI.
+ * Shared types used across the synaptix mobile UI.
  * Import from here to keep all agents aligned on the same interfaces.
  */
 
@@ -10,7 +10,7 @@ export type ShellType = 'zsh' | 'tmux' | 'claude';
 
 export interface Session {
   id: string;           // server-assigned UUID
-  name: string;         // display name (cwd basename, e.g. "termora" or "api-refactor")
+  name: string;         // display name (cwd basename, e.g. "synaptix" or "api-refactor")
   cwd: string;          // current working directory
   status: SessionStatus;
   shell: ShellType;

@@ -15,7 +15,7 @@ import { initDatabase } from '../db.js';
  */
 
 function tempDbPath(): string {
-  return join(tmpdir(), `termora-sessions-${randomBytes(6).toString('hex')}.db`);
+  return join(tmpdir(), `synaptix-sessions-${randomBytes(6).toString('hex')}.db`);
 }
 
 describe('session tracking', () => {

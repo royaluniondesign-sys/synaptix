@@ -114,13 +114,13 @@ export function TerminalPane({
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
       {label && (
-        <div className="flex h-7 shrink-0 items-center border-b border-termora-border bg-termora-surface px-3">
+        <div className="flex h-7 shrink-0 items-center border-b border-synaptix-border bg-synaptix-surface px-3">
           <span className="text-xs text-neutral-500">{label}</span>
         </div>
       )}
       <div
         ref={containerRef}
-        className="min-h-0 flex-1 bg-termora-bg"
+        className="min-h-0 flex-1 bg-synaptix-bg"
       />
     </div>
   );

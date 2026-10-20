@@ -1,16 +1,16 @@
 {
-  "name": "@termora/agent",
+  "name": "@synaptix/agent",
   "version": "0.2.0",
-  "description": "Local Termora agent for PTY sessions, auth, tunnels, SSH/SFTP, and machine control",
+  "description": "Local Synaptix agent for PTY sessions, auth, tunnels, SSH/SFTP, and machine control",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/royaluniondesign-sys/termora.git",
+    "url": "https://github.com/royaluniondesign-sys/synaptix.git",
     "directory": "packages/agent"
   },
-  "homepage": "https://termora.dev",
+  "homepage": "https://synaptix.dev",
   "bugs": {
-    "url": "https://github.com/royaluniondesign-sys/termora/issues"
+    "url": "https://github.com/royaluniondesign-sys/synaptix/issues"
   },
   "type": "module",
   "main": "dist/index.js",

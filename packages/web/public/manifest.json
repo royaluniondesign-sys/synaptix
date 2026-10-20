@@ -1,6 +1,6 @@
 {
-  "name": "Termora",
-  "short_name": "Termora",
+  "name": "Synaptix",
+  "short_name": "Synaptix",
   "description": "Installable cockpit for real terminals, machines, and developer workflows",
   "start_url": "/",
   "display": "standalone",

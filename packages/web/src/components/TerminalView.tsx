@@ -345,7 +345,7 @@ function KeyStrip({ onKey, keyboardMode, onKeyboardModeChange }: {
 
 // ── Fan-out modal ───────────────────────────────────────────────────────────
 
-// Termora targets any CLI agent, not a specific brand — this is a starting
+// Synaptix targets any CLI agent, not a specific brand — this is a starting
 // point for the datalist, not an allowlist. The field itself is free text:
 // type the full command exactly as you'd run it yourself, with {prompt}
 // wherever the prompt goes.

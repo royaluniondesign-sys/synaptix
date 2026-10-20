@@ -1,4 +1,4 @@
-# Termora current status
+# Synaptix current status
 
 This is the repo-level truth table for the current implementation. It exists to keep public README, roadmap, and platform claims aligned.
 
@@ -35,4 +35,4 @@ This is the repo-level truth table for the current implementation. It exists to 
 
 ## Non-claims
 
-Termora has no store submission evidence, signed artifacts, notarization evidence, published installers, or app-store submission yet. Any public claim must stay scoped to the evidence above, the platform readiness checklist, and `docs/release-evidence-manifest.json`.
+Synaptix has no store submission evidence, signed artifacts, notarization evidence, published installers, or app-store submission yet. Any public claim must stay scoped to the evidence above, the platform readiness checklist, and `docs/release-evidence-manifest.json`.

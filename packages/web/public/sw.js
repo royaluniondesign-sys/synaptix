@@ -1,5 +1,5 @@
-// termora service worker — caches app shell for offline/tunnel-down support
-const CACHE = 'termora-v1';
+// synaptix service worker — caches app shell for offline/tunnel-down support
+const CACHE = 'synaptix-v1';
 
 self.addEventListener('install', (e) => {
   // Cache the app shell immediately

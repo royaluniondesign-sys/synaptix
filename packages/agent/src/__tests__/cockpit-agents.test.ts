@@ -9,18 +9,18 @@ import type { AddressInfo } from 'node:net';
  * HTTP contract for the agent registry: auth is required, custom agents can be
  * registered/removed, built-ins are protected, and the status endpoint
  * classifies terminal output. The registry file is redirected to a temp dir so
- * the suite never touches the real ~/.termora.
+ * the suite never touches the real ~/.synaptix.
  */
 
 describe('cockpit agent registry endpoints', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'termora-cockpit-agents-'));
+  const dir = mkdtempSync(join(tmpdir(), 'synaptix-cockpit-agents-'));
   const dbPath = join(dir, 'test.db');
   let baseUrl = '';
   let authHeader = '';
   let close: () => Promise<void>;
 
   beforeAll(async () => {
-    process.env.TERMORA_AGENTS_FILE = join(dir, 'agents.json');
+    process.env.SYNAPTIX_AGENTS_FILE = join(dir, 'agents.json');
     const { createAppServer } = await import('../server.js');
     const { initDatabase } = await import('../db.js');
     const { createSessionJWT } = await import('../auth.js');
@@ -46,7 +46,7 @@ describe('cockpit agent registry endpoints', () => {
 
   afterAll(async () => {
     await close();
-    delete process.env.TERMORA_AGENTS_FILE;
+    delete process.env.SYNAPTIX_AGENTS_FILE;
     rmSync(dir, { recursive: true, force: true });
   });
 

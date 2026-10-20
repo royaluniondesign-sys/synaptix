@@ -3,7 +3,7 @@ import { CAPABILITIES, deriveAgents, deriveTasks, gateSummary, overviewTask, typ
 
 const status: CockpitStatusLike = {
   machine: 'devbox',
-  root: '/srv/termora',
+  root: '/srv/synaptix',
   git: { branch: 'main', dirty: true, lastCommit: 'abc123 fix' },
   agents: [
     { id: 'claude', name: 'Claude Code', state: 'ready', available: true },
@@ -47,6 +47,6 @@ describe('cockpit model', () => {
   });
 
   it('marks only the shipped surfaces as live', () => {
-    expect(CAPABILITIES.filter((item) => item.state === 'live').map((item) => item.name).sort()).toEqual(['Any CLI Agent', 'Termora CLI']);
+    expect(CAPABILITIES.filter((item) => item.state === 'live').map((item) => item.name).sort()).toEqual(['Any CLI Agent', 'Synaptix CLI']);
   });
 });

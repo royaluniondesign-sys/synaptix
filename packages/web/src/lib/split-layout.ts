@@ -30,7 +30,7 @@ export interface SplitLayout {
 
 export const SPLIT_LAYOUT_VERSION = 1 as const;
 
-export const SPLIT_LAYOUT_STORAGE_KEY = 'termora.split-layout.v1';
+export const SPLIT_LAYOUT_STORAGE_KEY = 'synaptix.split-layout.v1';
 
 export const SPLIT_MODES: readonly SplitMode[] = ['single', 'columns', 'rows', 'quad'];
 

@@ -24,7 +24,7 @@ export const BUILTIN_AGENTS: DemoAgent[] = [
 ];
 
 export const DEMO_FILE_CONTENT: Record<string, string> = {
-  'README.md': '# demo-project\n\nSample project shown in the Termora demo.\nNothing in this file is real.\n',
+  'README.md': '# demo-project\n\nSample project shown in the Synaptix demo.\nNothing in this file is real.\n',
   'package.json': '{\n  "name": "demo-project",\n  "version": "1.0.0",\n  "scripts": { "test": "vitest run" }\n}\n',
   'src/server.ts': "import express from 'express'\n\nconst app = express()\napp.get('/health', (_req, res) => res.json({ ok: true }))\napp.listen(3000)\n",
 };

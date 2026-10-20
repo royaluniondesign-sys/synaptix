@@ -64,9 +64,9 @@ test('the Pages workflow publishes only for site changes on main and holds no se
 
 test('the page uses the project logo and the build script copies it', () => {
   const build = readFileSync(new URL('../build-site.mjs', import.meta.url), 'utf8')
-  assert.match(html, /src="termora-logo\.svg"/)
-  assert.match(html, /rel="icon" href="termora-logo\.svg"/)
-  assert.ok(build.includes("'assets/termora-logo.svg'"), 'build-site.mjs must copy assets/termora-logo.svg')
+  assert.match(html, /src="synaptix-logo\.svg"/)
+  assert.match(html, /rel="icon" href="synaptix-logo\.svg"/)
+  assert.ok(build.includes("'assets/synaptix-logo.svg'"), 'build-site.mjs must copy assets/synaptix-logo.svg')
 })
 
 test('no unprovable superlatives, and every difference states its cost', () => {

@@ -12,7 +12,7 @@ const S = {
   bg: '#09090b',
 } as const;
 
-const DISMISS_KEY = 'termora_update_dismissed';
+const DISMISS_KEY = 'synaptix_update_dismissed';
 const CHECK_INTERVAL = 1000 * 60 * 60 * 4; // 4 hours
 
 interface ReleaseInfo {
@@ -24,7 +24,7 @@ interface ReleaseInfo {
 async function fetchLatestRelease(): Promise<ReleaseInfo | null> {
   try {
     const res = await fetch(
-      'https://api.github.com/repos/stablyai/termora/releases/latest',
+      'https://api.github.com/repos/stablyai/synaptix/releases/latest',
       { headers: { Accept: 'application/vnd.github.v3+json' }, signal: AbortSignal.timeout(5000) },
     );
     if (!res.ok) return null;
@@ -146,7 +146,7 @@ export function UpdateNotification({ currentVersion }: UpdateNotificationProps) 
                 Update Available
               </div>
               <div style={{ fontSize: 10, color: S.text3 }}>
-                Termora v{release.version} is ready.
+                Synaptix v{release.version} is ready.
               </div>
             </div>
             <button

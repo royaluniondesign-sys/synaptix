@@ -62,14 +62,14 @@ function healthyFetch() {
 }
 
 describe('readCockpitEnv (skip when absent)', () => {
-  it('returns null unless both TERMORA_URL and TERMORA_TOKEN are set', () => {
+  it('returns null unless both SYNAPTIX_URL and SYNAPTIX_TOKEN are set', () => {
     expect(readCockpitEnv({})).toBeNull()
-    expect(readCockpitEnv({ TERMORA_URL: 'http://x' })).toBeNull()
-    expect(readCockpitEnv({ TERMORA_TOKEN: 't' })).toBeNull()
+    expect(readCockpitEnv({ SYNAPTIX_URL: 'http://x' })).toBeNull()
+    expect(readCockpitEnv({ SYNAPTIX_TOKEN: 't' })).toBeNull()
   })
 
   it('trims and returns both values', () => {
-    expect(readCockpitEnv({ TERMORA_URL: ' http://x ', TERMORA_TOKEN: ' t ' })).toEqual({
+    expect(readCockpitEnv({ SYNAPTIX_URL: ' http://x ', SYNAPTIX_TOKEN: ' t ' })).toEqual({
       url: 'http://x',
       token: 't',
     })

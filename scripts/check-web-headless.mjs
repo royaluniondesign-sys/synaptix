@@ -1,22 +1,22 @@
-// Headless dogfood check for the Termora web UI / headless render path.
+// Headless dogfood check for the Synaptix web UI / headless render path.
 //
 // Three layers, always safe to run (never requests a token, never prints one):
 //   1. Static contract checks against the render/gate source (always).
 //   2. Live HTML shell check against a reachable web server (server up only).
 //   3. Authenticated render check via /api/cockpit/status — only when the
-//      TERMORA_TOKEN env var is provided, exchanged for a JWT when needed, and redacted.
+//      SYNAPTIX_TOKEN env var is provided, exchanged for a JWT when needed, and redacted.
 //
 // Env:
-//   TERMORA_WEB_URL  base URL of the running web build (default http://127.0.0.1:4031)
-//   TERMORA_TOKEN    bootstrap or JWT token used only for the authenticated live check
+//   SYNAPTIX_WEB_URL  base URL of the running web build (default http://127.0.0.1:4031)
+//   SYNAPTIX_TOKEN    bootstrap or JWT token used only for the authenticated live check
 //
 // Skips (does not fail) live layers that have no server or no token; fails on
 // any broken contract when the layer is exercised.
 
 import { existsSync, readFileSync } from 'node:fs';
 
-const BASE_URL = process.env.TERMORA_WEB_URL ?? 'http://127.0.0.1:4031';
-const TOKEN = process.env.TERMORA_TOKEN ?? null;
+const BASE_URL = process.env.SYNAPTIX_WEB_URL ?? 'http://127.0.0.1:4031';
+const TOKEN = process.env.SYNAPTIX_TOKEN ?? null;
 const REDACTED = TOKEN ? '[REDACTED]' : null;
 const looksLikeJwt = (token) => token.split('.').length === 3;
 
@@ -84,7 +84,7 @@ if (authScreen) {
 
 const useAuth = read('packages/web/src/hooks/useAuth.ts');
 if (useAuth) {
-  if (useAuth.includes("'termora_jwt'")) ok('useAuth persists JWT under termora_jwt');
+  if (useAuth.includes("'synaptix_jwt'")) ok('useAuth persists JWT under synaptix_jwt');
   else bad('useAuth JWT storage key drift');
   if (/searchParams/.test(useAuth)) ok('useAuth accepts ?token= bootstrap');
   else bad('useAuth token param drift');
@@ -119,7 +119,7 @@ if (probeResult.kind === 'unreachable') {
   ok(`GET ${BASE_URL}/ serves the headless HTML shell`);
 
   if (!TOKEN) {
-    console.log('TERMORA_TOKEN not set — skipped authenticated render check (no credentials requested)');
+    console.log('SYNAPTIX_TOKEN not set — skipped authenticated render check (no credentials requested)');
   } else {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);

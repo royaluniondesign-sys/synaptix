@@ -145,7 +145,7 @@ export function StatusBar({
 
       {/* Version */}
       <Segment>
-        <span>termora v0.2.0</span>
+        <span>synaptix v0.2.0</span>
       </Segment>
     </div>
   );

@@ -94,9 +94,9 @@
       "artifact": "CLI binary",
       "surface": "cli",
       "statusCategory": "missing",
-      "evidenceRequired": "Bundled by installers and runnable as termora",
-      "nextEvidenceCommand": "manual: build installer artifact, then run bundled termora --help (pending)",
-      "expectedObservation": "Installed app exposes bundled termora --help output",
+      "evidenceRequired": "Bundled by installers and runnable as synaptix",
+      "nextEvidenceCommand": "manual: build installer artifact, then run bundled synaptix --help (pending)",
+      "expectedObservation": "Installed app exposes bundled synaptix --help output",
       "evidenceSatisfied": false,
       "supported": false
     }

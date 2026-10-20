@@ -248,7 +248,7 @@ function FABButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-const PROJECTS = ['RUD-WEB', 'Termora', 'excited-bohr', 'excited-tesla', 'intelligent-galileo', 'serene-raman'];
+const PROJECTS = ['RUD-WEB', 'Synaptix', 'excited-bohr', 'excited-tesla', 'intelligent-galileo', 'serene-raman'];
 
 function NavItem({ label, icon, active, badge, badgeColor, onClick }: {
   label: string;
@@ -336,7 +336,7 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
             <rect width="36" height="36" rx="8" fill={S.primary}/>
             <text x="18" y="25" textAnchor="middle" fill="white" fontSize="18" fontWeight="700" fontFamily="Arial,sans-serif">T</text>
           </svg>
-          <span style={{ fontSize: 13, fontWeight: 700, color: S.text1, letterSpacing: -0.4, flex: 1 }}>Termora</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: S.text1, letterSpacing: -0.4, flex: 1 }}>Synaptix</span>
           <span style={{
             width: 7, height: 7, borderRadius: '50%', background: statusColor,
             animation: isConnected ? 'pulse-dot 2s ease-in-out infinite' : 'none',
@@ -381,8 +381,8 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
           active={current === 'dashboard'}
           onClick={() => onChange('dashboard')} />
 
-        {/* Termora Mobile */}
-        <NavItem label="Termora Mobile" icon={icons.mobile}
+        {/* Synaptix Mobile */}
+        <NavItem label="Synaptix Mobile" icon={icons.mobile}
           active={current === 'mobile'}
           onClick={() => onChange('mobile')} />
       </div>

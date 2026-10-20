@@ -1,23 +1,23 @@
-// Termora mobile companion scaffold.
+// Synaptix mobile companion scaffold.
 // Native builds are intentionally disabled until push/deep-link requirements are implemented.
 
-const pushEnvironment = process.env.TERMORA_IOS_PUSH_ENV === 'production' ? 'production' : 'development';
+const pushEnvironment = process.env.SYNAPTIX_IOS_PUSH_ENV === 'production' ? 'production' : 'development';
 
 module.exports = {
   expo: {
-    name: 'Termora',
-    slug: 'termora-mobile',
-    scheme: 'termora',
+    name: 'Synaptix',
+    slug: 'synaptix-mobile',
+    scheme: 'synaptix',
     version: '0.0.0',
     orientation: 'portrait',
     ios: {
-      bundleIdentifier: 'com.termora.mobile',
+      bundleIdentifier: 'com.synaptix.mobile',
       entitlements: {
         'aps-environment': pushEnvironment,
       },
     },
     android: {
-      package: 'com.termora.mobile',
+      package: 'com.synaptix.mobile',
     },
     plugins: [],
   },

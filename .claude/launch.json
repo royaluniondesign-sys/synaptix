@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "termora-web",
+      "name": "synaptix-web",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--workspace=packages/web"],
       "port": 4031

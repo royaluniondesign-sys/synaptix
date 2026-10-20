@@ -33,7 +33,7 @@ const MAX_BACKOFF = 30_000;
 /**
  * WebSocket client with persistent reconnection.
  *
- * Handles JSON serialization of the termora protocol messages,
+ * Handles JSON serialization of the synaptix protocol messages,
  * automatic reconnection on disconnect (no hard cap — keeps trying
  * with exponential backoff), periodic heartbeat pings, and
  * visibility/network-aware wake-up reconnection.

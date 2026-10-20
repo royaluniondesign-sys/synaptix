@@ -42,7 +42,7 @@ const jobs = new Map<string, CockpitJob>();
 let agentRegistry: AgentRegistry | undefined;
 
 function getAgentRegistry(): AgentRegistry {
-  agentRegistry ??= new AgentRegistry(process.env.TERMORA_AGENTS_FILE || undefined);
+  agentRegistry ??= new AgentRegistry(process.env.SYNAPTIX_AGENTS_FILE || undefined);
   return agentRegistry;
 }
 const MAX_OUTPUT = 32_000;
@@ -187,7 +187,7 @@ async function launchWorktreeFanout(body: WorktreeLaunchBody) {
   const count = Math.min(Math.max(Number(body.count ?? 2), 1), 5);
   const promptSlug = slugify(prompt);
   const worktrees = await createFanoutWorktrees(repoRoot, count, promptSlug);
-  const runAgents = body.runAgents === true && process.env.TERMORA_ENABLE_AGENT_SPAWN === '1';
+  const runAgents = body.runAgents === true && process.env.SYNAPTIX_ENABLE_AGENT_SPAWN === '1';
   const agentId = String(body.agentId ?? '').trim();
   const profile = agentId ? getAgentRegistry().get(agentId) : undefined;
   if (agentId && !profile) throw new Error(`Unknown agent: ${agentId}`);
@@ -201,7 +201,7 @@ async function launchWorktreeFanout(body: WorktreeLaunchBody) {
       worktrees,
       agentJobs,
       agentSpawn: 'disabled',
-      note: 'Set TERMORA_ENABLE_AGENT_SPAWN=1 to execute external agent commands from this endpoint.',
+      note: 'Set SYNAPTIX_ENABLE_AGENT_SPAWN=1 to execute external agent commands from this endpoint.',
     };
   }
 
@@ -589,7 +589,7 @@ export function mountCockpitRoutes(app: Express, requireAuth: AuthGuard): void {
         const { default: https } = await import('node:https');
         const url = new URL(baseUrl);
         const extraHeaders: Record<string, string> = provider === 'openrouter'
-          ? { 'HTTP-Referer': 'https://termora.app', 'X-Title': 'Termora' }
+          ? { 'HTTP-Referer': 'https://synaptix.app', 'X-Title': 'Synaptix' }
           : {};
 
         const apiReq = https.request(url, {

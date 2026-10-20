@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** termora
+**Project:** synaptix
 **Generated:** 2026-04-04 13:50:39
 **Category:** Financial Dashboard
 

@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Termora</title>
+<title>Synaptix</title>
 <meta name="description" content="Open-source cockpit for real terminals and CLI coding agents on your own machine, from a browser or phone. Early alpha.">
 <meta name="theme-color" content="#7170ff">
-<link rel="icon" href="termora-logo.svg" type="image/svg+xml">
+<link rel="icon" href="synaptix-logo.svg" type="image/svg+xml">
 <style>
   @font-face { font-family: "Instrument Serif"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/instrument-serif-latin-400-normal.woff2") format("woff2"); }
   @font-face { font-family: "Instrument Serif"; font-weight: 400; font-style: italic; font-display: swap; src: url("fonts/instrument-serif-latin-400-italic.woff2") format("woff2"); }
@@ -230,9 +230,9 @@
 <a class="skip" href="#what">Skip to content</a>
 
 <header class="top"><div class="wrap">
-  <a class="brand" href="#top"><img src="termora-logo.svg" alt="" width="44" height="44"><span>termora</span></a>
+  <a class="brand" href="#top"><img src="synaptix-logo.svg" alt="" width="44" height="44"><span>synaptix</span></a>
   <nav class="mono" aria-label="Sections"><a href="#what">What it does</a><a href="#use">Use</a><a href="#scope">Scope</a><a href="#differs">Choices</a><a href="#status">Manifest</a><a href="#install">Run it</a></nav>
-  <a class="go mono" href="https://github.com/royaluniondesign-sys/termora">Source</a>
+  <a class="go mono" href="https://github.com/royaluniondesign-sys/synaptix">Source</a>
 </div></header>
 
 <main id="top">
@@ -240,7 +240,7 @@
   <p class="kick mono">Early alpha · MIT · runs on your own machine</p>
   <h1>Your machine, <em>in your hands.</em></h1>
   <div class="hero-row">
-    <p class="lede">Termora streams the real terminals and coding agents running on your own computer to a browser or your phone. Nothing runs in a cloud workspace. The shell is yours.</p>
+    <p class="lede">Synaptix streams the real terminals and coding agents running on your own computer to a browser or your phone. Nothing runs in a cloud workspace. The shell is yours.</p>
     <p class="cta">
       <a class="btn" href="#demo">Try the live demo</a>
       <a class="btn alt" href="#install">Run it from source</a>
@@ -249,10 +249,10 @@
 </div>
 <div class="stage"><div class="wrap">
   <div class="desk">
-    <div class="bar mono"><i></i><i></i><i></i><span>Termora cockpit · desktop</span></div>
-    <img src="img/cockpit-desktop.jpg" alt="The Termora cockpit on a desktop screen: a sidebar with the workspace, a terminal area, a control panel listing seven agents in the registry, and a file tree." width="1440" height="900">
+    <div class="bar mono"><i></i><i></i><i></i><span>Synaptix cockpit · desktop</span></div>
+    <img src="img/cockpit-desktop.jpg" alt="The Synaptix cockpit on a desktop screen: a sidebar with the workspace, a terminal area, a control panel listing seven agents in the registry, and a file tree." width="1440" height="900">
   </div>
-  <div class="phone"><img src="img/cockpit-phone-dashboard.jpg" alt="The Termora cockpit on a phone: quick actions, the session area, control state and a bottom bar with Dashboard, Terminals, Tunnels, Notifications and Settings." width="780" height="1688"></div>
+  <div class="phone"><img src="img/cockpit-phone-dashboard.jpg" alt="The Synaptix cockpit on a phone: quick actions, the session area, control state and a bottom bar with Dashboard, Terminals, Tunnels, Notifications and Settings." width="780" height="1688"></div>
   <figcaption><b>Fig. 1</b>Screenshots of the real interface running against a simulated backend. No machine is connected; the badge in the images says so.</figcaption>
 </div></div>
 </div>
@@ -271,7 +271,7 @@
   <div class="rows">
     <div class="row"><span class="n">1</span><h3>Real terminals</h3><p>Sessions are real PTYs streamed over WebSocket. tmux keeps them alive when it is installed. Create, rename, close, reconnect and resume them from any browser.</p></div>
     <div class="row"><span class="n">2</span><h3>Pairing that checks the token</h3><p>Scan a QR code or use a pairing token, which is exchanged for a JWT session token. Authentication endpoints are rate limited, and a revoked device stops working.</p></div>
-    <div class="row"><span class="n">3</span><h3>An agent registry</h3><p>Claude Code, Codex, OpenCode, Hermes, Aider, Gemini CLI and Goose, plus your own. Commands run as argument lists, never through a shell, and launching them is off unless you set <code>TERMORA_ENABLE_AGENT_SPAWN=1</code>.</p></div>
+    <div class="row"><span class="n">3</span><h3>An agent registry</h3><p>Claude Code, Codex, OpenCode, Hermes, Aider, Gemini CLI and Goose, plus your own. Commands run as argument lists, never through a shell, and launching them is off unless you set <code>SYNAPTIX_ENABLE_AGENT_SPAWN=1</code>.</p></div>
     <div class="row"><span class="n">4</span><h3>Worktree fan-out</h3><p>Start the same task in several isolated git worktrees, one session each.</p></div>
     <div class="row"><span class="n">5</span><h3>A desktop shell</h3><p>An Electron app that bundles the agent and the interface into one package.</p></div>
   </div>
@@ -281,8 +281,8 @@
   <p class="label mono" style="background:var(--v);color:var(--k)">02 · Try it</p>
   <h2>Click it. <em>Nothing is real.</em></h2>
   <div class="demo-frame">
-    <div class="bar mono"><span>termora · cockpit</span><span>simulated backend</span></div>
-    <iframe src="demo/" title="Termora cockpit demo (simulated backend)" loading="lazy"></iframe>
+    <div class="bar mono"><span>synaptix · cockpit</span><span>simulated backend</span></div>
+    <iframe src="demo/" title="Synaptix cockpit demo (simulated backend)" loading="lazy"></iframe>
   </div>
   <p class="note">The real interface, running against a simulated backend inside this page. No machine is connected and nothing you type leaves it. <a href="demo/">Open it full screen</a>.</p>
 </div></section>
@@ -292,17 +292,17 @@
   <h2>Four steps. <em>No account.</em></h2>
   <p class="intro">Your phone never talks to a fake shell. It streams authenticated input and output to real terminal sessions on your computer.</p>
   <ol class="steps">
-    <li><span class="n">1</span><b>Run the agent</b><p>Start Termora on a Mac or Linux machine. It opens real PTY sessions and keeps them alive with tmux when tmux is installed.</p></li>
+    <li><span class="n">1</span><b>Run the agent</b><p>Start Synaptix on a Mac or Linux machine. It opens real PTY sessions and keeps them alive with tmux when tmux is installed.</p></li>
     <li><span class="n">2</span><b>Pair a device</b><p>Scan the QR code from your phone, or open the address in a browser. A pairing token becomes a session token.</p></li>
     <li><span class="n">3</span><b>Open terminals and agents</b><p>Start a shell, or launch a CLI agent you have installed, from the quick-action row. Split the screen into one, two or four panes.</p></li>
-    <li><span class="n">4</span><b>Read the state</b><p>Termora reads the last lines of each terminal and labels it: idle, running, editing, testing, waiting, failed or done. It is a guess from text.</p></li>
+    <li><span class="n">4</span><b>Read the state</b><p>Synaptix reads the last lines of each terminal and labels it: idle, running, editing, testing, waiting, failed or done. It is a guess from text.</p></li>
   </ol>
 </div></section>
 
 <section id="scope"><div class="wrap sec">
   <p class="label mono">04 · Scope</p>
   <h2>In scope. <em>Out of scope.</em></h2>
-  <p class="intro">Termora is a window onto a machine you already own. It does not replace the agents, host your code, or run anything for you in the cloud.</p>
+  <p class="intro">Synaptix is a window onto a machine you already own. It does not replace the agents, host your code, or run anything for you in the cloud.</p>
   <div class="scope">
     <div>
       <h3>Covers</h3>
@@ -311,13 +311,13 @@
         <li><strong>One screen for many agents</strong>A registry, a launcher and a state label shared by seven CLI agents and your own commands.</li>
         <li><strong>Parallel work</strong>The same task in several git worktrees, one session each.</li>
         <li><strong>A phone-friendly terminal</strong>An on-screen key row and quick commands, so a phone is enough to steer a session.</li>
-        <li><strong>Local, open source</strong>MIT license. No Termora account or server.</li>
+        <li><strong>Local, open source</strong>MIT license. No Synaptix account or server.</li>
       </ul>
     </div>
     <div>
       <h3>Does not cover</h3>
       <ul>
-        <li><strong>Installing your agents</strong>You install Claude Code, Codex and the rest yourself. Termora checks they are on your PATH.</li>
+        <li><strong>Installing your agents</strong>You install Claude Code, Codex and the rest yourself. Synaptix checks they are on your PATH.</li>
         <li><strong>SSH and SFTP</strong>Connecting to other machines is on the roadmap and not finished.</li>
         <li><strong>A native mobile app</strong>A scaffold only. Use the browser or the installable web app.</li>
         <li><strong>Signed installers</strong>The desktop packages are unsigned and not published as a release.</li>
@@ -340,8 +340,8 @@
       </ul>
     </div>
     <div class="phones">
-      <div class="phone"><img src="img/cockpit-phone-terminal.jpg" alt="The Termora terminal on a phone: a terminal area, quick commands Plan, Diff, Commit and Reset, a row with ESC, TAB, CTRL, ALT and an arrow key, and an on-screen keyboard." width="780" height="1688"></div>
-      <div class="phone b"><img src="img/cockpit-phone-dashboard.jpg" alt="The Termora dashboard on a phone." width="780" height="1688"></div>
+      <div class="phone"><img src="img/cockpit-phone-terminal.jpg" alt="The Synaptix terminal on a phone: a terminal area, quick commands Plan, Diff, Commit and Reset, a row with ESC, TAB, CTRL, ALT and an arrow key, and an on-screen keyboard." width="780" height="1688"></div>
+      <div class="phone b"><img src="img/cockpit-phone-dashboard.jpg" alt="The Synaptix dashboard on a phone." width="780" height="1688"></div>
     </div>
   </div>
 </div></section>
@@ -349,14 +349,14 @@
 <section id="differs"><div class="wrap sec">
   <p class="label mono">06 · Choices</p>
   <h2>Six choices. <em>Each has a cost.</em></h2>
-  <p class="intro">Other tools make other choices, such as a hosted workspace or a remote control for one specific agent. These are Termora's. What you get is in the middle column; what it costs you is in the last.</p>
+  <p class="intro">Other tools make other choices, such as a hosted workspace or a remote control for one specific agent. These are Synaptix's. What you get is in the middle column; what it costs you is in the last.</p>
   <div class="scroll">
     <table class="diff">
-      <caption>Termora's design choices and their trade-offs</caption>
+      <caption>Synaptix's design choices and their trade-offs</caption>
       <thead><tr><th scope="col">Choice</th><th scope="col">What you get</th><th scope="col">What it costs</th></tr></thead>
       <tbody>
         <tr><td>Your own machine</td><td>Your files, tools and logins stay where they already are. There is no workspace to rebuild.</td><td>The machine has to be on. If it sleeps or is switched off, there is nothing to connect to.</td></tr>
-        <tr><td>No account, no relay</td><td>Nothing to sign up for, and no Termora server that holds your sessions.</td><td>Reaching it from outside your network takes a public tunnel (ngrok or SSH) that you have to accept, or a network you set up yourself.</td></tr>
+        <tr><td>No account, no relay</td><td>Nothing to sign up for, and no Synaptix server that holds your sessions.</td><td>Reaching it from outside your network takes a public tunnel (ngrok or SSH) that you have to accept, or a network you set up yourself.</td></tr>
         <tr><td>Many agents, one screen</td><td>Seven CLI agents and your own commands share one registry, one launcher and one state label.</td><td>The state label is a guess from terminal text. There is no deep integration with any agent, and you install the agents yourself.</td></tr>
         <tr><td>Real terminals</td><td>A real PTY streamed to the browser, kept alive with tmux when it is installed. Anything that runs in a terminal runs here.</td><td>It works at terminal level. You see what the terminal shows, not a structured view of an agent's plan or diff.</td></tr>
         <tr><td>Isolated worktrees</td><td>Fan one task out to several git worktrees, one session each, without them touching each other's files.</td><td>Git repositories only, and comparing the results is still your job.</td></tr>
@@ -364,7 +364,7 @@
       </tbody>
     </table>
   </div>
-  <p class="after">This is not a claim that nobody else does these things. It describes what Termora does and what each choice costs you.</p>
+  <p class="after">This is not a claim that nobody else does these things. It describes what Synaptix does and what each choice costs you.</p>
 </div></section>
 
 <section id="status" class="on-k"><div class="wrap sec">
@@ -373,10 +373,10 @@
   <p class="intro">The desktop packages are built and started automatically on every change. They are unsigned, not notarized, and not published as a release, so there is nothing to download yet. A person has not yet installed and used them on a Mac or a Windows PC.</p>
   <div class="scroll" style="border-color:var(--w)">
     <table style="color:var(--k)">
-      <caption>Status of each way to run Termora, as of this build</caption>
+      <caption>Status of each way to run Synaptix, as of this build</caption>
       <thead><tr><th scope="col">Target</th><th scope="col">State</th><th scope="col">Notes</th></tr></thead>
       <tbody>
-        <tr><td>From source<small>macOS, Linux</small></td><td><span class="stamp ok">Works</span></td><td>Node.js 20 or newer. This is the supported way to try Termora today.</td></tr>
+        <tr><td>From source<small>macOS, Linux</small></td><td><span class="stamp ok">Works</span></td><td>Node.js 20 or newer. This is the supported way to try Synaptix today.</td></tr>
         <tr><td>Linux<small>AppImage</small></td><td><span class="stamp wip">Built in CI · unsigned</span></td><td>Starts and serves the interface in an automated test.</td></tr>
         <tr><td>macOS<small>Apple Silicon, dmg and zip</small></td><td><span class="stamp wip">Built in CI · unsigned</span></td><td>Starts in an automated test. Not notarized, so macOS will warn you. No Intel build.</td></tr>
         <tr><td>Windows<small>x64 installer</small></td><td><span class="stamp wip">Built in CI · unsigned</span></td><td>Starts in an automated test. WSL support is not documented yet.</td></tr>
@@ -385,7 +385,7 @@
       </tbody>
     </table>
   </div>
-  <p class="note">The full list, kept in step with the code, is in the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/docs/current-status.md">status document</a> and the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/ROADMAP.md">roadmap</a>.</p>
+  <p class="note">The full list, kept in step with the code, is in the <a href="https://github.com/royaluniondesign-sys/synaptix/blob/main/docs/current-status.md">status document</a> and the <a href="https://github.com/royaluniondesign-sys/synaptix/blob/main/ROADMAP.md">roadmap</a>.</p>
 </div></section>
 
 <section id="install"><div class="wrap sec">
@@ -396,8 +396,8 @@
     <div>
       <div class="term">
         <div class="bar mono"><span>shell</span><span>local only</span></div>
-<pre><span class="p">$</span> git clone https://github.com/royaluniondesign-sys/termora.git
-<span class="p">$</span> cd termora
+<pre><span class="p">$</span> git clone https://github.com/royaluniondesign-sys/synaptix.git
+<span class="p">$</span> cd synaptix
 <span class="p">$</span> npm install
 <span class="p">$</span> TUNNEL=local npm run dev <span class="cursor"></span>
 <span class="c"># prints a QR code and an address</span></pre>
@@ -410,7 +410,7 @@
     </div>
     <aside class="hazard" id="privacy">
       <strong>Read this before you drop TUNNEL=local.</strong>
-      <p>By default Termora tries to open a public tunnel (ngrok, then SSH through localhost.run) so your phone can reach it from outside your network. Traffic then passes through that provider. A pairing token protects access, but the address is public.</p>
+      <p>By default Synaptix tries to open a public tunnel (ngrok, then SSH through localhost.run) so your phone can reach it from outside your network. Traffic then passes through that provider. A pairing token protects access, but the address is public.</p>
       <p><code>TUNNEL=local</code> keeps it on your own network.</p>
     </aside>
   </div>
@@ -420,10 +420,10 @@
   <p class="label mono" style="background:var(--v);color:var(--k)">09 · Questions</p>
   <h2>Asked. <em>Answered plainly.</em></h2>
   <div class="qa">
-    <div><h3>Is it free?</h3><p>Termora is open source under the MIT license. There is no paid plan today.</p></div>
-    <div><h3>Where does my data go?</h3><p>Termora runs on your machine. There is no Termora server, account or sign-up, and the application code contains no analytics or telemetry. This page loads no scripts, fonts or trackers from other sites. The one exception to "stays on your machine" is the optional public tunnel described under Run it.</p></div>
+    <div><h3>Is it free?</h3><p>Synaptix is open source under the MIT license. There is no paid plan today.</p></div>
+    <div><h3>Where does my data go?</h3><p>Synaptix runs on your machine. There is no Synaptix server, account or sign-up, and the application code contains no analytics or telemetry. This page loads no scripts, fonts or trackers from other sites. The one exception to "stays on your machine" is the optional public tunnel described under Run it.</p></div>
     <div><h3>Why no download button?</h3><p>The desktop packages are unsigned, not notarized, and have not been published as a release. Until they are, running from source is the honest way to try it.</p></div>
-    <div><h3>Which agents?</h3><p>CLI agents that you have installed yourself: Claude Code, Codex, OpenCode, Hermes, Aider, Gemini CLI and Goose, or any command you add. Termora checks that the command exists on your PATH. It does not bundle or install them.</p></div>
+    <div><h3>Which agents?</h3><p>CLI agents that you have installed yourself: Claude Code, Codex, OpenCode, Hermes, Aider, Gemini CLI and Goose, or any command you add. Synaptix checks that the command exists on your PATH. It does not bundle or install them.</p></div>
     <div><h3>Windows?</h3><p>A Windows x64 installer is built and started automatically, but nobody has used it on a real Windows machine yet. From-source support covers macOS and Linux.</p></div>
     <div><h3>A problem?</h3><p>Open an issue on GitHub with your operating system, Node.js version and what you did.</p></div>
   </div>
@@ -432,19 +432,19 @@
 <section class="close"><div class="wrap">
   <div>
     <h2>Run it. <em>Tell us what broke.</em></h2>
-    <p>The most useful thing right now is someone using Termora for real work and reporting what gets in the way.</p>
+    <p>The most useful thing right now is someone using Synaptix for real work and reporting what gets in the way.</p>
     <p class="cta">
-      <a class="btn" href="https://github.com/royaluniondesign-sys/termora/issues">Open an issue</a>
-      <a class="btn alt" href="https://github.com/royaluniondesign-sys/termora">View the source</a>
+      <a class="btn" href="https://github.com/royaluniondesign-sys/synaptix/issues">Open an issue</a>
+      <a class="btn alt" href="https://github.com/royaluniondesign-sys/synaptix">View the source</a>
     </p>
   </div>
-  <img class="logo" src="termora-logo.svg" alt="" width="300" height="300">
+  <img class="logo" src="synaptix-logo.svg" alt="" width="300" height="300">
 </div></section>
 </main>
 
 <footer><div class="wrap">
-  <span>Termora is open source under the <a href="https://github.com/royaluniondesign-sys/termora/blob/main/LICENSE">MIT license</a>.</span>
-  <span><a href="https://github.com/royaluniondesign-sys/termora">GitHub</a> · <a href="https://github.com/royaluniondesign-sys/termora/blob/main/ROADMAP.md">Roadmap</a> · <a href="https://github.com/royaluniondesign-sys/termora/blob/main/SECURITY.md">Security</a></span>
+  <span>Synaptix is open source under the <a href="https://github.com/royaluniondesign-sys/synaptix/blob/main/LICENSE">MIT license</a>.</span>
+  <span><a href="https://github.com/royaluniondesign-sys/synaptix">GitHub</a> · <a href="https://github.com/royaluniondesign-sys/synaptix/blob/main/ROADMAP.md">Roadmap</a> · <a href="https://github.com/royaluniondesign-sys/synaptix/blob/main/SECURITY.md">Security</a></span>
 </div></footer>
 </body>
 </html>

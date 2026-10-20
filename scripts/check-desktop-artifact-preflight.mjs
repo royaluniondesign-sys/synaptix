@@ -18,7 +18,7 @@ export const SIGNING_ENV_KEYS = [
 export const PUBLISH_ENV_KEYS = ['GH_TOKEN', 'GITHUB_TOKEN']
 export const CREDENTIAL_ENV_KEYS = [...SIGNING_ENV_KEYS, ...PUBLISH_ENV_KEYS]
 
-export const DESKTOP_PACKAGE_NAME = '@termora/desktop-app'
+export const DESKTOP_PACKAGE_NAME = '@synaptix/desktop-app'
 export const BUILD_TOOLING = ['electron', 'electron-builder']
 
 const PLATFORM_TARGETS = { darwin: 'mac', linux: 'linux', win32: 'win' }
@@ -180,7 +180,7 @@ function printUsage() {
       'Deterministic preflight for real unsigned desktop artifact builds. It never builds,',
       'signs, notarizes, publishes, or touches the network. It verifies:',
       '  - host platform maps to a supported desktop target,',
-      '  - apps/desktop/package-lock.json exists and matches @termora/desktop-app,',
+      '  - apps/desktop/package-lock.json exists and matches @synaptix/desktop-app,',
       '  - electron and electron-builder resolve under apps/desktop,',
       '  - release/ is git-ignored,',
       '  - signing/publish credentials are absent from the environment.',

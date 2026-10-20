@@ -1,6 +1,6 @@
 # Sponsors
 
-termora is open source and free to use. If you find it useful, consider supporting the project.
+synaptix is open source and free to use. If you find it useful, consider supporting the project.
 
 ## How to Support
 

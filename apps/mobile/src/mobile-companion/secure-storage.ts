@@ -1,4 +1,4 @@
-// Termora mobile companion — phase 1 secure-storage abstraction.
+// Synaptix mobile companion — phase 1 secure-storage abstraction.
 //
 // Pure TypeScript: this is the interface the native shell will implement with
 // expo-secure-store (or Keychain/Keystore). It deliberately declares no native
@@ -7,9 +7,9 @@
 
 /** Storage slots the companion is allowed to persist. Tokens never touch logs. */
 export const SECURE_STORAGE_KEYS = {
-  sessionJwt: 'termora.session.jwt',
-  deviceToken: 'termora.device.token',
-  pairing: 'termora.pairing',
+  sessionJwt: 'synaptix.session.jwt',
+  deviceToken: 'synaptix.device.token',
+  pairing: 'synaptix.pairing',
 } as const
 
 export type SecureStorageKey = (typeof SECURE_STORAGE_KEYS)[keyof typeof SECURE_STORAGE_KEYS]

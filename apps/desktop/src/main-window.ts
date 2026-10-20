@@ -1,4 +1,4 @@
-// Termora desktop main-process window bridge (dev shell only).
+// Synaptix desktop main-process window bridge (dev shell only).
 //
 // Wires the existing shell to a real BrowserWindow host plus the IPC contract so
 // the Electron main process (added once Electron lands) only needs to supply

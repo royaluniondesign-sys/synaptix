@@ -54,7 +54,7 @@ Market notes come from third-party pages found on 2026-10-12 and are not verifie
 
 ## Legal checks
 
-- Termora began as a fork of clsh (see `CHANGELOG.md`). The MIT notice in `LICENSE` must stay. Confirm the original author's license terms before charging for anything derived from it.
+- Synaptix began as a fork of clsh (see `CHANGELOG.md`). The MIT notice in `LICENSE` must stay. Confirm the original author's license terms before charging for anything derived from it.
 - Reference research on other products records patterns only. No code or assets are copied.
 
 ## What this plan does not promise

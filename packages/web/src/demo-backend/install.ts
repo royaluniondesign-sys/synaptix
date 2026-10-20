@@ -280,7 +280,7 @@ function showBanner(): void {
 }
 
 export function installDemoBackend(): void {
-  try { window.localStorage.setItem('termora_jwt', 'demo'); } catch { /* storage unavailable: the auth screen will show */ }
+  try { window.localStorage.setItem('synaptix_jwt', 'demo'); } catch { /* storage unavailable: the auth screen will show */ }
   installFetch();
   window.WebSocket = DemoWebSocket as unknown as typeof WebSocket;
   window.EventSource = DemoEventSource as unknown as typeof EventSource;

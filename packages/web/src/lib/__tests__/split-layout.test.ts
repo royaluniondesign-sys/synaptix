@@ -154,7 +154,7 @@ describe('storage helpers', () => {
 
 describe('layout typing', () => {
   it('exposes a stable storage key', () => {
-    expect(SPLIT_LAYOUT_STORAGE_KEY).toBe('termora.split-layout.v1');
+    expect(SPLIT_LAYOUT_STORAGE_KEY).toBe('synaptix.split-layout.v1');
   });
 
   it('keeps a versioned root', () => {

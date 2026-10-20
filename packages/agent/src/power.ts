@@ -20,7 +20,7 @@ export function checkNetworkPersistence(): void {
     return; // Can't read pmset, skip silently
   }
 
-  // ANSI colors matching the termora startup style
+  // ANSI colors matching the synaptix startup style
   const o = '\x1b[38;5;208m'; // orange
   const dim = '\x1b[2m';
   const r = '\x1b[0m';

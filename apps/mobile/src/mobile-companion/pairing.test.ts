@@ -10,11 +10,11 @@ import {
 
 describe('parsePairingUrl', () => {
   it('parses the agent PWA pairing URL (token in query)', () => {
-    const result = parsePairingUrl('https://termora.example.com/?token=abc123')
+    const result = parsePairingUrl('https://synaptix.example.com/?token=abc123')
     expect(result).toEqual({
       ok: true,
       source: 'web-url',
-      pairing: { baseUrl: 'https://termora.example.com', token: 'abc123' },
+      pairing: { baseUrl: 'https://synaptix.example.com', token: 'abc123' },
     })
   })
 
@@ -25,7 +25,7 @@ describe('parsePairingUrl', () => {
 
   it('parses a native deep link with a label', () => {
     const result = parsePairingUrl(
-      'termora://pair?url=https%3A%2F%2Fhost%2F&token=tok&label=studio-mac',
+      'synaptix://pair?url=https%3A%2F%2Fhost%2F&token=tok&label=studio-mac',
     )
     expect(result).toEqual({
       ok: true,
@@ -35,7 +35,7 @@ describe('parsePairingUrl', () => {
   })
 
   it('rejects a native deep link with an unexpected host', () => {
-    expect(parsePairingUrl('termora://other?url=https%3A%2F%2Fhost&token=tok')).toEqual({
+    expect(parsePairingUrl('synaptix://other?url=https%3A%2F%2Fhost&token=tok')).toEqual({
       ok: false,
       reason: 'unsupported-scheme',
     })
@@ -64,14 +64,14 @@ describe('parsePairingUrl', () => {
 
   it('rejects a missing token', () => {
     expect(parsePairingUrl('https://host/')).toEqual({ ok: false, reason: 'missing-token' })
-    expect(parsePairingUrl('termora://pair?url=https%3A%2F%2Fhost')).toEqual({
+    expect(parsePairingUrl('synaptix://pair?url=https%3A%2F%2Fhost')).toEqual({
       ok: false,
       reason: 'missing-token',
     })
   })
 
   it('rejects a deep link with a non-http base URL', () => {
-    expect(parsePairingUrl('termora://pair?url=file%3A%2F%2Fhost&token=tok')).toEqual({
+    expect(parsePairingUrl('synaptix://pair?url=file%3A%2F%2Fhost&token=tok')).toEqual({
       ok: false,
       reason: 'invalid-base-url',
     })

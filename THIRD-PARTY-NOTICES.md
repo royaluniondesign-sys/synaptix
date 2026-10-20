@@ -1,6 +1,6 @@
 # Third-party notices
 
-Termora is MIT-licensed (see `LICENSE`). It bundles or loads these third-party assets:
+Synaptix is MIT-licensed (see `LICENSE`). It bundles or loads these third-party assets:
 
 | Asset | Where | License |
 | --- | --- | --- |

@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Propose a Termora improvement
+about: Propose a Synaptix improvement
 title: '[Feature] '
 labels: enhancement
 assignees: ''

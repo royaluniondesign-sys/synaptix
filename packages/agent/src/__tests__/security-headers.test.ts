@@ -33,7 +33,7 @@ function makeConfig(dbPath: string): AgentConfig {
 }
 
 describe('response headers', () => {
-  const dbPath = join(tmpdir(), `termora-headers-${randomBytes(6).toString('hex')}.db`);
+  const dbPath = join(tmpdir(), `synaptix-headers-${randomBytes(6).toString('hex')}.db`);
   const { db, statements } = initDatabase(dbPath);
   const { httpServer } = createAppServer(makeConfig(dbPath), statements);
   let baseUrl = '';

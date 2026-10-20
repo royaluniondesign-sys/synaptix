@@ -33,7 +33,7 @@ function makeConfig(dbPath: string): AgentConfig {
 }
 
 describe('cockpit read-file endpoint', () => {
-  const dbPath = join(tmpdir(), `termora-cockpit-file-${randomBytes(6).toString('hex')}.db`);
+  const dbPath = join(tmpdir(), `synaptix-cockpit-file-${randomBytes(6).toString('hex')}.db`);
   const config = makeConfig(dbPath);
   const { db, statements } = initDatabase(dbPath);
   const { httpServer } = createAppServer(config, statements);
@@ -67,7 +67,7 @@ describe('cockpit read-file endpoint', () => {
     expect(body.path).toBe('package.json');
     expect(body.binary).toBe(false);
     expect(body.truncated).toBe(false);
-    expect(body.content).toContain('"name": "termora"');
+    expect(body.content).toContain('"name": "synaptix"');
   });
 
   it('refuses to escape the repo root', async () => {

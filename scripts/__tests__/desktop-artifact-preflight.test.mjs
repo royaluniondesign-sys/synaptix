@@ -22,7 +22,7 @@ const SCRIPT = join(
 const CLEAN_ENV = { PATH: process.env.PATH }
 
 function makeRoot() {
-  const root = mkdtempSync(join(tmpdir(), 'termora-preflight-'))
+  const root = mkdtempSync(join(tmpdir(), 'synaptix-preflight-'))
   mkdirSync(join(root, 'apps', 'desktop'), { recursive: true })
   return root
 }
@@ -31,11 +31,11 @@ function provisionReadyRoot(root) {
   writeFileSync(join(root, '.gitignore'), 'node_modules/\ndist/\nrelease/\n')
   writeFileSync(
     join(root, 'apps', 'desktop', 'package.json'),
-    JSON.stringify({ name: '@termora/desktop-app' }),
+    JSON.stringify({ name: '@synaptix/desktop-app' }),
   )
   writeFileSync(
     join(root, 'apps', 'desktop', 'package-lock.json'),
-    JSON.stringify({ name: '@termora/desktop-app', lockfileVersion: 3 }),
+    JSON.stringify({ name: '@synaptix/desktop-app', lockfileVersion: 3 }),
   )
   const modules = join(root, 'apps', 'desktop', 'node_modules')
   for (const [name, version] of [
@@ -127,7 +127,7 @@ test('resolveModuleUnderDesktop rejects root-hoisted dependencies', () => {
   const root = makeRoot()
   try {
     writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'root' }))
-    writeFileSync(join(root, 'apps', 'desktop', 'package.json'), JSON.stringify({ name: '@termora/desktop-app' }))
+    writeFileSync(join(root, 'apps', 'desktop', 'package.json'), JSON.stringify({ name: '@synaptix/desktop-app' }))
     const rootElectron = join(root, 'node_modules', 'electron')
     mkdirSync(rootElectron, { recursive: true })
     writeFileSync(join(rootElectron, 'package.json'), JSON.stringify({ name: 'electron', version: '44.0.0' }))

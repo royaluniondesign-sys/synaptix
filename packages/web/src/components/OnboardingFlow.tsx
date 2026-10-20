@@ -14,8 +14,8 @@ const S = {
   text3: '#71717a',
 } as const;
 
-const SHELL_KEY = 'termora_shell';
-const THEME_KEY = 'termora_theme';
+const SHELL_KEY = 'synaptix_shell';
+const THEME_KEY = 'synaptix_theme';
 
 interface Props {
   onComplete: () => void;
@@ -162,14 +162,14 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         marginBottom: 24,
         boxShadow: `0 0 32px ${S.primary}18`,
       }}>
-        <img src="/termora-logo.svg" alt="" style={{ width: 44, height: 44 }} />
+        <img src="/synaptix-logo.svg" alt="" style={{ width: 44, height: 44 }} />
       </div>
 
       <h1 style={{
         fontSize: 28, fontWeight: 700, color: S.text1,
         letterSpacing: -0.8, margin: '0 0 10px', textAlign: 'center',
       }}>
-        Welcome to termora
+        Welcome to synaptix
       </h1>
       <p style={{
         fontSize: 14, color: S.text2, textAlign: 'center',
@@ -229,7 +229,7 @@ function FeatureRow({ icon, label, desc, color }: { icon: React.ReactNode; label
 
 function StepHowItWorks({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const [copied, setCopied] = useState(false);
-  const installCmd = 'npm install -g termora-agent && termora-agent start';
+  const installCmd = 'npm install -g synaptix-agent && synaptix-agent start';
 
   const copy = () => {
     void navigator.clipboard.writeText(installCmd).then(() => {
@@ -240,7 +240,7 @@ function StepHowItWorks({ onNext, onBack }: { onNext: () => void; onBack: () => 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '28px 24px' }}>
-      <StepHeader step={1} title="Install on your server" subtitle="termora runs a tiny agent on your Mac/Linux server that your phone connects to." />
+      <StepHeader step={1} title="Install on your server" subtitle="synaptix runs a tiny agent on your Mac/Linux server that your phone connects to." />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, marginTop: 24 }}>
         <StepCard num="1" title="Open Terminal on your server">
@@ -544,7 +544,7 @@ function StepDone({ onComplete }: { onComplete: () => void }) {
           letterSpacing: -0.2,
         }}
       >
-        Open termora →
+        Open synaptix →
       </button>
     </div>
   );

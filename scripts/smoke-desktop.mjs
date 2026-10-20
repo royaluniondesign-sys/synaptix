@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Smoke test for a packaged Termora desktop build (Linux, macOS or Windows).
+// Smoke test for a packaged Synaptix desktop build (Linux, macOS or Windows).
 //
 // Launches the packaged app (a Linux .AppImage, or the unpacked app of any
 // platform) with a throwaway home directory (under a virtual display on Linux), waits for the embedded agent
@@ -12,8 +12,8 @@
 // Usage: node scripts/smoke-desktop.mjs [path-to-app-binary-or-AppImage] [--timeout-ms 120000]
 //
 // Without a path it looks in apps/desktop/release/desktop for the build of the
-// current platform: *.AppImage (Linux), mac*/Termora.app (macOS) or
-// win-unpacked/Termora.exe (Windows).
+// current platform: *.AppImage (Linux), mac*/Synaptix.app (macOS) or
+// win-unpacked/Synaptix.exe (Windows).
 
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
@@ -37,12 +37,12 @@ function findArtifact() {
   }
   if (process.platform === 'darwin') {
     for (const name of entries.filter((entry) => entry.startsWith('mac'))) {
-      const binary = join(dir, name, 'Termora.app', 'Contents', 'MacOS', 'Termora')
+      const binary = join(dir, name, 'Synaptix.app', 'Contents', 'MacOS', 'Synaptix')
       if (existsSync(binary)) return binary
     }
     return null
   }
-  const binary = join(dir, 'win-unpacked', 'Termora.exe')
+  const binary = join(dir, 'win-unpacked', 'Synaptix.exe')
   return existsSync(binary) ? binary : null
 }
 
@@ -75,7 +75,7 @@ if (!artifact || !existsSync(artifact)) {
 }
 
 // Windows: overriding USERPROFILE makes the packaged app crash at startup (0x80000003, no log),
-// so the app runs with the real profile and its ~/.termora data. Only do that on a throwaway CI
+// so the app runs with the real profile and its ~/.synaptix data. Only do that on a throwaway CI
 // runner, or when explicitly asked.
 if (process.platform === 'win32' && !process.env.CI && !process.argv.includes('--allow-real-home')) {
   console.error('smoke-desktop: on Windows this test uses the real user profile; run it in CI or pass --allow-real-home')
@@ -83,7 +83,7 @@ if (process.platform === 'win32' && !process.env.CI && !process.argv.includes('-
 }
 
 const port = await freePort()
-const home = mkdtempSync(join(tmpdir(), 'termora-smoke-'))
+const home = mkdtempSync(join(tmpdir(), 'synaptix-smoke-'))
 const isAppImage = artifact.endsWith('.AppImage')
 // GUI-subsystem builds (Windows) write nothing to stdout, so Chromium logs to a file we can read on failure.
 const electronLog = join(home, 'electron.log')
@@ -96,7 +96,7 @@ const [command, commandArgs] = needsVirtualDisplay
 
 const child = spawn(command, commandArgs, {
   // The agent keeps its data under the home directory; point HOME at a throwaway one (not on Windows, see above).
-  env: { ...process.env, ...(process.platform === 'win32' ? {} : { HOME: home }), TERMORA_PORT: String(port), NODE_OPTIONS: '', ELECTRON_ENABLE_LOGGING: '1' },
+  env: { ...process.env, ...(process.platform === 'win32' ? {} : { HOME: home }), SYNAPTIX_PORT: String(port), NODE_OPTIONS: '', ELECTRON_ENABLE_LOGGING: '1' },
   stdio: ['ignore', 'pipe', 'pipe'],
   detached: process.platform !== 'win32',
 })

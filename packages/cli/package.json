@@ -1,20 +1,20 @@
 {
-  "name": "@termora/cli",
+  "name": "@synaptix/cli",
   "version": "0.2.0",
-  "description": "termora CLI \u2014 bootstrap and manage your termora instance",
+  "description": "synaptix CLI \u2014 bootstrap and manage your synaptix instance",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/royaluniondesign-sys/termora.git",
+    "url": "https://github.com/royaluniondesign-sys/synaptix.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://termora.dev",
+  "homepage": "https://synaptix.dev",
   "bugs": {
-    "url": "https://github.com/royaluniondesign-sys/termora/issues"
+    "url": "https://github.com/royaluniondesign-sys/synaptix/issues"
   },
   "type": "module",
   "bin": {
-    "termora": "dist/index.js"
+    "synaptix": "dist/index.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@termora/agent": "*"
+    "@synaptix/agent": "*"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

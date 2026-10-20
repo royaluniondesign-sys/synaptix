@@ -47,7 +47,7 @@ const NAV: NavGroup[] = [
     { id: 'voice', label: 'Voice' },
   ]},
   { title: 'Set Up', items: [
-    { id: 'account', label: 'Termora Account' },
+    { id: 'account', label: 'Synaptix Account' },
     { id: 'general', label: 'General' },
     { id: 'integrations', label: 'Integrations' },
     { id: 'mobile', label: 'Mobile' },
@@ -75,7 +75,7 @@ const NAV: NavGroup[] = [
   ]},
   { title: 'Remote Hosts', items: [
     { id: 'ssh-hosts', label: 'SSH Hosts' },
-    { id: 'remote-servers', label: 'Remote Termora Servers', badge: 'Beta' },
+    { id: 'remote-servers', label: 'Remote Synaptix Servers', badge: 'Beta' },
   ]},
   { title: 'Privacy & Security', items: [
     { id: 'macos-permissions', label: 'macOS Permissions' },
@@ -90,7 +90,7 @@ const NAV: NavGroup[] = [
   ]},
 ];
 
-const PROJECTS = ['RUD-WEB', 'Termora', 'excited-bohr', 'excited-tesla', 'intelligent-galileo', 'serene-raman'];
+const PROJECTS = ['RUD-WEB', 'Synaptix', 'excited-bohr', 'excited-tesla', 'intelligent-galileo', 'serene-raman'];
 
 // ─── primitives ───────────────────────────────────────────────────────────────
 
@@ -343,7 +343,7 @@ const AVAILABLE_AGENTS = [
 ];
 
 function AgentsSection() {
-  const [defAgent, setDefAgent] = useState(() => localStorage.getItem('termora_default_agent') ?? 'auto');
+  const [defAgent, setDefAgent] = useState(() => localStorage.getItem('synaptix_default_agent') ?? 'auto');
   const [hooks, setHooks] = useState(true);
   const [trustFolder, setTrustFolder] = useState(false);
   const [codexServer, setCodexServer] = useState(true);
@@ -355,7 +355,7 @@ function AgentsSection() {
   const [installed, setInstalled] = useState<InstalledAgent[]>(INSTALLED_AGENTS_DEFAULT);
   const [available, setAvailable] = useState<Record<string, boolean>>({});
 
-  const setDef = (id: string) => { setDefAgent(id); localStorage.setItem('termora_default_agent', id); };
+  const setDef = (id: string) => { setDefAgent(id); localStorage.setItem('synaptix_default_agent', id); };
 
   const [refreshing, setRefreshing] = useState(false);
   const refreshInstalled = () => {
@@ -392,13 +392,13 @@ function AgentsSection() {
 
       <GLabel label="Behavior" />
       <Card>
-        <Row label="Agent status hooks" desc="Shows working, waiting, and done states in Termora. Turn off to remove Termora-managed hooks and stop reinstalling them.">
+        <Row label="Agent status hooks" desc="Shows working, waiting, and done states in Synaptix. Turn off to remove Synaptix-managed hooks and stop reinstalling them.">
           <Toggle value={hooks} onChange={setHooks} />
         </Row>
-        <Row label="Trust the folder when Termora starts an agent" desc='Agents Termora starts skip their "Do you trust this folder?" prompt, so the project&apos;s agent hooks and settings run right away. Without this, each agent asks the first time it runs in a folder. Agents running without you watching, such as orchestration workers, automations and agents started from your phone, will wait at that question until you answer it in their terminal. Folders already trusted stay trusted.'>
+        <Row label="Trust the folder when Synaptix starts an agent" desc='Agents Synaptix starts skip their "Do you trust this folder?" prompt, so the project&apos;s agent hooks and settings run right away. Without this, each agent asks the first time it runs in a folder. Agents running without you watching, such as orchestration workers, automations and agents started from your phone, will wait at that question until you answer it in their terminal. Folders already trusted stay trusted.'>
           <Toggle value={trustFolder} onChange={setTrustFolder} />
         </Row>
-        <Row label="Run each Codex terminal on its own server" desc="Keeps Termora's status and closing tabs working correctly. Turn off to use Codex's shared server and its agents overview. Applies to new terminals.">
+        <Row label="Run each Codex terminal on its own server" desc="Keeps Synaptix's status and closing tabs working correctly. Turn off to use Codex's shared server and its agents overview. Applies to new terminals.">
           <Toggle value={codexServer} onChange={setCodexServer} />
         </Row>
         <Row label="Warn when a Codex tab shares a server" desc="Shows a notice on a Codex you started yourself when it shares a server with other tabs, because its agent status may be wrong.">
@@ -426,7 +426,7 @@ function AgentsSection() {
 
       <GLabel label="Agent Permissions" />
       <p style={{ fontSize: 11, color: S.text3, margin: '0 0 8px', lineHeight: 1.55 }}>
-        Choose whether Termora launches agents with fewer permission prompts or with manual checks.
+        Choose whether Synaptix launches agents with fewer permission prompts or with manual checks.
       </p>
       <Card>
         <div style={{ display: 'flex', padding: '10px 14px', gap: 8, borderBottom: `1px solid ${S.border}` }}>
@@ -501,9 +501,9 @@ const PROVIDERS = [
   { id: 'codex',      label: 'Codex',       free: false, type: 'cli' as const, cmd: 'codex login',          hint: 'Requires Codex CLI v0.136.0+.' },
   { id: 'gemini',     label: 'Gemini CLI',  free: false, type: 'cli' as const, cmd: 'gemini auth',          hint: 'Sign in with your Google account.' },
   { id: 'grok',       label: 'Grok (xAI)',  free: false, type: 'cli' as const, cmd: 'grok login',           hint: 'Run grok login in a terminal, then refresh here.' },
-  { id: 'ollama',     label: 'Ollama',      free: true,  type: 'url' as const, key: 'termora_ollama_url',   placeholder: 'http://localhost:11434', hint: 'Pull models: ollama pull llama3.1' },
-  { id: 'openai',     label: 'OpenAI',      free: false, type: 'key' as const, key: 'termora_openai_key',   placeholder: 'sk-...', hint: 'platform.openai.com/api-keys' },
-  { id: 'openrouter', label: 'OpenRouter',  free: true,  type: 'key' as const, key: 'termora_or_key',       placeholder: 'sk-or-...', hint: 'openrouter.ai — free-tier models available.' },
+  { id: 'ollama',     label: 'Ollama',      free: true,  type: 'url' as const, key: 'synaptix_ollama_url',   placeholder: 'http://localhost:11434', hint: 'Pull models: ollama pull llama3.1' },
+  { id: 'openai',     label: 'OpenAI',      free: false, type: 'key' as const, key: 'synaptix_openai_key',   placeholder: 'sk-...', hint: 'platform.openai.com/api-keys' },
+  { id: 'openrouter', label: 'OpenRouter',  free: true,  type: 'key' as const, key: 'synaptix_or_key',       placeholder: 'sk-or-...', hint: 'openrouter.ai — free-tier models available.' },
 ];
 function ProviderCard({ p }: { p: typeof PROVIDERS[0] }) {
   const [val, setVal] = useState(() => p.type !== 'cli' ? (localStorage.getItem(p.key ?? '') ?? '') : '');
@@ -535,7 +535,7 @@ function ProviderCard({ p }: { p: typeof PROVIDERS[0] }) {
               <button type="button" onClick={save} style={{ height: 32, padding: '0 12px', borderRadius: 7, border: 'none', background: saved ? S.success : S.primary, color: S.bg, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>{saved ? 'Saved!' : 'Save'}</button>
               {val.trim() && <button type="button" onClick={() => { if (p.key) localStorage.removeItem(p.key); setVal(''); }} style={{ height: 32, padding: '0 9px', borderRadius: 7, border: `1px solid ${S.error}44`, background: `${S.error}10`, color: S.error, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>Clear</button>}
             </div>
-            {p.type === 'key' && <div style={{ fontSize: 10, color: S.text3, marginTop: 3 }}>Stored locally only — never sent to Termora servers.</div>}
+            {p.type === 'key' && <div style={{ fontSize: 10, color: S.text3, marginTop: 3 }}>Stored locally only — never sent to Synaptix servers.</div>}
           </>
         )}
         <div style={{ fontSize: 10, color: S.text3, marginTop: 4 }}>{p.hint}</div>
@@ -545,10 +545,10 @@ function ProviderCard({ p }: { p: typeof PROVIDERS[0] }) {
 }
 // CLI-based agent account setup (like Orca's "orca account add --agent X" pattern)
 const CLI_AGENT_ACCOUNTS = [
-  { id: 'opencode', label: 'OpenCode', cmd: 'termora account add --agent opencode', desc: 'Add accounts by running this command in a terminal on the Termora host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
-  { id: 'codex',    label: 'Codex',    cmd: 'termora account add --agent codex',    desc: 'Add accounts by running this command in a terminal on the Termora host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
-  { id: 'gemini',   label: 'Gemini',   cmd: 'termora account add --agent gemini',   desc: 'Add accounts by running this command in a terminal on the Termora host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
-  { id: 'grok',     label: 'Grok',     cmd: 'termora account add --agent grok',     desc: 'Add accounts by running this command in a terminal on the Termora host.' },
+  { id: 'opencode', label: 'OpenCode', cmd: 'synaptix account add --agent opencode', desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
+  { id: 'codex',    label: 'Codex',    cmd: 'synaptix account add --agent codex',    desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
+  { id: 'gemini',   label: 'Gemini',   cmd: 'synaptix account add --agent gemini',   desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
+  { id: 'grok',     label: 'Grok',     cmd: 'synaptix account add --agent grok',     desc: 'Add accounts by running this command in a terminal on the Synaptix host.' },
 ];
 
 function AgentAccountCard({ agent }: { agent: typeof CLI_AGENT_ACCOUNTS[0] }) {
@@ -585,7 +585,7 @@ function ClaudeAccountCard() {
         <Logo id="claude" size={32} />
         <div>
           <div style={{ fontSize: 14, fontWeight: 600, color: S.text1 }}>Claude</div>
-          <div style={{ fontSize: 11, color: S.text3, lineHeight: 1.45, marginTop: 2 }}>Optional. Termora can use your normal Claude login; add accounts only if you want quick switching without moving chat sessions.</div>
+          <div style={{ fontSize: 11, color: S.text3, lineHeight: 1.45, marginTop: 2 }}>Optional. Synaptix can use your normal Claude login; add accounts only if you want quick switching without moving chat sessions.</div>
         </div>
       </div>
       <div style={{ borderTop: `1px solid ${S.border}`, padding: '10px 14px' }}>
@@ -608,7 +608,7 @@ function ClaudeAccountCard() {
             <div style={{ fontSize: 11, color: S.text3, marginTop: 3 }}>{acc.desc}</div>
           </div>
         ))}
-        <div style={{ fontSize: 10, color: S.text3, lineHeight: 1.55, marginTop: 4 }}>No managed Claude accounts for this device. Termora will use that environment's system default Claude login until you add one here.</div>
+        <div style={{ fontSize: 10, color: S.text3, lineHeight: 1.55, marginTop: 4 }}>No managed Claude accounts for this device. Synaptix will use that environment's system default Claude login until you add one here.</div>
       </div>
     </Card>
   );
@@ -617,7 +617,7 @@ function ClaudeAccountCard() {
 function ProvidersSection() {
   return (
     <>
-      <STitle label="AI Provider Accounts" desc="Optional. Termora works with your existing provider logins; add accounts only if you want Termora to help switch between them." />
+      <STitle label="AI Provider Accounts" desc="Optional. Synaptix works with your existing provider logins; add accounts only if you want Synaptix to help switch between them." />
       <ClaudeAccountCard />
       {CLI_AGENT_ACCOUNTS.map(a => <AgentAccountCard key={a.id} agent={a} />)}
       <GLabel label="API Keys" />
@@ -635,7 +635,7 @@ function OrchestrationSection() {
     <>
       <STitle label="Orchestration" desc="Run multiple agents in parallel on fan-out tasks." />
       <Card>
-        <Row label="Enable orchestration" desc="Allows Termora to spawn and coordinate parallel agent sessions for multi-worktree tasks."><Toggle value={enabled} onChange={setEnabled} /></Row>
+        <Row label="Enable orchestration" desc="Allows Synaptix to spawn and coordinate parallel agent sessions for multi-worktree tasks."><Toggle value={enabled} onChange={setEnabled} /></Row>
         <Row label="Auto-route tasks" desc="Automatically pick the best agent for each sub-task based on type."><Toggle value={autoRoute} onChange={setAutoRoute} disabled={!enabled} /></Row>
         <Row label="Max parallel agents" desc="Maximum number of agents that can run simultaneously." last>
           <div style={{ display: 'flex', gap: 4 }}>
@@ -706,7 +706,7 @@ function VoiceSection() {
   );
 }
 
-// ─── Termora Account ──────────────────────────────────────────────────────────
+// ─── Synaptix Account ──────────────────────────────────────────────────────────
 function AccountSection({ connectionStatus, latencyMs }: { connectionStatus: ConnectionStatus; latencyMs: number | null }) {
   const { info, refresh } = useConnectionInfo();
   const isConn = connectionStatus === 'connected';
@@ -714,7 +714,7 @@ function AccountSection({ connectionStatus, latencyMs }: { connectionStatus: Con
   const sl = isConn ? 'Connected' : connectionStatus === 'reconnecting' ? 'Reconnecting…' : 'Offline';
   return (
     <>
-      <STitle label="Termora Account" desc="Agent connection and authentication." />
+      <STitle label="Synaptix Account" desc="Agent connection and authentication." />
       <Card>
         <Row label="Status" desc={info.machineName ?? 'This machine'}><Chip label={sl} color={sc} /></Row>
         <Row label="Latency" desc="WebSocket round-trip" last>
@@ -735,14 +735,14 @@ function AccountSection({ connectionStatus, latencyMs }: { connectionStatus: Con
 function GeneralSection() {
   return (
     <>
-      <STitle label="General" desc="General Termora preferences." />
+      <STitle label="General" desc="General Synaptix preferences." />
       <Card>
         <Row label="Language" last>
           <select style={{ background: S.surface3, border: `1px solid ${S.border}`, borderRadius: 6, color: S.text2, fontSize: 11, padding: '4px 8px', fontFamily: 'inherit' }}><option>English</option><option>Español</option></select>
         </Row>
       </Card>
       <Card style={{ marginTop: 8 }}>
-        <Row label="About Termora" desc={`Version ${__APP_VERSION__} — Built by RUD Lab`} last><span style={{ fontSize: 10, color: S.text3 }}>MIT License</span></Row>
+        <Row label="About Synaptix" desc={`Version ${__APP_VERSION__} — Built by RUD Lab`} last><span style={{ fontSize: 10, color: S.text3 }}>MIT License</span></Row>
       </Card>
     </>
   );
@@ -769,7 +769,7 @@ function GitSection() {
         <Row label="Enable worktrees" desc="Fan out agent tasks across Git worktrees for parallel execution." last><Toggle value={worktrees} onChange={setWorktrees} /></Row>
       </Card>
       <GLabel label="CLI Integration" />
-      <Card><div style={{ padding: '10px 14px' }}><div style={{ fontSize: 11, color: S.text2, marginBottom: 7 }}>Install Termora git helpers:</div><CodeLine text="termora git install-hooks" /></div></Card>
+      <Card><div style={{ padding: '10px 14px' }}><div style={{ fontSize: 11, color: S.text2, marginBottom: 7 }}>Install Synaptix git helpers:</div><CodeLine text="synaptix git install-hooks" /></div></Card>
     </>
   );
 }
@@ -843,8 +843,8 @@ const SKINS: { id: SkinId; name: string; sub: string }[] = [
   { id: 'ice-white',      name: 'Ice White',      sub: 'Bright clean keys' },
 ];
 function AppearanceSection({ skin, onSkinChange }: { skin: SkinId; onSkinChange: (s: SkinId) => void }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('termora_theme') ?? 'obsidian');
-  const pick = (id: string) => { setTheme(id); localStorage.setItem('termora_theme', id); };
+  const [theme, setTheme] = useState(() => localStorage.getItem('synaptix_theme') ?? 'obsidian');
+  const pick = (id: string) => { setTheme(id); localStorage.setItem('synaptix_theme', id); };
   return (
     <>
       <STitle label="Appearance" desc="Terminal theme, keyboard skin, and display preferences." />
@@ -926,7 +926,7 @@ function NotificationsSection() {
   const [onWait, setOnWait] = useState(false);
   return (
     <>
-      <STitle label="Notifications" desc="Control when and how Termora notifies you." />
+      <STitle label="Notifications" desc="Control when and how Synaptix notifies you." />
       <Card>
         <Row label="In-app notifications" desc="Show events in the Notifications tab with unread badge"><Toggle value={inApp} onChange={setInApp} /></Row>
         <Row label="macOS notifications" desc="Native OS notification when a job finishes, even in background" last>
@@ -966,7 +966,7 @@ function ShortcutsSection() {
   ];
   return (
     <>
-      <STitle label="Shortcuts" desc="Keyboard shortcuts available in Termora." />
+      <STitle label="Shortcuts" desc="Keyboard shortcuts available in Synaptix." />
       <Card>
         {SHORTCUTS.map((s, i) => (
           <Row key={s.label} label={s.label} last={i === SHORTCUTS.length - 1}>
@@ -1030,12 +1030,12 @@ function PrivacySection() {
   const [crash, setCrash] = useState(false);
   return (
     <>
-      <STitle label="Privacy & Telemetry" desc="Control what data Termora collects and shares." />
+      <STitle label="Privacy & Telemetry" desc="Control what data Synaptix collects and shares." />
       <Card>
         <Row label="Usage telemetry" desc="Anonymous session counts. Never contains terminal content."><Toggle value={telemetry} onChange={setTelemetry} /></Row>
         <Row label="Crash reports" desc="Automatically send crash logs to help fix bugs" last><Toggle value={crash} onChange={setCrash} /></Row>
       </Card>
-      <Card style={{ marginTop: 8 }}><div style={{ padding: '10px 14px', fontSize: 11, color: S.text3, lineHeight: 1.6 }}>All API keys are stored only in your browser's localStorage. Termora's backend never receives your AI provider credentials.</div></Card>
+      <Card style={{ marginTop: 8 }}><div style={{ padding: '10px 14px', fontSize: 11, color: S.text3, lineHeight: 1.6 }}>All API keys are stored only in your browser's localStorage. Synaptix's backend never receives your AI provider credentials.</div></Card>
     </>
   );
 }
@@ -1070,7 +1070,7 @@ function ExperimentalSection() {
       <STitle label="Experimental" desc="New features that are still taking shape. Give them a try." />
       <Card>
         <Row label="Agent Dashboard" desc="Monitor agents that need you, are working, or are done in a dedicated view."><Toggle value={agentDash} onChange={setAgentDash} /></Row>
-        <Row label="Auto-resume chats" desc="Automatically resume chats that were working when Termora restarts."><Toggle value={autoResume} onChange={setAutoResume} /></Row>
+        <Row label="Auto-resume chats" desc="Automatically resume chats that were working when Synaptix restarts."><Toggle value={autoResume} onChange={setAutoResume} /></Row>
         <Row label="Status bar pet" desc="Shows a small animated pet (Terminito) pinned to the bottom-right corner."><Toggle value={pet} onChange={setPet} /></Row>
         <Row label="Worktree card preview" desc="Preview updated worktree-card layout and status presentation."><Toggle value={worktrees} onChange={setWorktrees} /></Row>
         <Row label="Agent sleep" desc="Stop idle background agent terminals after a timeout and resume when opened." last><Toggle value={agentSleep} onChange={setAgentSleep} /></Row>
@@ -1092,9 +1092,9 @@ function PluginsSection() {
   const [marketEnabled, setMarketEnabled] = useState(false);
   return (
     <>
-      <STitle label="Plugins" desc="Extend Termora with community-built plugins." />
+      <STitle label="Plugins" desc="Extend Synaptix with community-built plugins." />
       <Card>
-        <Row label="Enable plugin marketplace" desc="Access and install community plugins from the Termora registry." last><Toggle value={marketEnabled} onChange={setMarketEnabled} /></Row>
+        <Row label="Enable plugin marketplace" desc="Access and install community plugins from the Synaptix registry." last><Toggle value={marketEnabled} onChange={setMarketEnabled} /></Row>
       </Card>
       {!marketEnabled && <Card style={{ marginTop: 8 }}><div style={{ padding: '10px 14px', fontSize: 11, color: S.text3, lineHeight: 1.6 }}>Enable the plugin marketplace to browse and install extensions.</div></Card>}
     </>
@@ -1132,8 +1132,8 @@ function SectionContent({ id, p }: { id: SectionId; p: SettingsViewProps }) {
     case 'voice':               return <VoiceSection />;
     case 'account':             return <AccountSection connectionStatus={p.connectionStatus} latencyMs={p.latencyMs} />;
     case 'general':             return <GeneralSection />;
-    case 'integrations':        return <Placeholder label="Integrations" desc="Connect Termora with GitHub, Slack, Linear, and other tools." />;
-    case 'mobile':              return <Placeholder label="Mobile" desc="Set up the Termora mobile companion app." />;
+    case 'integrations':        return <Placeholder label="Integrations" desc="Connect Synaptix with GitHub, Slack, Linear, and other tools." />;
+    case 'mobile':              return <Placeholder label="Mobile" desc="Set up the Synaptix mobile companion app." />;
     case 'automations':         return <Placeholder label="Automations" desc="Trigger agent runs automatically based on events." />;
     case 'artifacts':           return <Placeholder label="Artifacts" desc="Create and manage reusable AI-generated assets." />;
     case 'share-skills':        return <Placeholder label="Share Skills" desc="Publish skills to your team." />;
@@ -1152,7 +1152,7 @@ function SectionContent({ id, p }: { id: SectionId; p: SettingsViewProps }) {
     case 'shortcuts':           return <ShortcutsSection />;
     case 'stats':               return <StatsSection />;
     case 'ssh-hosts':           return <Placeholder label="SSH Hosts" desc="Manage SSH connections and remote machine profiles." />;
-    case 'remote-servers':      return <Placeholder label="Remote Termora Servers" desc="Connect to Termora agents running on remote machines." />;
+    case 'remote-servers':      return <Placeholder label="Remote Synaptix Servers" desc="Connect to Synaptix agents running on remote machines." />;
     case 'macos-permissions':   return <MacOSPermissionsSection authToken={p.authToken} />;
     case 'privacy':             return <PrivacySection />;
     case 'advanced':            return <AdvancedSection />;
@@ -1165,7 +1165,7 @@ function SectionContent({ id, p }: { id: SectionId; p: SettingsViewProps }) {
 // ─── project icon colors ──────────────────────────────────────────────────────
 const PROJECT_COLORS: Record<string, { bg: string; fg: string; icon?: string }> = {
   'RUD-WEB':           { bg: '#e53e3e', fg: '#fff', icon: 'R' },
-  'Termora':           { bg: '#3b82f6', fg: '#fff', icon: 'T' },
+  'Synaptix':           { bg: '#3b82f6', fg: '#fff', icon: 'T' },
   'excited-bohr':      { bg: '#8b5cf6', fg: '#fff', icon: 'B' },
   'excited-tesla':     { bg: '#10b981', fg: '#fff', icon: 'T' },
   'intelligent-galileo': { bg: '#f59e0b', fg: '#fff', icon: 'G' },

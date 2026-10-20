@@ -47,7 +47,7 @@ describe('startAgent', () => {
   });
 
   it('binds an ephemeral port and serves the health endpoint', async () => {
-    dbPath = join(tmpdir(), `termora-runtime-${randomBytes(6).toString('hex')}.db`);
+    dbPath = join(tmpdir(), `synaptix-runtime-${randomBytes(6).toString('hex')}.db`);
     handle = await startAgent({ config: makeConfig(dbPath), log: false });
 
     expect(handle.port).toBeGreaterThan(0);
@@ -58,7 +58,7 @@ describe('startAgent', () => {
   });
 
   it('releases the port and is idempotent on close', async () => {
-    dbPath = join(tmpdir(), `termora-runtime-${randomBytes(6).toString('hex')}.db`);
+    dbPath = join(tmpdir(), `synaptix-runtime-${randomBytes(6).toString('hex')}.db`);
     handle = await startAgent({ config: makeConfig(dbPath), log: false });
     const port = handle.port;
 

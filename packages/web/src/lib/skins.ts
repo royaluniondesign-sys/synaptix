@@ -1,5 +1,5 @@
 /**
- * Keyboard skin definitions for the termora MacBook keyboard.
+ * Keyboard skin definitions for the synaptix MacBook keyboard.
  * Each skin defines CSS custom property values applied via [data-skin] attribute.
  */
 

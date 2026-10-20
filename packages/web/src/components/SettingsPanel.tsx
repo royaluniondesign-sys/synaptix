@@ -251,7 +251,7 @@ function ConnectionSection() {
 // ── Multi-machine section ────────────────────────────────────────────────────
 function MultiMachineSection() {
   const [copied, setCopied] = useState(false);
-  const setupCmd = 'git clone https://github.com/royaluniondesign-sys/termora.git && cd termora && npm install && npm run dev';
+  const setupCmd = 'git clone https://github.com/royaluniondesign-sys/synaptix.git && cd synaptix && npm install && npm run dev';
 
   const doCopy = useCallback(() => {
     navigator.clipboard.writeText(setupCmd).then(() => {
@@ -267,14 +267,14 @@ function MultiMachineSection() {
         borderRadius: 10, padding: '12px 14px', marginBottom: 8,
       }}>
         <div style={{ fontSize: 12, color: C.text2, marginBottom: 10, lineHeight: 1.5 }}>
-          Each machine runs its own termora agent. Connect from any device — browser, phone, tablet — by opening that machine&apos;s URL.
+          Each machine runs its own synaptix agent. Connect from any device — browser, phone, tablet — by opening that machine&apos;s URL.
         </div>
 
         {/* Steps */}
         {[
           {
             n: 1,
-            title: 'Install termora on the other machine',
+            title: 'Install synaptix on the other machine',
             content: (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
                 <code style={{ flex: 1, fontFamily: "'Fira Code', monospace", fontSize: 10, color: C.orange, background: C.bg, padding: '6px 8px', borderRadius: 6, border: `1px solid ${C.border}`, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', display: 'block' }}>
@@ -420,7 +420,7 @@ export function SettingsPanel({ onClose, onOpenSkinStudio, sessionCount }: Setti
               <SectionLabel label="How it works" />
               <div style={{ background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 10, padding: '11px 14px' }}>
                 <div style={{ fontFamily: "'Fira Code', monospace", fontSize: 10, color: C.text3, lineHeight: 1.8 }}>
-                  <div><span style={{ color: C.blue }}>phone</span> → <span style={{ color: C.orange }}>ngrok/SSH</span> → <span style={{ color: C.green }}>termora agent</span> → <span style={{ color: C.text1 }}>PTY</span></div>
+                  <div><span style={{ color: C.blue }}>phone</span> → <span style={{ color: C.orange }}>ngrok/SSH</span> → <span style={{ color: C.green }}>synaptix agent</span> → <span style={{ color: C.text1 }}>PTY</span></div>
                   <div style={{ marginTop: 4 }}>Each machine = independent agent + URL.</div>
                   <div>Switch between machines by opening different URLs.</div>
                 </div>

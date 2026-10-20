@@ -34,8 +34,8 @@ for (const ref of ['cockpit-desktop-v2.png', 'mobile-companion-v2.png']) {
 
 const desktop = JSON.parse(readFileSync('apps/desktop/package.json', 'utf8'));
 const mobile = JSON.parse(readFileSync('apps/mobile/package.json', 'utf8'));
-if (desktop.name !== '@termora/desktop-app') throw new Error('Unexpected desktop package name');
-if (mobile.name !== '@termora/mobile-app') throw new Error('Unexpected mobile package name');
+if (desktop.name !== '@synaptix/desktop-app') throw new Error('Unexpected desktop package name');
+if (mobile.name !== '@synaptix/mobile-app') throw new Error('Unexpected mobile package name');
 
 // Mobile phase 1: native builds stay gated. These assertions stop the scaffold
 // from silently growing a real native build, a signing credential, or a runtime

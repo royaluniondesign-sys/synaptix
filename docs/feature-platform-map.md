@@ -1,4 +1,4 @@
-# Termora feature platform map
+# Synaptix feature platform map
 
 This maps the required agent-cockpit features to desktop, mobile, backend, and optional cloud surfaces.
 
@@ -13,7 +13,7 @@ This maps the required agent-cockpit features to desktop, mobile, backend, and o
 | SSH Worktrees | Remote host registry and worktree UI | Monitor remote agents | Remote agent install, SSH, port forward | NAT relay optional |
 | Annotate AI Diffs | Inline diff comments and review flow | Quick review/comment | Diff parser and prompt→change trace | Share review state |
 | Drag Files to Agents | Drag files/images into prompts | Upload photo/file/document | Attachment store, expiry, privacy | Optional transfer relay |
-| Termora CLI | Local command bridge | Indirect actions via backend | MVP: `help`, `version`, `status`, `file`; future: agent/worktree/gates | Token/scoped control |
+| Synaptix CLI | Local command bridge | Indirect actions via backend | MVP: `help`, `version`, `status`, `file`; future: agent/worktree/gates | Token/scoped control |
 | Quick Open | Global palette for repos/files/agents | Compact search | Local index | Recent remote index |
 | Usage tracking | Provider/model/account usage UI | Alerts and reset timers | Metering per session/agent | Optional billing/sync |
 | Rich repo previews | Markdown/image/PDF/log preview panes | Compact repo cards | Implemented safe file preview foundation; richer processors pending | Snapshot sync |
@@ -42,7 +42,7 @@ This maps the required agent-cockpit features to desktop, mobile, backend, and o
 
 | Check | Status | Purpose |
 | --- | --- | --- |
-| `npm run check:cockpit` | Implemented / skip-safe | Dogfoods live cockpit API when `TERMORA_URL` and `TERMORA_TOKEN` are supplied; otherwise verifies graceful skip. |
+| `npm run check:cockpit` | Implemented / skip-safe | Dogfoods live cockpit API when `SYNAPTIX_URL` and `SYNAPTIX_TOKEN` are supplied; otherwise verifies graceful skip. |
 | `npm run check:web-headless` | Implemented / skip-safe | Verifies static web render gates, live HTML shell, and authenticated status when token env is supplied. |
 | `npm run check:desktop-boundary` | Implemented | Ensures desktop files/contracts stay within the dependency boundary. |
 | `npm run check:desktop-smoke` | Implemented | Verifies built web assets, IPC/preload names, runtime paths, and no static Electron binding. |

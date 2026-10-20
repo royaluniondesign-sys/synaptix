@@ -4,7 +4,7 @@ interface ConnectionOverlayProps {
 
 const LABELS: Record<ConnectionOverlayProps['mode'], string> = {
   detecting: 'Detecting environment...',
-  connecting: 'Connecting to termora...',
+  connecting: 'Connecting to synaptix...',
 };
 
 /**
@@ -14,12 +14,12 @@ const LABELS: Record<ConnectionOverlayProps['mode'], string> = {
  */
 export function ConnectionOverlay({ mode }: ConnectionOverlayProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-termora-bg/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-synaptix-bg/80 backdrop-blur-sm">
       <div className="flex flex-col items-center gap-4">
         {/* Pulsing dot */}
         <div className="relative flex h-4 w-4 items-center justify-center">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-termora-orange opacity-40" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-termora-orange" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-synaptix-orange opacity-40" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-synaptix-orange" />
         </div>
 
         {/* Status text */}

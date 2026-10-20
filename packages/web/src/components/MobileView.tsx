@@ -24,7 +24,7 @@ function PhoneMockup({ url }: { url: string | null }) {
           <rect width="36" height="36" rx="8" fill={S.primary} />
           <text x="18" y="25" textAnchor="middle" fill="white" fontSize="18" fontWeight="700" fontFamily="Arial">T</text>
         </svg>
-        <span style={{ fontSize: 10, color: S.text1, fontWeight: 700 }}>Termora</span>
+        <span style={{ fontSize: 10, color: S.text1, fontWeight: 700 }}>Synaptix</span>
         {url ? (
           <span style={{ fontSize: 7, color: S.success, textAlign: 'center', lineHeight: 1.3, wordBreak: 'break-all' }}>Connected</span>
         ) : (
@@ -49,7 +49,7 @@ export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: S.bg }}>
       {/* Header */}
       <div style={{ padding: '14px 20px 12px', borderBottom: `1px solid ${S.border}`, background: S.surface, flexShrink: 0 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: S.text1, margin: 0, letterSpacing: -0.3 }}>Termora Mobile</h2>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: S.text1, margin: 0, letterSpacing: -0.3 }}>Synaptix Mobile</h2>
         <p style={{ fontSize: 11, color: S.text3, margin: '3px 0 0' }}>Connect your phone to this agent session</p>
       </div>
 
@@ -66,7 +66,7 @@ export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
                 'Open your browser on your phone',
                 tunnelUrl ? `Navigate to: ${tunnelUrl}` : 'Start the agent to get a tunnel URL',
                 'Log in with the same token',
-                'Your phone is now a Termora companion',
+                'Your phone is now a Synaptix companion',
               ].map((step, i) => (
                 <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'flex-start' }}>
                   <div style={{

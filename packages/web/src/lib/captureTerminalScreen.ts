@@ -1,25 +1,25 @@
 import type { Terminal } from '@xterm/xterm';
-import { TERMORA_THEME } from './theme';
+import { SYNAPTIX_THEME } from './theme';
 
 // Standard 16-color ANSI palette mapped to our terminal theme
-const DEFAULT_FG = TERMORA_THEME.foreground ?? '#d0d0d0';
+const DEFAULT_FG = SYNAPTIX_THEME.foreground ?? '#d0d0d0';
 const P16: readonly string[] = [
-  TERMORA_THEME.black ?? DEFAULT_FG,         // 0  black
-  TERMORA_THEME.red ?? DEFAULT_FG,           // 1  red
-  TERMORA_THEME.green ?? DEFAULT_FG,         // 2  green
-  TERMORA_THEME.yellow ?? DEFAULT_FG,        // 3  yellow
-  TERMORA_THEME.blue ?? DEFAULT_FG,          // 4  blue
-  TERMORA_THEME.magenta ?? DEFAULT_FG,       // 5  magenta
-  TERMORA_THEME.cyan ?? DEFAULT_FG,          // 6  cyan
-  TERMORA_THEME.white ?? DEFAULT_FG,         // 7  white
-  TERMORA_THEME.brightBlack ?? DEFAULT_FG,   // 8  bright black
-  TERMORA_THEME.brightRed ?? DEFAULT_FG,     // 9  bright red
-  TERMORA_THEME.brightGreen ?? DEFAULT_FG,   // 10 bright green
-  TERMORA_THEME.brightYellow ?? DEFAULT_FG,  // 11 bright yellow
-  TERMORA_THEME.brightBlue ?? DEFAULT_FG,    // 12 bright blue
-  TERMORA_THEME.brightMagenta ?? DEFAULT_FG, // 13 bright magenta
-  TERMORA_THEME.brightCyan ?? DEFAULT_FG,    // 14 bright cyan
-  TERMORA_THEME.brightWhite ?? DEFAULT_FG,   // 15 bright white
+  SYNAPTIX_THEME.black ?? DEFAULT_FG,         // 0  black
+  SYNAPTIX_THEME.red ?? DEFAULT_FG,           // 1  red
+  SYNAPTIX_THEME.green ?? DEFAULT_FG,         // 2  green
+  SYNAPTIX_THEME.yellow ?? DEFAULT_FG,        // 3  yellow
+  SYNAPTIX_THEME.blue ?? DEFAULT_FG,          // 4  blue
+  SYNAPTIX_THEME.magenta ?? DEFAULT_FG,       // 5  magenta
+  SYNAPTIX_THEME.cyan ?? DEFAULT_FG,          // 6  cyan
+  SYNAPTIX_THEME.white ?? DEFAULT_FG,         // 7  white
+  SYNAPTIX_THEME.brightBlack ?? DEFAULT_FG,   // 8  bright black
+  SYNAPTIX_THEME.brightRed ?? DEFAULT_FG,     // 9  bright red
+  SYNAPTIX_THEME.brightGreen ?? DEFAULT_FG,   // 10 bright green
+  SYNAPTIX_THEME.brightYellow ?? DEFAULT_FG,  // 11 bright yellow
+  SYNAPTIX_THEME.brightBlue ?? DEFAULT_FG,    // 12 bright blue
+  SYNAPTIX_THEME.brightMagenta ?? DEFAULT_FG, // 13 bright magenta
+  SYNAPTIX_THEME.brightCyan ?? DEFAULT_FG,    // 14 bright cyan
+  SYNAPTIX_THEME.brightWhite ?? DEFAULT_FG,   // 15 bright white
 ];
 
 /** Resolve a cell's foreground color using xterm.js boolean helpers. */

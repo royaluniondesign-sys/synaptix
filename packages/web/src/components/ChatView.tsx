@@ -97,8 +97,8 @@ const PROVIDER_FREE: Record<ChatProvider, boolean> = {
   'openrouter': true,
 };
 
-const CONFIG_KEY = 'termora_chat_config';
-const HISTORY_KEY = 'termora_chat_history';
+const CONFIG_KEY = 'synaptix_chat_config';
+const HISTORY_KEY = 'synaptix_chat_history';
 
 function loadConfig(): ProviderConfig {
   try {
@@ -755,7 +755,7 @@ function ConfigPanel({ draft, onChange, onSave, onClose }: {
               autoComplete="off"
             />
             <p style={{ fontSize: 9, color: S.text3, margin: '4px 0 0' }}>
-              Stored locally in browser only — never sent to Termora servers.
+              Stored locally in browser only — never sent to Synaptix servers.
               {draft.provider === 'openrouter' && ' Free models available at openrouter.ai.'}
             </p>
           </div>

@@ -3,8 +3,8 @@ import {
   looksLikeJwt,
   normalizeBaseUrl,
   readEnv,
-  TermoraClient,
-  TermoraError,
+  SynaptixClient,
+  SynaptixError,
   type FetchLike,
 } from '../client.js'
 
@@ -36,18 +36,18 @@ function mockFetch(handler: (input: string, init?: RequestInit) => Response | Pr
 }
 
 function client(env: { url: string; token: string }, fetchImpl: ReturnType<typeof mockFetch>) {
-  return new TermoraClient(env, fetchImpl as unknown as FetchLike)
+  return new SynaptixClient(env, fetchImpl as unknown as FetchLike)
 }
 
 describe('readEnv', () => {
   it('returns null unless both vars are present', () => {
     expect(readEnv({})).toBeNull()
-    expect(readEnv({ TERMORA_URL: 'http://x' })).toBeNull()
-    expect(readEnv({ TERMORA_TOKEN: 't' })).toBeNull()
+    expect(readEnv({ SYNAPTIX_URL: 'http://x' })).toBeNull()
+    expect(readEnv({ SYNAPTIX_TOKEN: 't' })).toBeNull()
   })
 
   it('trims and returns both values', () => {
-    expect(readEnv({ TERMORA_URL: ' http://x ', TERMORA_TOKEN: ' t ' })).toEqual({
+    expect(readEnv({ SYNAPTIX_URL: ' http://x ', SYNAPTIX_TOKEN: ' t ' })).toEqual({
       url: 'http://x',
       token: 't',
     })
@@ -70,7 +70,7 @@ describe('looksLikeJwt', () => {
   })
 })
 
-describe('TermoraClient', () => {
+describe('SynaptixClient', () => {
   it('exchanges a static token, then calls the cockpit endpoint with the JWT', async () => {
     const fetchImpl = mockFetch((input) =>
       input.endsWith('/api/auth/bootstrap')
@@ -125,12 +125,12 @@ describe('TermoraClient', () => {
     expect(String(fetchImpl.mock.calls[0]?.[0])).toBe('http://x/api/cockpit/file?path=a.txt')
   })
 
-  it('surfaces server errors as TermoraError', async () => {
+  it('surfaces server errors as SynaptixError', async () => {
     const fetchImpl = mockFetch(() => jsonResponse({ error: 'Path escapes repository root' }, 400))
 
     await expect(
       client({ url: 'http://x', token: 'a.b.c' }, fetchImpl).getFile('../etc/passwd'),
-    ).rejects.toBeInstanceOf(TermoraError)
+    ).rejects.toBeInstanceOf(SynaptixError)
   })
 
   it('fails authentication clearly', async () => {

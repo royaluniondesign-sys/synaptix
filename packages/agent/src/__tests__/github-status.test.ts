@@ -98,8 +98,8 @@ describe('redactSecrets', () => {
 
 describe('parseRepoView', () => {
   it('extracts owner/name and default branch', () => {
-    expect(parseRepoView('{"nameWithOwner":"termora/termora","defaultBranchRef":{"name":"main"}}')).toEqual({
-      nameWithOwner: 'termora/termora',
+    expect(parseRepoView('{"nameWithOwner":"synaptix/synaptix","defaultBranchRef":{"name":"main"}}')).toEqual({
+      nameWithOwner: 'synaptix/synaptix',
       defaultBranch: 'main',
     });
   });
@@ -173,7 +173,7 @@ describe('collectGithubStatus', () => {
           '  \u2713 Logged in to github.com account monalisa (keyring)',
           "  - Token scopes: 'repo', 'workflow'",
         ].join('\n'),
-        'gh repo view --json nameWithOwner,defaultBranchRef': '{"nameWithOwner":"termora/termora","defaultBranchRef":{"name":"main"}}',
+        'gh repo view --json nameWithOwner,defaultBranchRef': '{"nameWithOwner":"synaptix/synaptix","defaultBranchRef":{"name":"main"}}',
         'gh pr list --limit 5 --json number,title,headRefName,state': JSON.stringify([
           { number: 7, title: 'Cockpit GitHub slice', headRefName: 'feat/gh', state: 'OPEN' },
         ]),
@@ -182,7 +182,7 @@ describe('collectGithubStatus', () => {
     );
 
     expect(status.authenticated).toBe(true);
-    expect(status.repo).toEqual({ nameWithOwner: 'termora/termora', defaultBranch: 'main' });
+    expect(status.repo).toEqual({ nameWithOwner: 'synaptix/synaptix', defaultBranch: 'main' });
     expect(status.prHints).toHaveLength(1);
     expect(status.prHints[0].number).toBe(7);
     expect(JSON.stringify(status)).not.toMatch(/gho_|github_pat_/);
@@ -195,7 +195,7 @@ describe('collectGithubStatus', () => {
 });
 
 describe('cockpit github endpoint guard', () => {
-  const dbPath = join(tmpdir(), `termora-github-${randomBytes(6).toString('hex')}.db`);
+  const dbPath = join(tmpdir(), `synaptix-github-${randomBytes(6).toString('hex')}.db`);
   const config: AgentConfig = {
     port: 0,
     webPort: 0,

@@ -1,4 +1,4 @@
-// Termora mobile companion — phase 1 push-permission model.
+// Synaptix mobile companion — phase 1 push-permission model.
 //
 // Pure TypeScript: models the notification permission/registration state without
 // importing expo-notifications. Push delivery stays gated until the relay/push

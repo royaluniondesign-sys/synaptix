@@ -1,4 +1,4 @@
-// Termora desktop entrypoint surface.
+// Synaptix desktop entrypoint surface.
 // This module exposes the desktop shell bootstrap contract (runtime plan +
 // agent launch descriptor + injected agent lifecycle) and re-exports the real
 // Electron launcher (`electron-main.ts`), preload bridge (`preload.ts`), and the
@@ -27,13 +27,13 @@ import {
 } from './shell.js'
 import {
   DESKTOP_IPC_CHANNELS,
-  TERMORA_PRELOAD_KEY,
-  createTermoraPreloadApi,
-  exposeTermoraPreload,
+  SYNAPTIX_PRELOAD_KEY,
+  createSynaptixPreloadApi,
+  exposeSynaptixPreload,
   type DesktopShellState,
   type DesktopShellStatus,
   type IpcMainLike,
-  type TermoraPreloadApi,
+  type SynaptixPreloadApi,
 } from './ipc-contract.js'
 import {
   DEFAULT_WINDOW_HEIGHT,
@@ -61,7 +61,7 @@ import {
   type DesktopAppRuntime,
   type StartDesktopAppOptions,
 } from './electron-main.js'
-import { bootstrapTermoraPreload } from './preload.js'
+import { bootstrapSynaptixPreload } from './preload.js'
 import {
   ELECTRON_MODULE,
   loadElectronMain,
@@ -73,9 +73,9 @@ import {
 
 export { desktopRuntimePlan, describeAgentLaunch, createAgentLifecycle }
 export { buildAgentWebUrl, createDesktopShell, loadAgentStartFn, runHeadlessDevShell }
-export { DESKTOP_IPC_CHANNELS, TERMORA_PRELOAD_KEY, createTermoraPreloadApi, exposeTermoraPreload }
+export { DESKTOP_IPC_CHANNELS, SYNAPTIX_PRELOAD_KEY, createSynaptixPreloadApi, exposeSynaptixPreload }
 export { createBrowserWindow, loadElectron, createDesktopMain, wireDesktopIpc }
-export { startDesktopApp, resolvePreloadPath, bootstrapTermoraPreload }
+export { startDesktopApp, resolvePreloadPath, bootstrapSynaptixPreload }
 export { ELECTRON_MODULE, loadElectronMain, loadElectronPreload }
 export {
   DEFAULT_WINDOW_HEIGHT,
@@ -97,7 +97,7 @@ export type {
   DesktopShellState,
   DesktopShellStatus,
   IpcMainLike,
-  TermoraPreloadApi,
+  SynaptixPreloadApi,
   WindowOptions,
   CreateBrowserWindowOptions,
   ElectronLoader,

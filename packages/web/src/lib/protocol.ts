@@ -1,5 +1,5 @@
 /**
- * Shared WebSocket message type definitions for termora client-server protocol.
+ * Shared WebSocket message type definitions for synaptix client-server protocol.
  */
 
 export type ClientMessage =

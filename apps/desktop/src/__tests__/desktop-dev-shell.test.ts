@@ -3,9 +3,9 @@ import { AGENT_RUNTIME_MODULE, AGENT_RUNTIME_SYMBOL } from '../agent-host.js'
 import type { AgentHandleLike, StartAgentFn } from '../agent-lifecycle.js'
 import {
   DESKTOP_IPC_CHANNELS,
-  TERMORA_PRELOAD_KEY,
-  createTermoraPreloadApi,
-  exposeTermoraPreload,
+  SYNAPTIX_PRELOAD_KEY,
+  createSynaptixPreloadApi,
+  exposeSynaptixPreload,
   type DesktopShellStatus,
   type IpcRendererLike,
 } from '../ipc-contract.js'
@@ -137,7 +137,7 @@ describe('loadAgentStartFn', () => {
   it('fails clearly when the module cannot be resolved', async () => {
     await expect(
       loadAgentStartFn(undefined, () => Promise.reject(new Error('MODULE_NOT_FOUND'))),
-    ).rejects.toThrow(/could not load @termora\/agent\/runtime/)
+    ).rejects.toThrow(/could not load @synaptix\/agent\/runtime/)
   })
 
   it('fails clearly when the export is missing', async () => {
@@ -163,7 +163,7 @@ describe('preload contract', () => {
       removeListener: () => undefined,
     }
 
-    const api = createTermoraPreloadApi(ipc)
+    const api = createSynaptixPreloadApi(ipc)
     const status = await api.getStatus()
     expect(invoke).toHaveBeenCalledWith(DESKTOP_IPC_CHANNELS.getStatus)
     expect(status?.state).toBe('running')
@@ -180,7 +180,7 @@ describe('preload contract', () => {
       removeListener,
     }
 
-    const api = createTermoraPreloadApi(ipc)
+    const api = createSynaptixPreloadApi(ipc)
     const received: DesktopShellStatus[] = []
     const unsubscribe = api.onStatus((status) => received.push(status))
 
@@ -199,8 +199,8 @@ describe('preload contract', () => {
       removeListener: () => undefined,
     }
 
-    exposeTermoraPreload({ exposeInMainWorld }, ipc)
-    expect(exposeInMainWorld).toHaveBeenCalledWith(TERMORA_PRELOAD_KEY, expect.any(Object))
+    exposeSynaptixPreload({ exposeInMainWorld }, ipc)
+    expect(exposeInMainWorld).toHaveBeenCalledWith(SYNAPTIX_PRELOAD_KEY, expect.any(Object))
   })
 })
 

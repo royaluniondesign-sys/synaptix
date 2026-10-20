@@ -1,4 +1,4 @@
-// @termora/agent -- CLI entry point
+// @synaptix/agent -- CLI entry point
 // Starts the local agent, opens a tunnel, prints QR code, and handles signals.
 //
 // The core lifecycle lives in ./runtime.ts (startAgent) so desktop shells can
@@ -71,6 +71,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  console.error('Fatal error starting termora agent:', err);
+  console.error('Fatal error starting synaptix agent:', err);
   process.exit(1);
 });

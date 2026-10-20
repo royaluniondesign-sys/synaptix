@@ -70,7 +70,7 @@ function WindowChrome({ activeTask }: { activeTask: TaskItem }) {
   return (
     <div className="tm-oct-windowbar">
       <div className="tm-oct-lights"><i /><i /><i /></div>
-      <div className="tm-oct-window-title">Termora</div>
+      <div className="tm-oct-window-title">Synaptix</div>
       <div className="tm-oct-tabs"><span className="active">{activeTask.title}</span></div>
     </div>
   );
@@ -161,7 +161,7 @@ function CapabilityCoverage({ onAction }: { onAction: (action: string) => void }
             'Terminal Splits': 'new terminal',
             'Quick Open': 'quick-open',
             'Notifications/unread': 'notifications',
-            'Termora CLI': 'run gates',
+            'Synaptix CLI': 'run gates',
             'Any CLI Agent': 'spawn agent',
             'Rich Repo Previews': 'open file tree',
             'Mobile Companion': 'mobile',
@@ -306,7 +306,7 @@ function PhonePreview({ status, agentCount, taskCount, connectionStatus, latency
   const online = connectionStatus === 'connected';
   return (
     <aside className="tm-oct-phone" aria-label="Phone layout preview">
-      <div className="tm-phone-brand"><img src={`${import.meta.env.BASE_URL}termora-logo.svg`} alt="" /><strong>Termora</strong></div>
+      <div className="tm-phone-brand"><img src={`${import.meta.env.BASE_URL}synaptix-logo.svg`} alt="" /><strong>Synaptix</strong></div>
       <h2>Phone view</h2>
       <div className="tm-phone-mode-tabs">{['desktop', 'agents', 'files'].map((mode) => <button key={mode} type="button" className={phoneMode === mode ? 'active' : ''} onClick={() => { setPhoneMode(mode); onAction(mode === 'files' ? 'list-files' : 'git-status'); }}>{mode}</button>)}</div>
       <div className="tm-phone-stats">

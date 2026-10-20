@@ -1,12 +1,12 @@
 # Product Evolution
 
-Termora started as a mobile-first terminal for real machines. The next version is an installable developer cockpit that combines terminal control, files, SSH/SFTP, Git, worktrees, agent sessions, browser previews, notifications, and verification gates.
+Synaptix started as a mobile-first terminal for real machines. The next version is an installable developer cockpit that combines terminal control, files, SSH/SFTP, Git, worktrees, agent sessions, browser previews, notifications, and verification gates.
 
 ## Direction
 
-Termora should become the control plane for local and remote development machines:
+Synaptix should become the control plane for local and remote development machines:
 
-1. Install Termora on Mac, Linux, WSL, or a server.
+1. Install Synaptix on Mac, Linux, WSL, or a server.
 2. Pair every device: phone, tablet, browser, secondary laptop.
 3. See every host, project, worktree, terminal, agent, diff, preview, and gate from one UI.
 4. Launch or steer CLI agents without caring which machine they run on.
@@ -15,7 +15,7 @@ Termora should become the control plane for local and remote development machine
 
 ## Competitive position
 
-Termora should take the best ideas across existing developer tools without inheriting their limits:
+Synaptix should take the best ideas across existing developer tools without inheriting their limits:
 
 - from mobile SSH clients: instant phone access, but with richer UI and session management;
 - from cloud IDEs: project/file/diff ergonomics, but local-first with no hosted workspace lock-in;
@@ -80,7 +80,7 @@ Current packages:
 
 Future packages:
 
-- `packages/mcp`: MCP server exposing safe Termora tools.
+- `packages/mcp`: MCP server exposing safe Synaptix tools.
 - `packages/desktop`: optional native wrapper if Electron/Tauri is chosen.
 
 ## New domain models
