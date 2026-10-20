@@ -1,4 +1,4 @@
-// Termora desktop packaging config (unsigned).
+// Synaptix desktop packaging config (unsigned).
 //
 // Packages the directory produced by scripts/stage-app.mjs. No signing,
 // notarization or publishing is configured here; scripts/package-desktop-unsigned.mjs
@@ -6,9 +6,9 @@
 
 /** @type {import('electron-builder').Configuration} */
 module.exports = {
-  appId: 'com.termora.app',
-  productName: 'Termora',
-  artifactName: 'Termora-${version}-${os}-${arch}.${ext}',
+  appId: 'com.synaptix.app',
+  productName: 'Synaptix',
+  artifactName: 'Synaptix-${version}-${os}-${arch}.${ext}',
   directories: {
     app: 'stage',
     output: 'release/desktop',
@@ -33,7 +33,7 @@ module.exports = {
   linux: {
     target: ['AppImage'],
     category: 'Development',
-    maintainer: 'Termora contributors <noreply@termora.dev>',
+    maintainer: 'Synaptix contributors <noreply@synaptix.dev>',
     synopsis: 'Terminal and agent cockpit'
   }
 };
