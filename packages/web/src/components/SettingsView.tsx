@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useConnectionInfo } from '../hooks/useConnectionInfo';
 import { useDevices } from '../hooks/useDevices';
 import { formatRelativeTime } from '../lib/format-relative-time';
@@ -142,7 +142,7 @@ function CodeLine({ text }: { text: string }) {
   );
 }
 function Placeholder({ label, desc }: { label: string; desc?: string }) {
-  return (<><STitle label={label} desc={desc} /><Card><div style={{ padding: '24px 16px', textAlign: 'center' }}><div style={{ fontSize: 26, opacity: 0.25, marginBottom: 6 }}>🚧</div><div style={{ fontSize: 12, color: S.text3 }}>Coming soon</div></div></Card></>);
+  return (<><STitle label={label} desc={desc} /><Card><div style={{ padding: '24px 16px', textAlign: 'center' }}><div style={{ opacity: 0.25, marginBottom: 6, display: 'flex', justifyContent: 'center' }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={S.text2} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/><line x1="2" y1="2" x2="22" y2="22"/></svg></div><div style={{ fontSize: 12, color: S.text3 }}>Coming soon</div></div></Card></>);
 }
 
 // ─── provider logos ───────────────────────────────────────────────────────────
@@ -358,11 +358,25 @@ function AgentsSection() {
   const setDef = (id: string) => { setDefAgent(id); localStorage.setItem('synaptix_default_agent', id); };
 
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshNote, setRefreshNote] = useState<string | null>(null);
   const refreshInstalled = () => {
     setRefreshing(true);
-    // Re-probe CLIs by resetting state to default then re-detecting
-    setInstalled(INSTALLED_AGENTS_DEFAULT);
-    setTimeout(() => setRefreshing(false), 800);
+    setRefreshNote(null);
+    fetch('/api/cockpit/agents')
+      .then(r => {
+        if (!r.ok) throw new Error('bad status');
+        return r.json() as Promise<{ id: string }[]>;
+      })
+      .then((data: { id: string }[]) => {
+        const ids = new Set(data.map((a: { id: string }) => a.id));
+        setInstalled(prev => prev.map(a => ({ ...a, enabled: ids.has(a.id) })));
+        setRefreshNote(null);
+      })
+      .catch(() => {
+        setInstalled(INSTALLED_AGENTS_DEFAULT);
+        setRefreshNote('Could not verify — showing defaults');
+      })
+      .finally(() => setRefreshing(false));
   };
   const toggleInstalled = (id: string, field: 'enabled') => setInstalled(prev => prev.map(a => a.id === id ? { ...a, [field]: !a[field] } : a));
   const setDefaultInstalled = (id: string) => setInstalled(prev => prev.map(a => ({ ...a, isDefault: a.id === id })));
@@ -379,7 +393,7 @@ function AgentsSection() {
       <Card>
         {DEFAULT_AGENTS.map((a, i) => (
           <button key={a.id} type="button" onClick={() => setDef(a.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: i < DEFAULT_AGENTS.length - 1 ? `1px solid ${S.border}` : 'none', background: defAgent === a.id ? `${S.primary}12` : 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
-            {a.logoId !== 'none' ? <Logo id={a.logoId} size={28} /> : <div style={{ width: 28, height: 28, borderRadius: 7, background: S.surface3, border: `1px solid ${S.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 12 }}>⬛</span></div>}
+            {a.logoId !== 'none' ? <Logo id={a.logoId} size={28} /> : <div style={{ width: 28, height: 28, borderRadius: 7, background: S.surface3, border: `1px solid ${S.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>}
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <span style={{ fontSize: 13, fontWeight: defAgent === a.id ? 600 : 400, color: defAgent === a.id ? S.text1 : S.text2 }}>{a.label}</span>
@@ -439,13 +453,14 @@ function AgentsSection() {
 
         {/* Installed agents */}
         <div style={{ padding: '10px 14px', borderBottom: `1px solid ${S.border}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: refreshNote ? 4 : 10 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: S.text1 }}>Installed</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Chip label={`${installed.length} detected`} color={S.success} />
               <button type="button" onClick={refreshInstalled} disabled={refreshing} style={{ height: 24, padding: '0 9px', borderRadius: 5, border: `1px solid ${S.border}`, background: refreshing ? `${S.success}10` : 'transparent', color: refreshing ? S.success : S.text2, fontSize: 10, cursor: 'pointer', fontFamily: 'inherit' }}>{refreshing ? 'Scanning…' : 'Refresh'}</button>
             </div>
           </div>
+          {refreshNote && <div style={{ fontSize: 10, color: S.warning, marginBottom: 8 }}>{refreshNote}</div>}
           {installed.map(agent => (
             <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${S.border}` }}>
               <Logo id={agent.logoId} size={26} />
@@ -552,8 +567,17 @@ const CLI_AGENT_ACCOUNTS = [
 ];
 
 function AgentAccountCard({ agent }: { agent: typeof CLI_AGENT_ACCOUNTS[0] }) {
-  const [refreshed, setRefreshed] = useState(false);
-  const refresh = () => { setRefreshed(true); setTimeout(() => setRefreshed(false), 1500); };
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshStatus, setRefreshStatus] = useState<'idle'|'ok'|'error'>('idle');
+  const refresh = () => {
+    setRefreshing(true);
+    setRefreshStatus('idle');
+    fetch('/api/cockpit/agents')
+      .then(r => { if (!r.ok) throw new Error('bad status'); return r.json(); })
+      .then(() => setRefreshStatus('ok'))
+      .catch(() => setRefreshStatus('error'))
+      .finally(() => setRefreshing(false));
+  };
   return (
     <Card style={{ marginBottom: 14 }}>
       <div style={{ padding: '12px 14px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -563,9 +587,9 @@ function AgentAccountCard({ agent }: { agent: typeof CLI_AGENT_ACCOUNTS[0] }) {
       <div style={{ borderTop: `1px solid ${S.border}`, padding: '10px 14px' }}>
         <div style={{ fontSize: 11, color: S.text2, marginBottom: 7, lineHeight: 1.55 }}>{agent.desc}</div>
         <CodeLine text={agent.cmd} />
-        <div style={{ display: 'flex', gap: 6, marginTop: 7 }}>
+        <div style={{ display: 'flex', gap: 6, marginTop: 7, alignItems: 'center' }}>
           <CopyBtn text={agent.cmd} />
-          <button type="button" onClick={refresh} style={{ height: 26, padding: '0 9px', borderRadius: 6, border: `1px solid ${S.border}`, background: refreshed ? `${S.success}12` : S.surface3, color: refreshed ? S.success : S.text2, fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{refreshed ? 'Refreshed!' : 'Refresh accounts'}</button>
+          <button type="button" onClick={refresh} disabled={refreshing} style={{ height: 26, padding: '0 9px', borderRadius: 6, border: `1px solid ${refreshStatus === 'ok' ? S.success : refreshStatus === 'error' ? S.error : S.border}`, background: refreshStatus === 'ok' ? `${S.success}12` : refreshStatus === 'error' ? `${S.error}10` : S.surface3, color: refreshStatus === 'ok' ? S.success : refreshStatus === 'error' ? S.error : S.text2, fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>{refreshing ? 'Checking…' : refreshStatus === 'ok' ? 'Updated!' : refreshStatus === 'error' ? 'Could not reach agent' : 'Refresh accounts'}</button>
         </div>
         <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 11, color: S.text3 }}>System default</span>
@@ -577,8 +601,26 @@ function AgentAccountCard({ agent }: { agent: typeof CLI_AGENT_ACCOUNTS[0] }) {
 }
 
 function ClaudeAccountCard() {
-  const [accounts] = useState([{ id: 'system', label: 'System default', desc: 'Use your current this device Claude login.', active: true }]);
+  const [accounts, setAccounts] = useState<{ id: string; label: string; desc: string; active: boolean }[]>([{ id: 'system', label: 'System default', desc: 'Use your current this device Claude login.', active: true }]);
   const [addClicked, setAddClicked] = useState(false);
+  const [newToken, setNewToken] = useState('');
+  const [showToken, setShowToken] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle'|'saved'>('idle');
+
+  const handleSave = () => {
+    const trimmed = newToken.trim();
+    if (!trimmed) return;
+    const stored: { id: string; token: string; label: string }[] = JSON.parse(localStorage.getItem('synaptix_claude_accounts') ?? '[]');
+    const newEntry = { id: `acc_${Date.now()}`, token: trimmed, label: `Account ${stored.length + 2}` };
+    stored.push(newEntry);
+    localStorage.setItem('synaptix_claude_accounts', JSON.stringify(stored));
+    setAccounts(prev => [...prev, { id: newEntry.id, label: newEntry.label, desc: 'Added via token.', active: false }]);
+    setNewToken('');
+    setAddClicked(false);
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
+
   return (
     <Card style={{ marginBottom: 14 }}>
       <div style={{ padding: '12px 14px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -599,6 +641,23 @@ function ClaudeAccountCard() {
             Add Account
           </button>
         </div>
+        {addClicked && (
+          <div style={{ background: S.bg, border: `1px solid ${S.borderLight}`, borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: S.text1, marginBottom: 6 }}>Add Claude account</div>
+            <div style={{ fontSize: 10, color: S.text3, marginBottom: 8, lineHeight: 1.5 }}>Paste a Claude session token or API key. Stored locally only — never sent to any server.</div>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input type={showToken ? 'text' : 'password'} value={newToken} onChange={e => setNewToken(e.target.value)} placeholder="sk-ant-… or session token" autoComplete="off" style={{ width: '100%', height: 30, background: S.surface3, border: `1px solid ${S.border}`, borderRadius: 6, padding: '0 30px 0 9px', color: S.text1, fontSize: 11, fontFamily: "'JetBrains Mono',monospace", outline: 'none', boxSizing: 'border-box' }} />
+                <button type="button" onClick={() => setShowToken(v => !v)} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: S.text3, cursor: 'pointer', padding: 0 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2">{showToken ? <><path d="M17.94 17.94A10 10 0 0 1 12 20c-7 0-11-8-11-8a18 18 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9 9 0 0 1 12 4c7 0 11 8 11 8a18 18 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></> : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>}</svg>
+                </button>
+              </div>
+              <button type="button" onClick={handleSave} style={{ height: 30, padding: '0 12px', borderRadius: 6, border: 'none', background: S.primary, color: S.bg, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>Save</button>
+              <button type="button" onClick={() => { setAddClicked(false); setNewToken(''); }} style={{ height: 30, padding: '0 9px', borderRadius: 6, border: `1px solid ${S.border}`, background: 'transparent', color: S.text2, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>Cancel</button>
+            </div>
+          </div>
+        )}
+        {saveStatus === 'saved' && <div style={{ fontSize: 10, color: S.success, marginBottom: 6 }}>Account saved.</div>}
         {accounts.map(acc => (
           <div key={acc.id} style={{ background: S.surface3, border: `1px solid ${S.border}`, borderRadius: 8, padding: '9px 12px', marginBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -921,6 +980,7 @@ function InputEditingSection({ keyboardMode, onKeyboardModeChange }: { keyboardM
 function NotificationsSection() {
   const [inApp, setInApp] = useState(true);
   const [os, setOs] = useState(false);
+  const [notifPermError, setNotifPermError] = useState(false);
   const [onDone, setOnDone] = useState(true);
   const [onFail, setOnFail] = useState(true);
   const [onWait, setOnWait] = useState(false);
@@ -930,9 +990,12 @@ function NotificationsSection() {
       <Card>
         <Row label="In-app notifications" desc="Show events in the Notifications tab with unread badge"><Toggle value={inApp} onChange={setInApp} /></Row>
         <Row label="macOS notifications" desc="Native OS notification when a job finishes, even in background" last>
-          <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
-            {!os && <button type="button" onClick={() => { void Notification.requestPermission().then(p => { if (p === 'granted') setOs(true); }); }} style={{ height: 25, padding: '0 9px', borderRadius: 5, border: `1px solid ${S.primary}44`, background: `${S.primary}10`, color: S.primary, fontSize: 9, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Enable</button>}
-            <Toggle value={os} onChange={setOs} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+              {!os && <button type="button" onClick={() => { void Notification.requestPermission().then(p => { if (p === 'granted') { setOs(true); setNotifPermError(false); } else { setNotifPermError(true); } }); }} style={{ height: 25, padding: '0 9px', borderRadius: 5, border: `1px solid ${S.primary}44`, background: `${S.primary}10`, color: S.primary, fontSize: 9, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Enable</button>}
+              <Toggle value={os} onChange={v => { setOs(v); if (!v) setNotifPermError(false); }} />
+            </div>
+            {notifPermError && <span style={{ fontSize: 9, color: S.error }}>Permission denied. Enable in system settings.</span>}
           </div>
         </Row>
       </Card>
@@ -981,15 +1044,29 @@ function ShortcutsSection() {
 }
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
-function StatsSection() {
+function StatsSection({ authToken }: { authToken: string | null }) {
+  const [recentJobs, setRecentJobs] = useState<number | null>(null);
+  const [statusError, setStatusError] = useState(false);
+
+  useEffect(() => {
+    const headers: HeadersInit = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+    fetch('/api/cockpit/status', { headers })
+      .then(r => { if (!r.ok) throw new Error('bad status'); return r.json() as Promise<{ recentJobs?: number }>; })
+      .then(data => setRecentJobs(data.recentJobs ?? null))
+      .catch(() => setStatusError(true));
+  }, [authToken]);
+
+  const fmt = (v: number | null) => v != null ? String(v) : statusError ? 'N/A' : '—';
+
   return (
     <>
       <STitle label="Stats & Usage" desc="Session activity and resource usage." />
       <Card>
-        <Row label="Sessions today"><span style={{ fontSize: 13, fontWeight: 600, color: S.primary, fontFamily: "'JetBrains Mono',monospace" }}>—</span></Row>
-        <Row label="Commands run"><span style={{ fontSize: 13, color: S.text2, fontFamily: "'JetBrains Mono',monospace" }}>—</span></Row>
-        <Row label="Data transferred" last><span style={{ fontSize: 13, color: S.text2, fontFamily: "'JetBrains Mono',monospace" }}>—</span></Row>
+        <Row label="Sessions today"><span style={{ fontSize: 13, fontWeight: 600, color: recentJobs != null ? S.primary : S.text3, fontFamily: "'JetBrains Mono',monospace" }}>{fmt(recentJobs)}</span></Row>
+        <Row label="Commands run"><span style={{ fontSize: 13, color: S.text2, fontFamily: "'JetBrains Mono',monospace" }}>{statusError ? 'N/A' : '—'}</span></Row>
+        <Row label="Data transferred" last><span style={{ fontSize: 13, color: S.text2, fontFamily: "'JetBrains Mono',monospace" }}>{statusError ? 'N/A' : '—'}</span></Row>
       </Card>
+      {statusError && <Card style={{ marginTop: 8, background: `${S.warning}08`, border: `1px solid ${S.warning}28` }}><div style={{ padding: '10px 14px', fontSize: 11, color: S.text2, lineHeight: 1.6 }}>Could not reach backend — stats unavailable.</div></Card>}
       <Card style={{ marginTop: 8 }}><div style={{ padding: '10px 14px', fontSize: 11, color: S.text3, lineHeight: 1.6 }}>Usage tracking is local-only. No data is sent to any server.</div></Card>
     </>
   );
@@ -1045,13 +1122,39 @@ function AdvancedSection() {
   const [debug, setDebug] = useState(false);
   const [wsFrames, setWsFrames] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(false);
+  const [updateResult, setUpdateResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!forceUpdate) return;
+    setUpdateResult(null);
+    fetch('/api/health')
+      .then(r => r.json() as Promise<{ version?: string }>)
+      .then(data => {
+        setUpdateResult(data.version ? `Backend version: ${data.version}` : 'Backend reachable — up to date.');
+      })
+      .catch(() => {
+        setUpdateResult('Could not reach backend.');
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setForceUpdate(false);
+          setTimeout(() => setUpdateResult(null), 2000);
+        }, 1000);
+      });
+  }, [forceUpdate]);
+
   return (
     <>
       <STitle label="Advanced" desc="Advanced configuration options for power users." />
       <Card>
         <Row label="Debug logging" desc="Log verbose WebSocket and agent messages to the browser console"><Toggle value={debug} onChange={setDebug} /></Row>
         <Row label="Show WebSocket frames" desc="Display raw WebSocket frame data in debug output"><Toggle value={wsFrames} onChange={setWsFrames} disabled={!debug} /></Row>
-        <Row label="Force update check" desc="Check for updates immediately, ignoring the 4-hour cooldown" last><Toggle value={forceUpdate} onChange={setForceUpdate} /></Row>
+        <Row label="Force update check" desc="Check for updates immediately, ignoring the 4-hour cooldown" last>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            <Toggle value={forceUpdate} onChange={setForceUpdate} disabled={forceUpdate} />
+            {updateResult && <span style={{ fontSize: 9, color: S.text3 }}>{updateResult}</span>}
+          </div>
+        </Row>
       </Card>
     </>
   );
@@ -1150,7 +1253,7 @@ function SectionContent({ id, p }: { id: SectionId; p: SettingsViewProps }) {
     case 'input-editing':       return <InputEditingSection keyboardMode={p.keyboardMode} onKeyboardModeChange={p.onKeyboardModeChange} />;
     case 'notifications':       return <NotificationsSection />;
     case 'shortcuts':           return <ShortcutsSection />;
-    case 'stats':               return <StatsSection />;
+    case 'stats':               return <StatsSection authToken={p.authToken} />;
     case 'ssh-hosts':           return <Placeholder label="SSH Hosts" desc="Manage SSH connections and remote machine profiles." />;
     case 'remote-servers':      return <Placeholder label="Remote Synaptix Servers" desc="Connect to Synaptix agents running on remote machines." />;
     case 'macos-permissions':   return <MacOSPermissionsSection authToken={p.authToken} />;

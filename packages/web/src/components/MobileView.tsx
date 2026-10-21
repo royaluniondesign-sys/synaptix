@@ -111,7 +111,26 @@ export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
               background: `${S.primary}08`, border: `1px solid ${S.primary}20`,
               fontSize: 12, color: S.text3, lineHeight: 1.6,
             }}>
-              <span style={{ color: S.primary, fontWeight: 600 }}>Coming soon:</span> Native iOS and Android apps with push notifications, biometric auth, and offline session browsing. Subscribe for early access.
+              <span style={{ color: S.primary, fontWeight: 600 }}>In development:</span> Native iOS and Android companion apps. Use the web PWA for now — tap the share button in Safari/Chrome and choose "Add to Home Screen" for a native-like experience.
+            </div>
+
+            {/* Add to Home Screen instructions */}
+            <div style={{
+              marginTop: 10, padding: '12px 16px', borderRadius: 9,
+              background: S.surface2, border: `1px solid ${S.border}`,
+              fontSize: 12, color: S.text2, lineHeight: 1.6,
+            }}>
+              <div style={{ fontWeight: 700, color: S.text1, marginBottom: 8, fontSize: 11, letterSpacing: 0.4 }}>ADD TO HOME SCREEN</div>
+              {[
+                { label: 'Safari (iOS)', steps: 'Tap the Share icon (□↑) → "Add to Home Screen" → Add' },
+                { label: 'Chrome (Android)', steps: 'Tap the ⋮ menu → "Add to Home screen" → Add' },
+                { label: 'Chrome (iOS)', steps: 'Tap the Share icon (□↑) → "Add to Home Screen" → Add' },
+              ].map(({ label, steps }) => (
+                <div key={label} style={{ marginBottom: 6 }}>
+                  <span style={{ color: S.primary, fontWeight: 600 }}>{label}:</span>{' '}
+                  <span>{steps}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

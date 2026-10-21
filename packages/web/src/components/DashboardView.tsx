@@ -45,7 +45,7 @@ type GithubStatus = {
 const COMMANDS = ['new terminal', 'spawn agent', 'open file tree', 'run gates', 'capture UI', 'watch CI', 'fan out worktrees', 'list worktrees', 'clean worktrees'];
 
 function Icon({ name }: { name: IconName }) {
-  if (name === 'github') return <span className="tm-oct-icon-text">GH</span>;
+  if (name === 'github') return <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" /></svg>;
   const paths: Record<Exclude<IconName, 'github'>, JSX.Element> = {
     terminal: <><polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" /></>,
     branch: <><circle cx="6" cy="5" r="2" /><circle cx="18" cy="19" r="2" /><path d="M8 5h3a3 3 0 0 1 3 3v8a3 3 0 0 0 3 3" /><path d="M6 7v10" /><circle cx="6" cy="19" r="2" /></>,
@@ -116,7 +116,7 @@ function WorkspaceSidebar({ status, tasks, activeTaskId, activeCommand, onTaskSe
       <div className="tm-oct-side-section grow">
         <div className="tm-oct-subtitle">Worktrees and jobs <em>{tasks.length}</em></div>
         <div className="tm-oct-task-list">
-          {tasks.length === 0 && <p className="tm-oct-github-note">Nothing yet. Write a task prompt under “Control state” and fan out worktrees, or run gates.</p>}
+          {tasks.length === 0 && <p className="tm-oct-github-note">Nothing yet. Write a task prompt under "Control state" and fan out worktrees, or run gates.</p>}
           {tasks.map((task) => (
             <button type="button" className={`tm-oct-task ${task.id === activeTaskId ? 'active' : ''}`} key={task.id} onClick={() => onTaskSelect(task.id)}>
               <div><Dot tone={task.status} /><strong>{task.title}</strong></div>
@@ -276,7 +276,7 @@ function LiveSessionPane({ sessions, activeSessionId, activeTask, onSessionSelec
           onClearPane={clearPane}
         />
       ) : (
-        <pre className="tm-oct-terminal main">{sessions.length === 0 ? 'No terminal session yet.\nUse “new terminal” to start one on this machine.' : 'Select a session tab to attach.'}</pre>
+        <pre className="tm-oct-terminal main">{sessions.length === 0 ? 'No terminal session yet.\nUse "new terminal" to start one on this machine.' : 'Click a session below to open it in the terminal.'}</pre>
       )}
       <div className="tm-oct-inputbar"><span>›</span><em>Type in a session pane to send input</em></div>
     </section>
@@ -391,7 +391,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
   const runWorktreeAction = useCallback(async (action: 'create' | 'list' | 'cleanup') => {
     if (!authHeaders || worktreeBusy) return;
     if (action === 'create' && !fanoutPrompt.trim()) {
-      setWorktreeOutput('Write a task prompt under “Control state” before fanning out worktrees.');
+      setWorktreeOutput('Write a task prompt under "Control state" before fanning out worktrees.');
       return;
     }
     setWorktreeBusy(true);
@@ -453,7 +453,7 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
     if (!authHeaders) return;
     if (action === 'new terminal') { onCreateSession(); return; }
     if (action === 'spawn agent') { void runWorktreeAction('create'); return; }
-    const backendAction = action === 'open file tree' ? 'list-files' : action === 'capture UI' || action === 'watch CI' ? 'git-status' : action;
+    const backendAction = action === 'open file tree' ? 'list-files' : action === 'capture UI' ? 'list-files' : action === 'watch CI' ? 'github-status' : action;
     try {
       const response = await fetch('/api/cockpit/actions', { method: 'POST', headers: { ...authHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: backendAction, path: '.' }) });
       if (!response.ok) throw new Error(`action ${backendAction} ${response.status}`);

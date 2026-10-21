@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { Session } from '../lib/types';
 import type { ConnectionStatus } from '../lib/ws-client';
 
@@ -8,6 +8,7 @@ interface TasksViewProps {
   onSessionSelect: (id: string) => void;
   onCreateSession: () => void;
   authToken: string | null;
+  onNavigate?: (view: string) => void;
 }
 
 type TabId = 'sessions' | 'tasks' | 'github';
@@ -18,7 +19,6 @@ const S = {
   error: '#ef4444', warning: '#f59e0b', text1: '#f4f4f5', text2: '#a1a1aa', text3: '#52525b',
 } as const;
 
-const PROJECTS = ['All projects', 'RUD-WEB', 'Synaptix', 'excited-bohr', 'excited-tesla', 'intelligent-galileo', 'serene-raman'];
 
 interface GhIssue { number: number; title: string; headRefName?: string; state: string; labels: string[]; updatedAt?: string }
 
@@ -68,7 +68,7 @@ function SessionRow({ session, index, onOpen }: { session: Session; index: numbe
         </div>
         <div style={{ fontSize: 11, color: S.text3, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cwd}</div>
       </div>
-      <div style={{ fontSize: 12, color: S.text3 }}>—</div>
+      <div style={{ fontSize: 12, color: S.text3, fontStyle: 'italic' }}>&mdash;</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -80,7 +80,7 @@ function SessionRow({ session, index, onOpen }: { session: Session; index: numbe
           {session.status === 'run' ? 'Running' : 'Idle'}
         </span>
       </div>
-      <div style={{ fontSize: 11, color: S.text3 }}>just now</div>
+      <div style={{ fontSize: 11, color: S.text3 }}>active</div>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button type="button" onClick={e => { e.stopPropagation(); onOpen(); }} style={{
           height: 28, padding: '0 12px', borderRadius: 6,
@@ -147,7 +147,7 @@ function GithubRow({ issue, onStart }: { issue: GhIssue; index: number; onStart:
 
 const COLUMN_HEADERS = ['ID', 'TITLE / CONTEXT', 'ASSIGNEES', 'STATUS', 'UPDATED', ''];
 
-export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreateSession, authToken }: TasksViewProps) {
+export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreateSession, authToken, onNavigate }: TasksViewProps) {
   const [tab, setTab] = useState<TabId>('sessions');
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
@@ -167,12 +167,38 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
   const [ghError, setGhError] = useState<string | null>(null);
   const [ghRepo, setGhRepo] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [markReadStatus, setMarkReadStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const filterMenuRef = useRef<HTMLDivElement>(null);
   const projectMenuRef = useRef<HTMLDivElement>(null);
+
+  const projects = useMemo(() => {
+    if (sessions.length === 0) return ['All projects'];
+    const names = Array.from(new Set(sessions.map(s => {
+      const parts = s.cwd.split('/');
+      return parts[parts.length - 1] || s.name;
+    }))).filter(Boolean);
+    return ['All projects', ...names];
+  }, [sessions]);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 2000);
+  };
+
+  const handleMarkAllRead = async () => {
+    if (!authToken) { showToast('Not available'); return; }
+    setMarkReadStatus('loading');
+    try {
+      const r = await fetch('/api/events/read', { method: 'POST', headers: { Authorization: 'Bearer ' + authToken } });
+      if (!r.ok) throw new Error(`${r.status}`);
+      setMarkReadStatus('done');
+      showToast('Done');
+      setTimeout(() => setMarkReadStatus('idle'), 2000);
+    } catch {
+      setMarkReadStatus('error');
+      showToast('Not available');
+      setTimeout(() => setMarkReadStatus('idle'), 2000);
+    }
   };
 
   const fetchGithub = useCallback(async () => {
@@ -312,7 +338,7 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
               borderRadius: 9, padding: '4px 0', minWidth: 160,
               boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
             }}>
-              {PROJECTS.map(p => (
+              {projects.map(p => (
                 <button key={p} type="button" onClick={() => { setSelectedProject(p); setProjectMenuOpen(false); }} style={{
                   width: '100%', height: 32, padding: '0 12px',
                   border: 'none', background: selectedProject === p ? `${S.primary}15` : 'transparent',
@@ -449,19 +475,23 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
 
               {/* Separator + actions */}
               <div style={{ borderTop: `1px solid rgba(255,255,255,0.07)`, margin: '4px 0' }} />
-              <button type="button" disabled style={{
+              <button type="button" onClick={() => { void handleMarkAllRead(); }} style={{
                 width: '100%', height: 30, padding: '0 12px',
                 border: 'none', background: 'transparent',
-                color: 'rgba(255,255,255,0.25)', fontSize: 12, cursor: 'default', fontFamily: 'inherit', textAlign: 'left',
-              }}>Mark all read</button>
+                color: markReadStatus === 'loading' ? S.text3 : S.text2,
+                fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                display: 'flex', alignItems: 'center', gap: 7,
+              }}>
+                {markReadStatus === 'loading' ? 'Marking…' : markReadStatus === 'done' ? 'Done' : markReadStatus === 'error' ? 'Not available' : 'Mark all read'}
+              </button>
               <button type="button" onClick={() => { clearFilters(); setFilterMenuOpen(false); }} style={{
                 width: '100%', height: 30, padding: '0 12px',
                 border: 'none', background: 'transparent',
-                color: 'rgba(255,255,255,0.25)', fontSize: 12, cursor: 'default', fontFamily: 'inherit', textAlign: 'left',
+                color: S.text2, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
                 display: 'flex', alignItems: 'center', gap: 7,
               }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.35 }}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-                Clear completed
+                <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                Clear filters
               </button>
             </div>
           )}
@@ -567,14 +597,25 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
             <svg width="32" height="32" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', margin: '0 auto 12px', opacity: 0.4 }}>
               <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
-            <p style={{ fontSize: 13, margin: '0 0 16px' }}>No tasks yet. Fan out worktrees in Agent Dashboard.</p>
-            <button type="button" onClick={() => setTab('sessions')} style={{
-              height: 32, padding: '0 14px', borderRadius: 7,
-              border: `1px solid ${S.border}`, background: S.surface2,
-              color: S.text2, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
-            }}>
-              View Sessions
-            </button>
+            <p style={{ fontSize: 13, margin: '0 0 16px' }}>No active tasks. Start a new terminal session or launch an agent from the Agents view.</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+              <button type="button" onClick={onCreateSession} style={{
+                height: 32, padding: '0 14px', borderRadius: 7,
+                border: 'none', background: S.primary, color: '#fff',
+                fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                Go to Dashboard
+              </button>
+              {onNavigate && (
+                <button type="button" onClick={() => onNavigate('agents')} style={{
+                  height: 32, padding: '0 14px', borderRadius: 7,
+                  border: `1px solid ${S.border}`, background: S.surface2,
+                  color: S.text2, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+                }}>
+                  Open Agents
+                </button>
+              )}
+            </div>
           </div>
         )}
 

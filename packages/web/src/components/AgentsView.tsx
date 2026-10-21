@@ -1,3 +1,5 @@
+import { useRef, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import type { Session } from '../lib/types';
 import type { ConnectionStatus, TerminalWSClient } from '../lib/ws-client';
 import type { MessageBus } from '../lib/message-bus';
@@ -30,37 +32,101 @@ interface AgentsViewProps {
 interface AgentInfo {
   id: string;
   name: string;
-  icon: string;
+  icon: ReactNode;
   color: string;
   detectFn: (s: Session) => boolean;
 }
+
+// SVG icon components — all use currentColor so they inherit the container's color.
+
+const IconCircuitBrain = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="9" cy="9" r="3" stroke="currentColor" strokeWidth="1.5" />
+    <line x1="9" y1="1.5" x2="9" y2="5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <line x1="9" y1="12.5" x2="9" y2="16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <line x1="1.5" y1="9" x2="5.5" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <line x1="12.5" y1="9" x2="16.5" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="9" cy="1.5" r="1" fill="currentColor" />
+    <circle cx="9" cy="16.5" r="1" fill="currentColor" />
+    <circle cx="1.5" cy="9" r="1" fill="currentColor" />
+    <circle cx="16.5" cy="9" r="1" fill="currentColor" />
+  </svg>
+);
+
+const IconTerminal = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="1.5" y="3" width="15" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
+    <polyline points="5,7.5 8.5,10.5 5,13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <line x1="10" y1="13.5" x2="14" y2="13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const IconCodeBrackets = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <polyline points="6,5 2,9 6,13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <polyline points="12,5 16,9 12,13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <line x1="10.5" y1="3" x2="7.5" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const IconSparkle = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path
+      d="M9 2L10.3 7H16L11.5 10.4L13.1 15.5L9 12.5L4.9 15.5L6.5 10.4L2 7H7.7L9 2Z"
+      stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const IconMonitor = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="1.5" y="2" width="15" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M6 16h6M9 13v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const IconMonitorLarge = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="3" y="5" width="34" height="24" rx="3" stroke="currentColor" strokeWidth="2" />
+    <path d="M13 35h14M20 29v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="20" cy="17" r="5" stroke="currentColor" strokeWidth="2" />
+    <line x1="20" y1="7" x2="20" y2="11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <line x1="20" y1="23" x2="20" y2="27" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <line x1="10" y1="17" x2="14" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <line x1="26" y1="17" x2="30" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="20" cy="7" r="1.5" fill="currentColor" />
+    <circle cx="20" cy="27" r="1.5" fill="currentColor" />
+    <circle cx="10" cy="17" r="1.5" fill="currentColor" />
+    <circle cx="30" cy="17" r="1.5" fill="currentColor" />
+  </svg>
+);
 
 const KNOWN_AGENTS: AgentInfo[] = [
   {
     id: 'claude',
     name: 'Claude Code',
-    icon: '🤖',
+    icon: <IconCircuitBrain />,
     color: '#a78bfa',
     detectFn: (s) => s.shell === 'claude' || s.name.toLowerCase().includes('claude'),
   },
   {
     id: 'opencode',
     name: 'OpenCode',
-    icon: '⚡',
+    icon: <IconTerminal />,
     color: '#60a5fa',
     detectFn: (s) => s.name.toLowerCase().includes('opencode') || s.preview.includes('opencode'),
   },
   {
     id: 'aider',
     name: 'Aider',
-    icon: '🔧',
+    icon: <IconCodeBrackets />,
     color: '#34d399',
     detectFn: (s) => s.name.toLowerCase().includes('aider') || s.preview.includes('aider'),
   },
   {
     id: 'codex',
     name: 'Codex CLI',
-    icon: '🌟',
+    icon: <IconSparkle />,
     color: '#fbbf24',
     detectFn: (s) => s.name.toLowerCase().includes('codex') || s.preview.includes('codex'),
   },
@@ -123,7 +189,12 @@ function AgentCard({ session, onSelect }: { session: Session; onSelect: (id: str
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-        <span style={{ fontSize: 20, flexShrink: 0 }}>{agent ? agent.icon : '🖥️'}</span>
+        <span style={{
+          color: agent ? agent.color : S.text2,
+          display: 'flex', alignItems: 'center', flexShrink: 0,
+        }}>
+          {agent ? agent.icon : <IconMonitor />}
+        </span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{
@@ -166,9 +237,9 @@ function AgentCard({ session, onSelect }: { session: Session; onSelect: (id: str
 
 function QuickLaunchRow({ onLaunch }: { onLaunch: (cmd: string) => void }) {
   const agents = [
-    { label: 'Claude Code', cmd: 'claude', icon: '🤖', color: S.primary },
-    { label: 'OpenCode', cmd: 'opencode', icon: '⚡', color: S.info },
-    { label: 'Aider', cmd: 'aider', icon: '🔧', color: S.success },
+    { label: 'Claude Code', cmd: 'claude', icon: <IconCircuitBrain />, color: S.primary },
+    { label: 'OpenCode', cmd: 'opencode', icon: <IconTerminal />, color: S.info },
+    { label: 'Aider', cmd: 'aider', icon: <IconCodeBrackets />, color: S.success },
   ];
 
   return (
@@ -197,7 +268,7 @@ function QuickLaunchRow({ onLaunch }: { onLaunch: (cmd: string) => void }) {
               (e.currentTarget as HTMLButtonElement).style.background = `${a.color}08`;
             }}
           >
-            <span>{a.icon}</span>{a.label}
+            <span style={{ display: 'flex', alignItems: 'center' }}>{a.icon}</span>{a.label}
           </button>
         ))}
       </div>
@@ -209,13 +280,27 @@ export function AgentsView({ sessions, connectionStatus, wsClient, onSessionSele
   const stats = useAgentStats(sessions);
   const isConnected = connectionStatus === 'connected';
 
+  // Pending launch: store the command here, fire it when sessions.length grows.
+  const pendingCommandRef = useRef<string | null>(null);
+  const prevSessionsLengthRef = useRef(sessions.length);
+
+  useEffect(() => {
+    if (
+      pendingCommandRef.current !== null &&
+      sessions.length > prevSessionsLengthRef.current
+    ) {
+      const newSession = sessions[sessions.length - 1];
+      if (newSession && wsClient) {
+        wsClient.send({ type: 'stdin', sessionId: newSession.id, data: pendingCommandRef.current + '\n' });
+      }
+      pendingCommandRef.current = null;
+    }
+    prevSessionsLengthRef.current = sessions.length;
+  }, [sessions, wsClient]);
+
   const handleLaunch = (cmd: string) => {
+    pendingCommandRef.current = cmd;
     onCreateSession();
-    // Command will be sent after session opens — stored in pending command in App
-    setTimeout(() => {
-      const lastSession = sessions[sessions.length - 1];
-      if (lastSession) wsClient?.send({ type: 'stdin', sessionId: lastSession.id, data: cmd + '\n' });
-    }, 500);
   };
 
   return (
@@ -256,7 +341,9 @@ export function AgentsView({ sessions, connectionStatus, wsClient, onSessionSele
           </>
         ) : (
           <div style={{ textAlign: 'center', padding: '32px 24px' }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>🤖</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: S.text3 }}>
+              <IconMonitorLarge />
+            </div>
             <div style={{ fontSize: 14, fontWeight: 600, color: S.text1, marginBottom: 6 }}>No agents running</div>
             <div style={{ fontSize: 12, color: S.text3, marginBottom: 16, lineHeight: 1.5 }}>
               Launch Claude Code, OpenCode, or Aider from Quick Launch above.

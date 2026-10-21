@@ -60,20 +60,13 @@ function QRModal({ url, onClose }: { url: string; onClose: () => void }) {
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div onClick={e => e.stopPropagation()} style={{ background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 14, padding: '20px 22px', width: 320, maxWidth: '90vw' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: S.text1 }}>Share Tunnel URL</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: S.text1 }}>Tunnel URL</span>
           <button type="button" onClick={onClose} style={{ background: 'transparent', border: 'none', color: S.text3, cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
         </div>
         <div style={{ background: S.bg, border: `1px solid ${S.border}`, borderRadius: 8, padding: '10px 12px', marginBottom: 12 }}>
-          <div style={{ fontSize: 11, color: S.primary, fontFamily: "'Geist Mono',monospace", wordBreak: 'break-all', lineHeight: 1.6 }}>{url}</div>
+          <div style={{ fontSize: 9, color: S.text3, marginBottom: 4, letterSpacing: 0.4 }}>PUBLIC URL</div>
+          <div style={{ fontSize: 11, color: S.primary, fontFamily: "'Geist Mono',monospace", wordBreak: 'break-all', lineHeight: 1.6, userSelect: 'all' }}>{url}</div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '28px 28px 28px 28px 28px 28px 28px 28px', gap: 4, justifyContent: 'center', marginBottom: 14 }}>
-          {Array.from({ length: 64 }, (_, i) => {
-            const seed = url.split('').reduce((a, c, j) => a ^ (c.charCodeAt(0) * (j + 1) * (i + 1)), i * 31);
-            const on = (seed % 3) !== 0;
-            return <div key={i} style={{ width: 28, height: 28, borderRadius: 4, background: on ? S.primary : S.surface3 }} />;
-          })}
-        </div>
-        <p style={{ fontSize: 10, color: S.text3, margin: '0 0 12px', textAlign: 'center', lineHeight: 1.5 }}>Open on another device or share the URL below</p>
         <button type="button" onClick={copy} style={{ width: '100%', height: 36, borderRadius: 8, border: `1px solid ${copied ? S.success : S.primary}`, background: copied ? `${S.success}12` : `${S.primary}15`, color: copied ? S.success : S.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
           {copied ? '✓ Copied!' : 'Copy URL'}
         </button>
@@ -184,11 +177,11 @@ function TunnelCard({ tunnel, onCopyUrl, onReconnect }: {
               color: S.text2, flex: '0 0 auto', padding: '0 12px',
             }}>
               <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-                <rect x="14" y="14" width="3" height="3" />
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                <polyline points="16 6 12 2 8 6" />
+                <line x1="12" y1="2" x2="12" y2="15" />
               </svg>
-              QR
+              Share
             </button>
             {/* Copy URL */}
             <button
@@ -245,15 +238,24 @@ export function TunnelsView({ wsClient, connectionStatus, tunnelUrl }: TunnelsVi
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
   useEffect(() => {
-    if (connectionStatus !== 'connected' || !tunnelUrl) { setTunnels([]); return; }
+    if (!tunnelUrl) { setTunnels([]); return; }
     const type: TunnelInfo['type'] =
       tunnelUrl.includes('ngrok') ? 'ngrok' :
       tunnelUrl.includes('lhr.life') || tunnelUrl.includes('localtunnel') ? 'localtunnel' :
       'ssh';
-    setTunnels([{
-      id: 'main', type, status: 'live', localPort: 4031,
-      publicUrl: tunnelUrl, label: 'MacBook Main', bytesForwarded: undefined,
-    }]);
+    if (connectionStatus === 'connected') {
+      setTunnels([{
+        id: 'main', type, status: 'live', localPort: 4031,
+        publicUrl: tunnelUrl, label: 'MacBook Main', bytesForwarded: undefined,
+      }]);
+    } else if (connectionStatus === 'reconnecting') {
+      setTunnels([{
+        id: 'main', type, status: 'connecting', localPort: 4031,
+        publicUrl: tunnelUrl, label: 'MacBook Main', bytesForwarded: undefined,
+      }]);
+    } else {
+      setTunnels([]);
+    }
   }, [connectionStatus, tunnelUrl]);
 
   const handleCopyUrl = useCallback((url: string) => {
@@ -263,9 +265,7 @@ export function TunnelsView({ wsClient, connectionStatus, tunnelUrl }: TunnelsVi
   const handleReconnect = useCallback((_id: string) => {
     if (wsClient) {
       wsClient.forceReconnect();
-      setTunnels(prev => prev.map(t => ({ ...t, status: 'connecting' })));
       showToast('Reconnecting tunnel…');
-      setTimeout(() => setTunnels(prev => prev.map(t => ({ ...t, status: 'live' }))), 3000);
     } else {
       showToast('Not connected — cannot reconnect tunnel');
     }
@@ -303,24 +303,29 @@ export function TunnelsView({ wsClient, connectionStatus, tunnelUrl }: TunnelsVi
       <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>
         {/* Stats row */}
         {connectionStatus === 'connected' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
-            {[
-              { label: 'UPTIME', value: '99.9%', color: S.success },
-              { label: 'LIVE', value: liveTunnels.length.toString(), color: S.primary },
-              { label: 'FORWARDED', value: '2.3 MB', color: S.text2 },
-            ].map((stat) => (
-              <div key={stat.label} style={{
-                background: S.surface2, border: `1px solid ${S.border}`,
-                borderRadius: 9, padding: '8px 10px', textAlign: 'center',
-              }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: stat.color, letterSpacing: -0.5, fontFamily: "'Geist Mono', monospace" }}>
-                  {stat.value}
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 4 }}>
+              {[
+                { label: 'UPTIME', value: '—', color: S.text3 },
+                { label: 'LIVE', value: liveTunnels.length.toString(), color: S.primary },
+                { label: 'FORWARDED', value: '—', color: S.text3 },
+              ].map((stat) => (
+                <div key={stat.label} style={{
+                  background: S.surface2, border: `1px solid ${S.border}`,
+                  borderRadius: 9, padding: '8px 10px', textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: stat.color, letterSpacing: -0.5, fontFamily: "'Geist Mono', monospace" }}>
+                    {stat.value}
+                  </div>
+                  <div style={{ fontSize: 8, color: S.text3, marginTop: 2, letterSpacing: 0.6 }}>
+                    {stat.label}
+                  </div>
                 </div>
-                <div style={{ fontSize: 8, color: S.text3, marginTop: 2, letterSpacing: 0.6 }}>
-                  {stat.label}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div style={{ fontSize: 9, color: S.text3, textAlign: 'center' }}>
+              Live stats not available in this version
+            </div>
           </div>
         )}
 
@@ -359,11 +364,11 @@ export function TunnelsView({ wsClient, connectionStatus, tunnelUrl }: TunnelsVi
             </div>
             <div style={{ display: 'flex', gap: 14 }}>
               <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: S.success }}>99.9%</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: S.text3 }}>—</div>
                 <div style={{ fontSize: 8, color: S.text3, marginTop: 1 }}>Uptime today</div>
               </div>
               <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: S.text1, fontFamily: "'Geist Mono', monospace" }}>1.2 GB</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: S.text3, fontFamily: "'Geist Mono', monospace" }}>—</div>
                 <div style={{ fontSize: 8, color: S.text3, marginTop: 1 }}>Total forwarded</div>
               </div>
               <div>
@@ -371,6 +376,7 @@ export function TunnelsView({ wsClient, connectionStatus, tunnelUrl }: TunnelsVi
                 <div style={{ fontSize: 8, color: S.text3, marginTop: 1 }}>Configured</div>
               </div>
             </div>
+            <div style={{ fontSize: 8, color: S.text3, marginTop: 6 }}>Live stats not available in this version</div>
           </div>
         )}
       </div>
