@@ -4,13 +4,7 @@ import { useDevices } from '../hooks/useDevices';
 import { formatRelativeTime } from '../lib/format-relative-time';
 import type { SkinId, KeyboardMode, PerKeyColors } from '../lib/types';
 import type { ConnectionStatus } from '../lib/ws-client';
-
-const S = {
-  bg: '#09090b', surface: '#0c0c0f', surface2: '#18181b', surface3: '#27272a',
-  border: '#27272a', borderLight: '#3f3f46',
-  primary: '#a78bfa', success: '#10b981', error: '#ef4444', warning: '#f59e0b',
-  text1: '#fafafa', text2: '#a1a1aa', text3: '#52525b',
-} as const;
+import { T as S } from '../lib/design';
 
 export interface SettingsViewProps {
   skin: SkinId;
@@ -642,7 +636,7 @@ function ClaudeAccountCard() {
           </button>
         </div>
         {addClicked && (
-          <div style={{ background: S.bg, border: `1px solid ${S.borderLight}`, borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
+          <div style={{ background: S.bg, border: `1px solid ${S.surface4}`, borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: S.text1, marginBottom: 6 }}>Add Claude account</div>
             <div style={{ fontSize: 10, color: S.text3, marginBottom: 8, lineHeight: 1.5 }}>Paste a Claude session token or API key. Stored locally only — never sent to any server.</div>
             <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
@@ -911,7 +905,7 @@ function AppearanceSection({ skin, onSkinChange }: { skin: SkinId; onSkinChange:
       <Card>
         {THEMES.map((t, i) => (
           <button key={t.id} type="button" onClick={() => pick(t.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderBottom: i < THEMES.length - 1 ? `1px solid ${S.border}` : 'none', background: theme === t.id ? `${S.primary}10` : 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
-            <div style={{ width: 38, height: 22, borderRadius: 5, background: t.bg, border: `1px solid ${S.borderLight}`, display: 'flex', alignItems: 'center', paddingLeft: 6, flexShrink: 0 }}><div style={{ width: 3, height: 11, borderRadius: 1, background: t.cursor }} /></div>
+            <div style={{ width: 38, height: 22, borderRadius: 5, background: t.bg, border: `1px solid ${S.surface4}`, display: 'flex', alignItems: 'center', paddingLeft: 6, flexShrink: 0 }}><div style={{ width: 3, height: 11, borderRadius: 1, background: t.cursor }} /></div>
             <span style={{ fontSize: 13, fontWeight: theme === t.id ? 600 : 400, color: theme === t.id ? S.text1 : S.text2, flex: 1 }}>{t.name}</span>
             {theme === t.id && <svg width="13" height="13" viewBox="0 0 24 24" stroke={S.primary} fill="none" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
           </button>
@@ -1034,7 +1028,7 @@ function ShortcutsSection() {
         {SHORTCUTS.map((s, i) => (
           <Row key={s.label} label={s.label} last={i === SHORTCUTS.length - 1}>
             <div style={{ display: 'flex', gap: 3 }}>
-              {s.keys.map(k => <kbd key={k} style={{ fontSize: 10, fontFamily: "'JetBrains Mono',monospace", background: S.surface3, border: `1px solid ${S.borderLight}`, borderRadius: 4, padding: '2px 6px', color: S.text2 }}>{k}</kbd>)}
+              {s.keys.map(k => <kbd key={k} style={{ fontSize: 10, fontFamily: "'JetBrains Mono',monospace", background: S.surface3, border: `1px solid ${S.surface4}`, borderRadius: 4, padding: '2px 6px', color: S.text2 }}>{k}</kbd>)}
             </div>
           </Row>
         ))}

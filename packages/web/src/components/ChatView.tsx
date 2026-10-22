@@ -1,18 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-
-const S = {
-  bg: '#09090b',
-  surface: '#0c0c0f',
-  surface2: '#18181b',
-  surface3: '#27272a',
-  border: '#27272a',
-  primary: '#a78bfa',
-  success: '#10b981',
-  error: '#ef4444',
-  text1: '#fafafa',
-  text2: '#a1a1aa',
-  text3: '#71717a',
-} as const;
+import { T as S } from '../lib/design';
 
 export type ChatProvider = 'claude-cli' | 'ollama' | 'openai' | 'openrouter';
 

@@ -1,10 +1,5 @@
 import { useState } from 'react';
-
-const S = {
-  bg: '#09090b', surface: '#111113', surface2: '#1c1c1f', surface3: '#2a2a2e',
-  border: 'rgba(255,255,255,0.07)', primary: '#7170ff', success: '#10b981',
-  warning: '#f59e0b', error: '#ef4444', text1: '#f4f4f5', text2: '#a1a1aa', text3: '#52525b',
-} as const;
+import { T as S } from '../lib/design';
 
 interface AutomationItem {
   id: string; name: string; trigger: string; lastRun: string | null;
