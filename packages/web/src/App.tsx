@@ -23,23 +23,9 @@ import { useNotifications } from './hooks/useNotifications';
 import { useOnboarding } from './hooks/useOnboarding';
 import { usePorts } from './hooks/usePorts';
 import { resolveAppSurface } from './lib/app-model';
+import { T as S } from './lib/design';
 import type { View } from './lib/types';
 import type { ConnectionStatus, TerminalWSClient } from './lib/ws-client';
-
-const S = {
-  bg: '#08090a',
-  surface: '#0f1011',
-  surface2: '#191a1b',
-  surface3: '#28282c',
-  border: 'rgba(255,255,255,0.08)',
-  primary: '#7170ff',
-  success: '#10b981',
-  error: '#ef4444',
-  warning: '#f59e0b',
-  text1: '#f7f8f8',
-  text2: '#d0d6e0',
-  text3: '#8a8f98',
-} as const;
 
 const TAB_CONFIG = [
   {
@@ -295,7 +281,6 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
   unreadBadge: string | null;
   connectionStatus: ConnectionStatus;
 }) {
-  const [search, setSearch] = useState('');
   const [projectFilter, setProjectFilter] = useState('');
   const isConnected = connectionStatus === 'connected';
   const statusColor = isConnected ? S.success : connectionStatus === 'reconnecting' ? S.warning : S.error;
@@ -346,25 +331,9 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
         </div>
       </div>
 
-      {/* Search */}
-      <div style={{ padding: '8px 10px 6px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 6, padding: '0 8px', height: 28 }}>
-          {icons.search}
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search"
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: S.text1, fontSize: 12, fontFamily: 'inherit' }}
-          />
-        </div>
-      </div>
-
-      {/* Primary navigation — matches Orca exactly */}
+      {/* Primary navigation */}
       <div style={{ padding: '0 6px', flexShrink: 0 }}>
-        {/* Onboarding checklist */}
-        <NavItem label="Onboarding checklist" icon={icons.checklist}
-          active={false} onClick={() => onChange('settings')} />
+        <div style={{ padding: '8px 14px 3px', fontSize: 10, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase', color: S.text3 }}>Main</div>
 
         {/* Tasks */}
         <NavItem label="Tasks" icon={icons.tasks}
@@ -397,6 +366,7 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
 
       {/* Secondary navigation */}
       <div style={{ padding: '0 6px', flexShrink: 0 }}>
+        <div style={{ padding: '8px 14px 3px', fontSize: 10, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase', color: S.text3 }}>Workspace</div>
         <NavItem label="Terminals" icon={icons.terminal}
           active={current === 'terminal'}
           badge={sessionBadge} badgeColor={S.text3}
@@ -404,6 +374,9 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
         <NavItem label="Tunnels" icon={icons.tunnels}
           active={current === 'tunnels'}
           onClick={() => onChange('tunnels')} />
+        <NavItem label="Ports" icon={<svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>}
+          active={current === 'ports'}
+          onClick={() => onChange('ports')} />
         <NavItem label="Chat" icon={icons.chat}
           active={current === 'chat'}
           onClick={() => onChange('chat')} />

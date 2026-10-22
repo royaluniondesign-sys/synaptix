@@ -1,21 +1,6 @@
 import type { PortEntry } from '../hooks/usePorts';
 import type { ConnectionStatus } from '../lib/ws-client';
-
-const S = {
-  bg: '#09090b',
-  surface: '#0c0c0f',
-  surface2: '#18181b',
-  surface3: '#27272a',
-  border: '#27272a',
-  borderLight: '#3f3f46',
-  primary: '#a78bfa',
-  success: '#34d399',
-  error: '#ef4444',
-  warning: '#fbbf24',
-  text1: '#fafafa',
-  text2: '#a1a1aa',
-  text3: '#71717a',
-} as const;
+import { T as S } from '../lib/design';
 
 interface PortsViewProps {
   ports: PortEntry[];

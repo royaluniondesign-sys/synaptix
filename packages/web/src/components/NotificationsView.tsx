@@ -1,18 +1,7 @@
 import { formatRelativeTime } from '../lib/format-relative-time';
 import type { NotificationEvent } from '../lib/types';
 import type { ConnectionStatus } from '../lib/ws-client';
-
-const S = {
-  bg: '#08090a',
-  surface: '#0f1011',
-  surface2: '#191a1b',
-  surface3: '#28282c',
-  border: 'rgba(255,255,255,0.08)',
-  primary: '#7170ff',
-  text1: '#f7f8f8',
-  text2: '#d0d6e0',
-  text3: '#8a8f98',
-} as const;
+import { T as S } from '../lib/design';
 
 const LEVEL_TONE = {
   success: '#10b981',

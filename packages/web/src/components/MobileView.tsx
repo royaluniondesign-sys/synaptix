@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import type { ConnectionStatus } from '../lib/ws-client';
+import { T as S } from '../lib/design';
 
 interface MobileViewProps { connectionStatus: ConnectionStatus; tunnelUrl: string | null; authToken?: string | null }
-
-const S = {
-  bg: '#09090b', surface: '#111113', surface2: '#1c1c1f', surface3: '#2a2a2e',
-  border: 'rgba(255,255,255,0.07)', primary: '#7170ff', success: '#10b981',
-  warning: '#f59e0b', text1: '#f4f4f5', text2: '#a1a1aa', text3: '#52525b',
-} as const;
 
 function PhoneMockup({ url }: { url: string | null }) {
   return (
