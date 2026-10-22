@@ -1109,14 +1109,7 @@ export function App() {
             />
           )}
           {view === 'agents' && (
-            <AgentsView
-              sessions={sessions}
-              connectionStatus={connectionStatus}
-              wsClient={wsClient}
-              messageBus={messageBus}
-              onSessionSelect={handleSessionSelect}
-              onCreateSession={handleCreateSession}
-            />
+            <AgentsView />
           )}
           {view === 'chat' && (
             <ChatView
