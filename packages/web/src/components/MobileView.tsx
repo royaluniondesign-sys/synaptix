@@ -4,32 +4,6 @@ import { T as S } from '../lib/design';
 
 interface MobileViewProps { connectionStatus: ConnectionStatus; tunnelUrl: string | null; authToken?: string | null }
 
-function PhoneMockup({ url }: { url: string | null }) {
-  return (
-    <div style={{
-      width: 140, height: 260, borderRadius: 22, border: `2px solid ${S.surface3}`,
-      background: S.surface, position: 'relative', overflow: 'hidden',
-      boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
-    }}>
-      {/* Notch */}
-      <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', width: 50, height: 6, borderRadius: 3, background: S.surface3 }} />
-      {/* Screen content */}
-      <div style={{ margin: '24px 8px 8px', background: '#08090a', borderRadius: 14, height: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 10 }}>
-        <svg width="24" height="24" viewBox="0 0 36 36" style={{ display: 'block' }}>
-          <rect width="36" height="36" rx="8" fill={S.primary} />
-          <text x="18" y="25" textAnchor="middle" fill="white" fontSize="18" fontWeight="700" fontFamily="Arial">T</text>
-        </svg>
-        <span style={{ fontSize: 10, color: S.text1, fontWeight: 700 }}>Synaptix</span>
-        {url ? (
-          <span style={{ fontSize: 7, color: S.success, textAlign: 'center', lineHeight: 1.3, wordBreak: 'break-all' }}>Connected</span>
-        ) : (
-          <span style={{ fontSize: 7, color: S.text3, textAlign: 'center' }}>Scan QR to pair</span>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
   const [copied, setCopied] = useState(false);
   const isConnected = connectionStatus === 'connected';
@@ -41,91 +15,191 @@ export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: S.bg }}>
-      {/* Header */}
-      <div style={{ padding: '14px 20px 12px', borderBottom: `1px solid ${S.border}`, background: S.surface, flexShrink: 0 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: S.text1, margin: 0, letterSpacing: -0.3 }}>Synaptix Mobile</h2>
-        <p style={{ fontSize: 11, color: S.text3, margin: '3px 0 0' }}>Connect your phone to this agent session</p>
+    <div style={{
+      height: '100%', display: 'flex', overflow: 'hidden',
+      background: S.bg,
+      backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+      backgroundSize: '24px 24px',
+      position: 'relative',
+    }}>
+      {/* Left: Hero */}
+      <div style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        justifyContent: 'center', padding: '0 48px',
+        minWidth: 0,
+      }}>
+        <div style={{
+          fontSize: 11, fontWeight: 600, letterSpacing: 1.5,
+          textTransform: 'uppercase', color: S.text3, marginBottom: 20,
+        }}>
+          Synaptix Mobile
+        </div>
+
+        <h1 style={{
+          fontSize: 40, fontWeight: 700, color: S.text1,
+          margin: '0 0 18px', lineHeight: 1.15, letterSpacing: -1,
+          maxWidth: 420,
+        }}>
+          Your agent sessions,<br />in your pocket.
+        </h1>
+
+        <p style={{
+          fontSize: 15, color: S.text2, lineHeight: 1.65,
+          maxWidth: 400, margin: '0 0 28px',
+        }}>
+          Monitor Claude agents from your phone. Check terminal output, review diffs, and trigger tasks while you're away from your desk.
+        </p>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+          <span style={{ fontSize: 12, color: S.text3 }}>Coming to</span>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            padding: '4px 10px', borderRadius: 20,
+            background: S.surface2, border: `1px solid ${S.border}`,
+            fontSize: 12, color: S.text2,
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            iOS
+          </span>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            padding: '4px 10px', borderRadius: 20,
+            background: S.surface2, border: `1px solid ${S.border}`,
+            fontSize: 12, color: S.text2,
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341l-.012-.009L12.5 5l-.003.002L7.489 15.33l-.012.01A6.023 6.023 0 0 0 6 19a6 6 0 0 0 6 6 6 6 0 0 0 6-6 6.023 6.023 0 0 0-1.477-3.659z"/></svg>
+            Android
+          </span>
+        </div>
+
+        {tunnelUrl ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <a
+              href={tunnelUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                height: 40, padding: '0 20px', borderRadius: 8,
+                background: S.text1, color: S.bg,
+                fontSize: 13, fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              Open on phone
+              <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <button type="button" onClick={copyLink} style={{
+              height: 40, padding: '0 16px', borderRadius: 8,
+              border: `1px solid ${S.border}`, background: 'transparent',
+              color: copied ? S.success : S.text2,
+              fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
+            }}>{copied ? 'Copied!' : 'Copy link'}</button>
+          </div>
+        ) : (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '10px 16px', borderRadius: 8,
+            background: S.surface2, border: `1px solid ${S.border}`,
+            fontSize: 12, color: S.text3,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="1.75" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Start agent with <code style={{ fontFamily: 'monospace', color: S.text1 }}>TUNNEL=ngrok</code> to get a shareable link
+          </div>
+        )}
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '24px 20px' }}>
-        <div style={{ display: 'flex', gap: 40, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          {/* Phone mockup */}
-          <PhoneMockup url={tunnelUrl} />
+      {/* Right: Info card */}
+      <div style={{
+        width: 300, margin: '32px 32px 32px 0', flexShrink: 0,
+        background: S.surface,
+        borderRadius: 14, border: `1px solid ${S.border}`,
+        overflow: 'hidden', display: 'flex', flexDirection: 'column',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+      }}>
+        {/* Card header */}
+        <div style={{
+          padding: '16px 18px 14px',
+          borderBottom: `1px solid ${S.border2}`,
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: 7,
+            background: S.surface3,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={S.text2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: S.text1 }}>Mobile Companion</div>
+          </div>
+        </div>
 
-          {/* Instructions */}
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: S.text1, marginBottom: 8 }}>How to connect</div>
-              {[
-                'Open your browser on your phone',
-                tunnelUrl ? `Navigate to: ${tunnelUrl}` : 'Start the agent to get a tunnel URL',
-                'Log in with the same token',
-                'Your phone is now a Synaptix companion',
-              ].map((step, i) => (
-                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'flex-start' }}>
-                  <div style={{
-                    width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-                    background: isConnected && i < 2 ? `${S.success}20` : S.surface2,
-                    border: `1px solid ${isConnected && i < 2 ? S.success : S.border}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 10, fontWeight: 700, color: isConnected && i < 2 ? S.success : S.text3,
-                  }}>{i + 1}</div>
-                  <span style={{ fontSize: 12, color: i === 1 && tunnelUrl ? S.primary : S.text2, lineHeight: 1.5, marginTop: 2, wordBreak: 'break-all' }}>{step}</span>
-                </div>
-              ))}
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          {/* Connection */}
+          <div style={{ padding: '14px 18px', borderBottom: `1px solid ${S.border2}` }}>
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', color: S.text3, marginBottom: 10 }}>Connection</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: S.surface2, borderRadius: 8 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: isConnected ? S.success : S.error, flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: S.text1, fontWeight: 500 }}>{isConnected ? 'Agent online' : 'Agent offline'}</div>
+                {tunnelUrl && <div style={{ fontSize: 10, color: S.text3, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tunnelUrl}</div>}
+              </div>
+              {tunnelUrl && (
+                <button type="button" onClick={copyLink} style={{
+                  padding: '3px 8px', borderRadius: 4, border: `1px solid ${S.border}`,
+                  background: 'transparent', color: S.text3, fontSize: 10, cursor: 'pointer', fontFamily: 'inherit',
+                }}>{copied ? '✓' : 'Copy'}</button>
+              )}
             </div>
+          </div>
 
-            {/* Tunnel URL */}
-            {tunnelUrl && (
-              <div style={{ background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 9, padding: '12px 14px', marginBottom: 14 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: S.text3, letterSpacing: 0.5, marginBottom: 6 }}>TUNNEL URL</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <code style={{ flex: 1, fontSize: 11, color: S.primary, fontFamily: "'JetBrains Mono',monospace", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {tunnelUrl}
-                  </code>
-                  <button type="button" onClick={copyLink} style={{
-                    height: 26, padding: '0 10px', borderRadius: 5,
-                    border: `1px solid ${copied ? S.success : S.border}`,
-                    background: copied ? `${S.success}12` : 'transparent',
-                    color: copied ? S.success : S.text2,
-                    fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                  }}>{copied ? 'Copied!' : 'Copy'}</button>
+          {/* Add to Home Screen */}
+          <div style={{ padding: '14px 18px', borderBottom: `1px solid ${S.border2}` }}>
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', color: S.text3, marginBottom: 10 }}>Add to Home Screen</div>
+            {[
+              { platform: 'Safari (iOS)', icon: '🍎', steps: 'Share (□↑) → Add to Home Screen' },
+              { platform: 'Chrome (Android)', icon: '🤖', steps: '⋮ menu → Add to Home screen' },
+            ].map(({ platform, icon, steps }) => (
+              <div key={platform} style={{ display: 'flex', gap: 10, marginBottom: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: S.text1 }}>{platform}</div>
+                  <div style={{ fontSize: 10, color: S.text3, marginTop: 2, lineHeight: 1.4 }}>{steps}</div>
                 </div>
               </div>
-            )}
+            ))}
+          </div>
 
-            {!tunnelUrl && (
-              <div style={{ background: `${S.warning}08`, border: `1px solid ${S.warning}20`, borderRadius: 9, padding: '10px 14px', fontSize: 12, color: S.text3 }}>
-                <span style={{ color: S.warning, fontWeight: 600 }}>No tunnel active.</span> Start the agent with <code style={{ fontFamily: 'monospace', color: S.primary }}>TUNNEL=ngrok</code> to get a public URL.
+          {/* Quick actions */}
+          <div style={{ padding: '14px 18px' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', color: S.text3, marginBottom: 10 }}>Quick Actions</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {tunnelUrl ? (
+                <a href={tunnelUrl} target="_blank" rel="noreferrer" style={{
+                  flex: 1, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  borderRadius: 7, background: S.surface2, border: `1px solid ${S.border}`,
+                  fontSize: 12, color: S.text1, textDecoration: 'none', fontWeight: 500,
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                  Open
+                </a>
+              ) : (
+                <div style={{
+                  flex: 1, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 7, background: S.surface2, border: `1px solid ${S.border}`,
+                  fontSize: 11, color: S.text3,
+                }}>No link yet</div>
+              )}
+              <div style={{
+                flex: 1, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                borderRadius: 7, background: S.surface2, border: `1px solid ${S.border}`,
+                fontSize: 12, color: S.text3,
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                QR Code
               </div>
-            )}
-
-            <div style={{
-              marginTop: 12, padding: '12px 16px', borderRadius: 9,
-              background: `${S.primary}08`, border: `1px solid ${S.primary}20`,
-              fontSize: 12, color: S.text3, lineHeight: 1.6,
-            }}>
-              <span style={{ color: S.primary, fontWeight: 600 }}>In development:</span> Native iOS and Android companion apps. Use the web PWA for now — tap the share button in Safari/Chrome and choose "Add to Home Screen" for a native-like experience.
-            </div>
-
-            {/* Add to Home Screen instructions */}
-            <div style={{
-              marginTop: 10, padding: '12px 16px', borderRadius: 9,
-              background: S.surface2, border: `1px solid ${S.border}`,
-              fontSize: 12, color: S.text2, lineHeight: 1.6,
-            }}>
-              <div style={{ fontWeight: 700, color: S.text1, marginBottom: 8, fontSize: 11, letterSpacing: 0.4 }}>ADD TO HOME SCREEN</div>
-              {[
-                { label: 'Safari (iOS)', steps: 'Tap the Share icon (□↑) → "Add to Home Screen" → Add' },
-                { label: 'Chrome (Android)', steps: 'Tap the ⋮ menu → "Add to Home screen" → Add' },
-                { label: 'Chrome (iOS)', steps: 'Tap the Share icon (□↑) → "Add to Home Screen" → Add' },
-              ].map(({ label, steps }) => (
-                <div key={label} style={{ marginBottom: 6 }}>
-                  <span style={{ color: S.primary, fontWeight: 600 }}>{label}:</span>{' '}
-                  <span>{steps}</span>
-                </div>
-              ))}
             </div>
           </div>
         </div>

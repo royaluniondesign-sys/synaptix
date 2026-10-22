@@ -246,44 +246,30 @@ function NavItem({ label, icon, active, badge, badgeColor, onClick }: {
       type="button"
       onClick={onClick}
       style={{
-        width: '100%', height: 34, display: 'flex', alignItems: 'center',
-        gap: 9, padding: '0 12px 0 14px', border: 'none', marginBottom: 1,
+        width: '100%', height: 32, display: 'flex', alignItems: 'center',
+        gap: 8, padding: '0 10px 0 12px', border: 'none',
         borderRadius: 0,
-        background: active ? `${S.primary}14` : 'transparent',
+        background: active ? 'rgba(255,255,255,0.07)' : 'transparent',
         color: active ? S.text1 : S.text2,
-        fontSize: 13, fontWeight: active ? 600 : 400,
+        fontSize: 13,
         fontFamily: 'inherit', cursor: 'pointer',
-        transition: 'background 80ms, color 80ms',
+        transition: 'background 80ms',
         textAlign: 'left', flexShrink: 0,
-        position: 'relative',
-        boxShadow: active ? `inset 2px 0 0 ${S.primary}` : 'none',
       }}
-      onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = `${S.primary}08`; }}
+      onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
       onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
     >
-      <span style={{ color: active ? S.primary : S.text3, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: S.text3, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>
       <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
       {badge != null && (
         <span style={{
-          fontSize: 9, fontWeight: 700, minWidth: 16, textAlign: 'center',
-          background: badgeColor ? `${badgeColor}22` : S.surface3,
-          color: badgeColor ?? S.text3,
-          padding: '2px 5px', borderRadius: 10,
-          border: `1px solid ${badgeColor ? `${badgeColor}30` : S.border}`,
+          fontSize: 9, fontWeight: 600, minWidth: 14, textAlign: 'center',
+          background: S.surface3,
+          color: badgeColor ?? S.text2,
+          padding: '1px 5px', borderRadius: 10,
         }}>{badge}</span>
       )}
     </button>
-  );
-}
-
-function SectionLabel({ label }: { label: string }) {
-  return (
-    <div style={{
-      padding: '10px 14px 3px',
-      fontSize: 10, fontWeight: 700,
-      letterSpacing: 1, textTransform: 'uppercase',
-      color: S.text3,
-    }}>{label}</div>
   );
 }
 
@@ -311,13 +297,16 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
     chat:     <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
     bell:     <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
     settings: <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-    mobile:   <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>,
-    plus:     <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+    mobile:      <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>,
+    automations: <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
+    plus:        <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
   };
+
+  const iconSearch = <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
 
   return (
     <div style={{
-      width: 224,
+      width: 216,
       background: S.surface,
       borderRight: `1px solid ${S.border}`,
       display: 'flex',
@@ -328,171 +317,140 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
 
       {/* Header */}
       <div style={{
-        padding: '14px 14px 12px',
-        borderBottom: `1px solid ${S.border}`,
+        padding: '12px 12px 10px',
+        borderBottom: `1px solid ${S.border2}`,
         flexShrink: 0,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <div style={{
-            width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-            background: `linear-gradient(135deg, ${S.primary} 0%, #a78bfa 100%)`,
+            width: 26, height: 26, borderRadius: 7, flexShrink: 0,
+            background: S.surface3,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: `0 2px 8px ${S.primary}40`,
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={S.text2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>
               <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
             </svg>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: S.text1, letterSpacing: -0.3 }}>Synaptix</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 1 }}>
-              <span style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: statusColor, flexShrink: 0,
-                boxShadow: isConnected ? `0 0 5px ${S.success}` : 'none',
-              }} />
-              <span style={{ fontSize: 10, color: S.text3 }}>{statusLabel}</span>
-            </div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: S.text1 }}>Synaptix</div>
           </div>
-          <button
-            type="button"
-            onClick={onNewSession}
-            title="New terminal"
-            style={{
-              width: 26, height: 26, borderRadius: 6,
-              border: `1px solid ${S.border}`,
-              background: 'transparent',
-              color: S.text3, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = S.surface2; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-          >
-            {I.plus}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%',
+              background: statusColor, flexShrink: 0,
+            }} />
+            <span style={{ fontSize: 10, color: S.text3 }}>{statusLabel}</span>
+          </div>
         </div>
       </div>
 
-      {/* Nav */}
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+      {/* Nav — flat list, no section dividers (matches Orca pattern) */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', paddingTop: 4 }}>
 
-        {/* Primary */}
-        <SectionLabel label="Primary" />
+        {/* Search shortcut */}
+        <button
+          type="button"
+          onClick={onQuickOpen}
+          style={{
+            width: '100%', height: 32, display: 'flex', alignItems: 'center',
+            gap: 8, padding: '0 10px 0 12px', border: 'none',
+            borderRadius: 0, background: 'transparent',
+            color: S.text3, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
+            textAlign: 'left', transition: 'background 80ms',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+        >
+          <span style={{ color: S.text3, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{iconSearch}</span>
+          <span style={{ flex: 1 }}>Search</span>
+          <span style={{ fontSize: 10, color: S.text3, opacity: 0.6, letterSpacing: 0 }}>⌘K</span>
+        </button>
+
         <NavItem label="Cockpit" icon={I.cockpit} active={current === 'dashboard'} onClick={() => onChange('dashboard')} />
         <NavItem label="Terminals" icon={I.terminal} active={current === 'terminal'}
-          badge={sessionBadge} badgeColor={S.primary}
+          badge={sessionBadge}
           onClick={() => onChange('terminal')} />
-        <NavItem label="Agents" icon={I.agents} active={current === 'agents'} onClick={() => onChange('agents')} />
-
-        {/* Tools */}
-        <SectionLabel label="Tools" />
+        <NavItem label="Agent Dashboard" icon={I.agents} active={current === 'agents'} onClick={() => onChange('agents')} />
         <NavItem label="Tasks" icon={I.tasks} active={current === 'tasks'} onClick={() => onChange('tasks')} />
+        <NavItem label="Automations" icon={I.automations} active={current === 'automations'} onClick={() => onChange('automations')} />
         <NavItem label="Tunnels" icon={I.tunnels} active={current === 'tunnels'} onClick={() => onChange('tunnels')} />
         <NavItem label="Ports" icon={I.ports} active={current === 'ports'} onClick={() => onChange('ports')} />
         <NavItem label="Chat" icon={I.chat} active={current === 'chat'} onClick={() => onChange('chat')} />
         <NavItem label="Notifications" icon={I.bell} active={current === 'notifications'}
-          badge={unreadBadge} badgeColor={S.error}
+          badge={unreadBadge}
           onClick={() => onChange('notifications')} />
-
-        {/* More */}
-        <SectionLabel label="More" />
-        <NavItem label="Mobile" icon={I.mobile} active={current === 'mobile'} onClick={() => onChange('mobile')} />
-
-        {/* New terminal shortcut */}
-        <div style={{ padding: '12px 10px 4px' }}>
-          <button
-            type="button"
-            onClick={onNewSession}
-            style={{
-              width: '100%', height: 32, borderRadius: 6,
-              border: `1px dashed ${S.border}`,
-              background: 'transparent',
-              color: S.text3, cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', gap: 8, padding: '0 10px',
-              fontSize: 12, transition: 'border-color 100ms, color 100ms',
-            }}
-            onMouseEnter={e => {
-              const b = e.currentTarget as HTMLButtonElement;
-              b.style.borderColor = `${S.primary}50`;
-              b.style.color = S.text2;
-            }}
-            onMouseLeave={e => {
-              const b = e.currentTarget as HTMLButtonElement;
-              b.style.borderColor = S.border;
-              b.style.color = S.text3;
-            }}
-          >
-            {I.plus}
-            <span>New Terminal</span>
-          </button>
-        </div>
+        <NavItem label="Synaptix Mobile" icon={I.mobile} active={current === 'mobile'} onClick={() => onChange('mobile')} />
       </div>
 
-      {/* Bottom */}
-      <div style={{ borderTop: `1px solid ${S.border}`, flexShrink: 0 }}>
-        {/* Settings row */}
+      {/* Bottom — icon row like Orca */}
+      <div style={{
+        borderTop: `1px solid ${S.border}`,
+        display: 'flex', alignItems: 'center',
+        padding: '0 4px',
+        height: 40, flexShrink: 0,
+        gap: 0,
+      }}>
+        <button
+          type="button"
+          onClick={() => onChange('settings')}
+          title="Settings"
+          style={{
+            width: 36, height: 36, border: 'none',
+            background: current === 'settings' ? 'rgba(255,255,255,0.07)' : 'transparent',
+            color: current === 'settings' ? S.text1 : S.text3,
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            borderRadius: 6, flexShrink: 0,
+          }}
+          onMouseEnter={e => { if (current !== 'settings') (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+          onMouseLeave={e => { if (current !== 'settings') (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+        >
+          {I.settings}
+        </button>
+        <button
+          type="button"
+          onClick={onQuickOpen}
+          title="Quick Open ⌘K"
+          style={{
+            width: 36, height: 36, border: 'none',
+            background: 'transparent', color: S.text3,
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            borderRadius: 6, flexShrink: 0, fontSize: 10,
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+        >
+          ⌘K
+        </button>
+        <div style={{ flex: 1 }} />
+        <button
+          type="button"
+          onClick={onNewSession}
+          title="New Terminal"
+          style={{
+            width: 36, height: 36, border: 'none',
+            background: 'transparent', color: S.text3,
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            borderRadius: 6, flexShrink: 0,
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+        >
+          {I.plus}
+        </button>
         <div style={{
-          display: 'flex', alignItems: 'center',
-          borderBottom: `1px solid ${S.border}`,
+          width: 26, height: 26, borderRadius: '50%',
+          background: S.surface3,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          marginRight: 4,
         }}>
-          <button
-            type="button"
-            onClick={() => onChange('settings')}
-            style={{
-              flex: 1, height: 38, border: 'none',
-              background: current === 'settings' ? `${S.primary}14` : 'transparent',
-              color: current === 'settings' ? S.primary : S.text3,
-              cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', gap: 8, padding: '0 14px',
-              fontSize: 12, fontWeight: current === 'settings' ? 600 : 400,
-              boxShadow: current === 'settings' ? `inset 2px 0 0 ${S.primary}` : 'none',
-            }}
-            onMouseEnter={e => { if (current !== 'settings') (e.currentTarget as HTMLButtonElement).style.background = `${S.primary}08`; }}
-            onMouseLeave={e => { if (current !== 'settings') (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-          >
-            {I.settings}
-            <span>Settings</span>
-          </button>
-          <button
-            type="button"
-            onClick={onQuickOpen}
-            title="Quick Open ⌘K"
-            style={{
-              width: 38, height: 38, border: 'none', borderLeft: `1px solid ${S.border}`,
-              background: 'transparent', color: S.text3,
-              cursor: 'pointer', fontFamily: 'inherit', fontSize: 10,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = S.surface2; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-          >
-            ⌘K
-          </button>
-        </div>
-
-        {/* User profile */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px' }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: '50%',
-            background: `linear-gradient(135deg, ${S.primary}, #a78bfa)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: S.text1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>User</div>
-            <div style={{ fontSize: 10, color: S.text3 }}>v{__APP_VERSION__}</div>
-          </div>
-          <span style={{
-            fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-            background: `${S.primary}20`, border: `1px solid ${S.primary}40`,
-            color: S.primary, flexShrink: 0, letterSpacing: 0.3,
-          }}>Max</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
         </div>
       </div>
     </div>
