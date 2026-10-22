@@ -159,11 +159,19 @@ export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
           <div style={{ padding: '14px 18px', borderBottom: `1px solid ${S.border2}` }}>
             <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', color: S.text3, marginBottom: 10 }}>Add to Home Screen</div>
             {[
-              { platform: 'Safari (iOS)', icon: '🍎', steps: 'Share (□↑) → Add to Home Screen' },
-              { platform: 'Chrome (Android)', icon: '🤖', steps: '⋮ menu → Add to Home screen' },
+              {
+                platform: 'Safari (iOS)',
+                icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+                steps: 'Share button → Add to Home Screen',
+              },
+              {
+                platform: 'Chrome (Android)',
+                icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>,
+                steps: 'Menu (3 dots) → Add to Home screen',
+              },
             ].map(({ platform, icon, steps }) => (
               <div key={platform} style={{ display: 'flex', gap: 10, marginBottom: 10, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
+                <span style={{ color: S.text3, flexShrink: 0, marginTop: 1 }}>{icon}</span>
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: S.text1 }}>{platform}</div>
                   <div style={{ fontSize: 10, color: S.text3, marginTop: 2, lineHeight: 1.4 }}>{steps}</div>
