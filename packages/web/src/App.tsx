@@ -613,74 +613,72 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
       </div>
       {showWorktree && <CreateWorktreeModal onClose={() => setShowWorktree(false)} />}
 
-      {/* Bottom — icon row like Orca */}
+      {/* Bottom icon row — exact Orca layout: ⚙ · ℹ · ↺ · ⊞  |  user avatar */}
       <div style={{
         borderTop: `1px solid ${S.border}`,
         display: 'flex', alignItems: 'center',
-        padding: '0 4px',
-        height: 40, flexShrink: 0,
-        gap: 0,
+        padding: '0 6px',
+        height: 36, flexShrink: 0,
+        gap: 2,
       }}>
-        <button
-          type="button"
-          onClick={() => onChange('settings')}
-          title="Settings"
-          style={{
-            width: 36, height: 36, border: 'none',
-            background: current === 'settings' ? 'rgba(255,255,255,0.07)' : 'transparent',
-            color: current === 'settings' ? S.text1 : S.text3,
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            borderRadius: 6, flexShrink: 0,
-          }}
-          onMouseEnter={e => { if (current !== 'settings') (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
-          onMouseLeave={e => { if (current !== 'settings') (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-        >
-          {I.settings}
-        </button>
-        <button
-          type="button"
-          onClick={onQuickOpen}
-          title="Quick Open ⌘K"
-          style={{
-            width: 36, height: 36, border: 'none',
-            background: 'transparent', color: S.text3,
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            borderRadius: 6, flexShrink: 0, fontSize: 10,
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-        >
-          ⌘K
-        </button>
+        {([
+          {
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            title: 'Settings',
+            active: current === 'settings',
+            action: () => onChange('settings'),
+          },
+          {
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+            title: 'Help & keyboard shortcuts',
+            active: false,
+            action: onQuickOpen,
+          },
+          {
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+            title: 'Refresh connection',
+            active: false,
+            action: () => onChange('reconnect' as View),
+          },
+          {
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>,
+            title: 'New Terminal ⌘T',
+            active: false,
+            action: onNewSession,
+          },
+        ] as const).map((btn, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={btn.action}
+            title={btn.title}
+            style={{
+              width: 30, height: 30, border: 'none', borderRadius: 5, flexShrink: 0,
+              background: btn.active ? 'rgba(255,255,255,0.07)' : 'transparent',
+              color: btn.active ? S.text1 : S.text3,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+            onMouseEnter={e => { if (!btn.active) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLButtonElement).style.color = S.text2; }}
+            onMouseLeave={e => { if (!btn.active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = btn.active ? S.text1 : S.text3; }}
+          >
+            {btn.icon}
+          </button>
+        ))}
+
         <div style={{ flex: 1 }} />
-        <button
-          type="button"
-          onClick={onNewSession}
-          title="New Terminal"
-          style={{
-            width: 36, height: 36, border: 'none',
-            background: 'transparent', color: S.text3,
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            borderRadius: 6, flexShrink: 0,
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-        >
-          {I.plus}
-        </button>
+
+        {/* User avatar */}
         <div style={{
-          width: 26, height: 26, borderRadius: '50%',
-          background: S.surface3,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          marginRight: 4,
-        }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
+          width: 24, height: 24, borderRadius: '50%',
+          background: S.primary,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0, cursor: 'pointer',
+          fontSize: 10, fontWeight: 700, color: '#fff',
+        }}
+          title="Account"
+          onClick={() => onChange('settings')}
+        >
+          C
         </div>
       </div>
     </div>
@@ -1015,11 +1013,13 @@ export function App() {
     <div style={{
       height: '100%',
       display: 'flex',
-      flexDirection: isDesktop ? 'row' : 'column',
+      flexDirection: 'column',
       background: S.bg,
       overflow: 'hidden',
       position: 'relative',
     }}>
+      {/* Main area: sidebar + content side by side */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: isDesktop ? 'row' : 'column', overflow: 'hidden', minHeight: 0 }}>
       {showSidebar && (
         <DesktopSidebar
           current={view}
@@ -1033,16 +1033,6 @@ export function App() {
       )}
 
       <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <StatusBar
-          connectionStatus={connectionStatus}
-          latencyMs={latencyMs}
-          sessionCount={sessions.length}
-          portCount={ports.length}
-          tunnelCount={tunnelUrl ? 1 : 0}
-          tunnelUrl={tunnelUrl}
-          ports={ports}
-          onPortsClick={() => setView('ports')}
-        />
         <div style={{ flex: 1, overflow: 'hidden' }}>
           {view === 'dashboard' && (
             <DashboardView
@@ -1159,6 +1149,19 @@ export function App() {
       )}
 
       <UpdateNotification currentVersion={__APP_VERSION__} />
+      </div>{/* end main row */}
+
+      {/* Global bottom status bar — spans full width like Orca */}
+      <StatusBar
+        connectionStatus={connectionStatus}
+        latencyMs={latencyMs}
+        sessionCount={sessions.length}
+        portCount={ports.length}
+        tunnelCount={tunnelUrl ? 1 : 0}
+        tunnelUrl={tunnelUrl}
+        ports={ports}
+        onPortsClick={() => setView('ports')}
+      />
     </div>
   );
 }

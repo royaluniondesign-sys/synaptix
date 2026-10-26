@@ -80,7 +80,7 @@ function CommandStrip({ activeCommand, onCommand, onCreateSession }: { activeCom
   return (
     <div className="tm-oct-command-strip">
       {COMMANDS.map((cmd) => (
-        <button key={cmd} className={cmd === activeCommand ? 'active' : ''} type="button" onClick={() => { onCommand(cmd); if (cmd === 'new terminal') onCreateSession(); }}>
+        <button key={cmd} title={cmd} className={cmd === activeCommand ? 'active' : ''} type="button" onClick={() => { onCommand(cmd); if (cmd === 'new terminal') onCreateSession(); }}>
           {cmd === 'new terminal' && <Icon name="plus" />}
           {cmd === 'spawn agent' && <Icon name="bot" />}
           {cmd === 'open file tree' && <Icon name="files" />}
@@ -90,7 +90,6 @@ function CommandStrip({ activeCommand, onCommand, onCreateSession }: { activeCom
           {cmd === 'fan out worktrees' && <Icon name="branch" />}
           {cmd === 'list worktrees' && <Icon name="activity" />}
           {cmd === 'clean worktrees' && <Icon name="close" />}
-          <span>{cmd}</span>
         </button>
       ))}
     </div>

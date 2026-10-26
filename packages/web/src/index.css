@@ -518,13 +518,14 @@ body { background: var(--tm-bg); }
   height:24px;
   display:inline-flex;
   align-items:center;
+  justify-content:center;
   gap:6px;
   border:1px solid #303030;
   background:#1d1d1d;
   color:#9f9f9f;
   border-radius:7px;
-  padding:0 9px;
-  font-size:10px;
+  padding:0;
+  width:28px;
   white-space:nowrap;
   cursor:pointer;
 }

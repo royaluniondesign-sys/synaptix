@@ -308,11 +308,109 @@ const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'sessions', label: 'Sessions' },
 ];
 
+function IssueDetail({ issue, onClose }: { issue: ExtIssue; onClose: () => void }) {
+  return (
+    <div style={{
+      width: '40%', flexShrink: 0, borderLeft: `1px solid ${S.border}`,
+      background: S.surface, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'flex-start', gap: 8,
+        padding: '12px 16px 10px', borderBottom: `1px solid ${S.border}`, flexShrink: 0,
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <IssueCircleIcon kind={issue.kind} state={issue.state} />
+            <span style={{ fontSize: 11, color: S.text3, fontFamily: S.fontMono }}>#{issue.number}</span>
+            <span style={{
+              fontSize: 9, padding: '1px 6px', borderRadius: 4,
+              background: issue.state === 'OPEN' ? `${S.success}22` : `${S.text3}22`,
+              border: `1px solid ${issue.state === 'OPEN' ? S.success : S.text3}44`,
+              color: issue.state === 'OPEN' ? S.success : S.text3,
+              fontWeight: 500,
+            }}>{issue.state}</span>
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: S.text1, lineHeight: 1.3, wordBreak: 'break-word' }}>
+            {issue.title}
+          </div>
+        </div>
+        <button type="button" onClick={onClose} style={{
+          background: 'none', border: 'none', color: S.text3, cursor: 'pointer',
+          padding: 4, display: 'flex', flexShrink: 0,
+        }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* Labels */}
+      {issue.labels.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, padding: '8px 16px', borderBottom: `1px solid ${S.border}`, flexShrink: 0 }}>
+          {issue.labels.map(l => <Tag key={l} label={l} color={getLabelColor(l)} />)}
+        </div>
+      )}
+
+      {/* Meta */}
+      <div style={{ padding: '8px 16px', borderBottom: `1px solid ${S.border}`, flexShrink: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: 11, color: S.text3 }}>
+            <span style={{ color: S.text2 }}>Author: </span>{issue.author}
+          </div>
+          <div style={{ fontSize: 11, color: S.text3 }}>
+            <span style={{ color: S.text2 }}>Created: </span>{timeAgo(issue.createdAt)}
+          </div>
+          {issue.headRefName && (
+            <div style={{ fontSize: 11, color: S.text3, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ color: S.text2 }}>Branch: </span>
+              <span style={{
+                fontSize: 9, padding: '1px 6px', borderRadius: 4,
+                background: S.surface3, border: `1px solid ${S.border}`,
+                color: S.text3, fontFamily: S.fontMono,
+              }}>{issue.headRefName}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 16px' }}>
+        <div style={{ fontSize: 12, color: S.text3, lineHeight: 1.6 }}>No description provided.</div>
+      </div>
+
+      {/* Actions */}
+      <div style={{
+        display: 'flex', gap: 6, padding: '10px 16px',
+        borderTop: `1px solid ${S.border}`, flexShrink: 0,
+      }}>
+        <button type="button" style={{
+          flex: 1, height: 30, borderRadius: 6, border: `1px solid ${S.border}`,
+          background: S.surface2, color: S.text2, fontSize: 11, fontWeight: 500,
+          cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+        }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          Open in GitHub
+        </button>
+        <button type="button" style={{
+          height: 30, padding: '0 12px', borderRadius: 6, border: `1px solid ${S.border}`,
+          background: S.surface2, color: S.text2, fontSize: 11, fontWeight: 500,
+          cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5,
+        }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy link
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreateSession, authToken, onNavigate }: TasksViewProps) {
   const [tab, setTab] = useState<TabId>('github');
   const [filterSearch, setFilterSearch] = useState('');
   const [chips, setChips] = useState<string[]>(['is:open', 'is:issue', 'assigned:me']);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<ExtIssue | null>(null);
   const [ghIssues, setGhIssues] = useState<GhIssue[]>([]);
   const [ghLoading, setGhLoading] = useState(false);
   const [ghError, setGhError] = useState<string | null>(null);
@@ -542,7 +640,8 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
       )}
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: 'auto' }}>
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+      <div style={{ flex: selectedIssue ? '0 0 60%' : '1 1 100%', overflow: 'auto', transition: 'flex 150ms' }}>
         {tab === 'sessions' ? (
           sessions.length === 0 ? (
             <div style={{
@@ -647,10 +746,12 @@ export function TasksView({ sessions, connectionStatus, onSessionSelect, onCreat
               hovered={hoveredRow === idx}
               onMouseEnter={() => setHoveredRow(idx)}
               onMouseLeave={() => setHoveredRow(null)}
-              onClick={() => { onCreateSession(); showToast(`Starting task for #${issue.number}`); }}
+              onClick={() => setSelectedIssue(issue)}
             />
           ))
         )}
+      </div>
+      {selectedIssue && <IssueDetail issue={selectedIssue} onClose={() => setSelectedIssue(null)} />}
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 

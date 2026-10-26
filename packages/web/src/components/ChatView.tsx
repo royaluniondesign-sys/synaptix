@@ -551,6 +551,7 @@ function MarkdownText({ text }: { text: string }) {
           <span key={i} style={{ whiteSpace: 'pre-wrap' }}
             dangerouslySetInnerHTML={{
               __html: part
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
                 .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.+?)\*/g, '<em>$1</em>')
                 .replace(/^### (.+)$/gm, '<span style="font-size:13px;font-weight:600;color:#fafafa">$1</span>')

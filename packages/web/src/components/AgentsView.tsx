@@ -35,12 +35,13 @@ const AgentIcon = ({ agent }: { agent: AgentSession['agent'] }) => {
   );
 };
 
-function SessionCard({ session }: { session: AgentSession }) {
+function SessionCard({ session, onSelect }: { session: AgentSession; onSelect: () => void }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onSelect}
       style={{
         padding: '10px 14px', cursor: 'pointer',
         background: hovered ? 'rgba(255,255,255,0.03)' : 'transparent',
@@ -98,12 +99,254 @@ function SessionCard({ session }: { session: AgentSession }) {
   );
 }
 
+function SessionDetail({ session, onClose }: { session: AgentSession; onClose: () => void }) {
+  return (
+    <div style={{
+      width: '40%', flexShrink: 0, borderLeft: `1px solid ${S.border}`,
+      background: S.surface, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'flex-start', gap: 8,
+        padding: '12px 14px 10px', borderBottom: `1px solid ${S.border}`, flexShrink: 0,
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: S.text1, lineHeight: 1.3, wordBreak: 'break-word' }}>
+            {session.title}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
+            <AgentIcon agent={session.agent} />
+            <span style={{ fontSize: 10, color: S.text3 }}>{session.model}</span>
+            <span style={{ fontSize: 10, color: S.text3 }}>·</span>
+            <span style={{ fontSize: 10, color: S.text3 }}>{session.time}</span>
+          </div>
+        </div>
+        <button type="button" onClick={onClose} style={{
+          background: 'none', border: 'none', color: S.text3, cursor: 'pointer',
+          padding: 4, display: 'flex', flexShrink: 0,
+        }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* Meta */}
+      <div style={{ padding: '10px 14px 8px', borderBottom: `1px solid ${S.border}`, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+          <span style={{ fontSize: 10, color: S.text3 }}>Messages</span>
+          <span style={{
+            fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 4,
+            background: S.surface3, color: S.text2,
+          }}>{session.msgs}</span>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          <span style={{
+            fontSize: 9, padding: '1px 6px', borderRadius: 4,
+            border: `1px solid ${S.border}`, color: S.text3, background: S.surface3,
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+            {session.dir}
+          </span>
+          {session.worktree ? (
+            <span style={{
+              fontSize: 9, padding: '1px 6px', borderRadius: 4,
+              border: `1px solid ${S.border}`, color: S.text3, background: S.surface3,
+            }}>{session.worktree}</span>
+          ) : (
+            <span style={{
+              fontSize: 9, padding: '1px 6px', borderRadius: 4,
+              border: `1px solid ${S.border}`, color: S.text3, background: S.surface3,
+            }}>Unavailable worktree</span>
+          )}
+        </div>
+      </div>
+
+      {/* Preview */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px' }}>
+        <div style={{ fontSize: 11, color: S.text3, lineHeight: 1.6 }}>{session.preview}</div>
+      </div>
+
+      {/* Actions */}
+      <div style={{
+        display: 'flex', gap: 6, padding: '10px 14px',
+        borderTop: `1px solid ${S.border}`, flexShrink: 0,
+      }}>
+        <button type="button" style={{
+          flex: 1, height: 30, borderRadius: 6, border: `1px solid ${S.border}`,
+          background: S.surface2, color: S.text2, fontSize: 11, fontWeight: 500,
+          cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+        }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          Open in Terminal
+        </button>
+        <button type="button" style={{
+          height: 30, padding: '0 12px', borderRadius: 6, border: `1px solid ${S.border}`,
+          background: S.surface2, color: S.text2, fontSize: 11, fontWeight: 500,
+          cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5,
+        }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy path
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SearchFeatureModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'absolute', inset: 0, zIndex: 50,
+        background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: 480, borderRadius: 16, border: `1px solid ${S.border}`,
+          background: S.surface, boxShadow: '0 16px 60px rgba(0,0,0,0.6)',
+          overflow: 'hidden', display: 'flex', flexDirection: 'column',
+        }}
+      >
+        <div style={{ display: 'flex', gap: 0 }}>
+          {/* Left: text */}
+          <div style={{ flex: 1, padding: '22px 20px 20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+              <span style={{
+                fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 4,
+                background: S.primary, color: '#fff', letterSpacing: '0.05em',
+              }}>NEW</span>
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: S.text1, lineHeight: 1.25, marginBottom: 10 }}>
+              Search every agent session
+            </div>
+            <div style={{ fontSize: 12, color: S.text2, lineHeight: 1.6, marginBottom: 14 }}>
+              Find any past conversation by what was said in it, then pick up where the agent left off. Your agents can search it too.
+            </div>
+            <div style={{ fontSize: 11, color: S.primary, marginBottom: 16 }}>
+              Settings → Agent Session Search
+            </div>
+            <button type="button" style={{
+              width: '100%', height: 40, borderRadius: 8,
+              border: `1px solid ${S.border}`, background: S.surface2,
+              color: S.text2, fontSize: 12, fontWeight: 500,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}>
+              Turn on session search
+            </button>
+          </div>
+
+          {/* Right: preview card */}
+          <div style={{
+            width: 200, flexShrink: 0, background: S.surface2,
+            borderLeft: `1px solid ${S.border}`,
+            padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 8,
+          }}>
+            {/* Mini toolbar */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 7 }}>
+              {[
+                <path key="copy" d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1"/>,
+                <polyline key="grid" points="3 3 21 3 21 21 3 21"/>,
+                <polyline key="expand" points="15 3 21 3 21 9"/>,
+                <circle key="settings" cx="12" cy="12" r="3"/>,
+              ].map((path, i) => (
+                <svg key={i} width="12" height="12" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="1.75" strokeLinecap="round">
+                  {path}
+                </svg>
+              ))}
+            </div>
+
+            {/* Heading */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: S.text1 }}>Agent Session History</div>
+              <div style={{ fontSize: 9, color: S.text3 }}>Indexed history</div>
+            </div>
+
+            {/* Local Mac pill */}
+            <span style={{
+              alignSelf: 'flex-start', fontSize: 9, padding: '2px 7px', borderRadius: 10,
+              border: `1px solid ${S.border}`, background: S.surface3, color: S.text3,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+              Local Mac
+            </span>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 3, background: S.surface, borderRadius: 5, padding: 2 }}>
+              {['Workspace', 'Project', 'All'].map((t, i) => (
+                <div key={t} style={{
+                  flex: 1, height: 18, borderRadius: 3, fontSize: 8, fontWeight: 600,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: i === 2 ? S.surface3 : 'transparent',
+                  color: i === 2 ? S.text2 : S.text3, cursor: 'default',
+                }}>{t}</div>
+              ))}
+            </div>
+
+            {/* Search input */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              background: S.surface, border: `1px solid ${S.border}`,
+              borderRadius: 5, padding: '3px 7px', height: 22,
+            }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round">
+                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <span style={{ fontSize: 9, color: S.text3 }}>login timeout</span>
+            </div>
+
+            {/* Result rows */}
+            {[
+              { title: 'Fix flaky auth redirect', preview: ['login timeout'], agent: 'Claude', msgs: 64, time: '3d' },
+              { title: 'Session refresh after sleep', preview: ['login', 'timeout'], agent: 'Codex', msgs: 27, time: '1w' },
+            ].map((r, i) => (
+              <div key={i} style={{
+                padding: '5px 6px', background: S.surface, borderRadius: 5,
+                border: `1px solid ${S.border}`,
+              }}>
+                <div style={{ fontSize: 9, fontWeight: 600, color: S.text2, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {r.title}
+                </div>
+                <div style={{ fontSize: 8, color: S.text3, marginBottom: 3 }}>
+                  {r.preview.map((word, wi) => (
+                    <span key={wi}>
+                      {wi > 0 && ' '}
+                      <span style={{ background: `${S.primary}33`, color: S.primary, borderRadius: 2, padding: '0 1px' }}>{word}</span>
+                    </span>
+                  ))}
+                </div>
+                <div style={{ fontSize: 8, color: S.text3 }}>{r.agent} · {r.msgs} msgs · {r.time}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Close button */}
+        <button type="button" onClick={onClose} style={{
+          position: 'absolute', top: 12, right: 12,
+          background: 'none', border: 'none', color: S.text3, cursor: 'pointer', padding: 4, display: 'flex',
+        }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 interface Group { label: string; count: number; sessions: AgentSession[] }
 
 export function AgentsView() {
   const [tab, setTab] = useState<'workspace' | 'project' | 'all'>('all');
   const [search, setSearch] = useState('');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<AgentSession | null>(null);
+  const [showSearchModal, setShowSearchModal] = useState(true);
 
   const filtered = SESSIONS.filter(s =>
     !search || s.title.toLowerCase().includes(search.toLowerCase()) || s.preview.toLowerCase().includes(search.toLowerCase())
@@ -123,7 +366,8 @@ export function AgentsView() {
   });
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: S.bg }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: S.bg, position: 'relative' }}>
+      {showSearchModal && <SearchFeatureModal onClose={() => setShowSearchModal(false)} />}
       {/* Header */}
       <div style={{
         padding: '12px 14px 10px', borderBottom: `1px solid ${S.border}`, flexShrink: 0,
@@ -196,43 +440,48 @@ export function AgentsView() {
         </button>
       </div>
 
-      {/* Session list */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        {groups.map(group => (
-          <div key={group.label}>
-            {/* Group header */}
-            <div
-              onClick={() => toggle(group.label)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '6px 14px', cursor: 'pointer',
-                background: S.surface,
-                borderBottom: `1px solid ${S.border}`,
-              }}
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round"
-                style={{ transform: collapsed.has(group.label) ? 'rotate(-90deg)' : 'none', transition: 'transform 150ms' }}>
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-              <span style={{ fontSize: 11, fontWeight: 500, color: S.text2 }}>{group.label}</span>
-              <span style={{
-                fontSize: 9, fontWeight: 600, minWidth: 16, height: 16,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: S.surface3, borderRadius: 4, color: S.text3, padding: '0 4px',
-              }}>{group.count}</span>
+      {/* Session list + detail panel */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+        <div style={{ flex: selected ? '0 0 60%' : '1 1 100%', overflowY: 'auto', transition: 'flex 150ms' }}>
+          {groups.map(group => (
+            <div key={group.label}>
+              {/* Group header */}
+              <div
+                onClick={() => toggle(group.label)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '6px 14px', cursor: 'pointer',
+                  background: S.surface,
+                  borderBottom: `1px solid ${S.border}`,
+                }}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round"
+                  style={{ transform: collapsed.has(group.label) ? 'rotate(-90deg)' : 'none', transition: 'transform 150ms' }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+                <span style={{ fontSize: 11, fontWeight: 500, color: S.text2 }}>{group.label}</span>
+                <span style={{
+                  fontSize: 9, fontWeight: 600, minWidth: 16, height: 16,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: S.surface3, borderRadius: 4, color: S.text3, padding: '0 4px',
+                }}>{group.count}</span>
+              </div>
+
+              {/* Sessions */}
+              {!collapsed.has(group.label) && group.sessions.map(s => (
+                <SessionCard key={s.id} session={s} onSelect={() => setSelected(s)} />
+              ))}
             </div>
+          ))}
 
-            {/* Sessions */}
-            {!collapsed.has(group.label) && group.sessions.map(s => <SessionCard key={s.id} session={s} />)}
+          {/* Show more */}
+          <div style={{ padding: '12px 14px', textAlign: 'center' }}>
+            <button type="button" style={{ background: 'none', border: 'none', color: S.text3, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}>
+              Show more sessions
+            </button>
           </div>
-        ))}
-
-        {/* Show more */}
-        <div style={{ padding: '12px 14px', textAlign: 'center' }}>
-          <button type="button" style={{ background: 'none', border: 'none', color: S.text3, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}>
-            Show more sessions
-          </button>
         </div>
+        {selected && <SessionDetail session={selected} onClose={() => setSelected(null)} />}
       </div>
     </div>
   );
