@@ -442,7 +442,7 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
 }) {
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
   const [showWorktree, setShowWorktree] = useState(false);
-  const toggleProject = (id: string) => setCollapsedProjects(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggleProject = (id: string) => setCollapsedProjects(prev => { const n = new Set(prev); if (n.has(id)) { n.delete(id); } else { n.add(id); } return n; });
 
   const isConnected = connectionStatus === 'connected';
   const isReconnecting = connectionStatus === 'reconnecting';
@@ -507,7 +507,7 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
         </div>
       </div>
 
-      {/* Nav — flat list, no section dividers (matches Orca pattern) */}
+      {/* Nav — flat list, no section dividers */}
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', paddingTop: 4 }}>
 
 
@@ -613,7 +613,7 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
       </div>
       {showWorktree && <CreateWorktreeModal onClose={() => setShowWorktree(false)} />}
 
-      {/* Bottom icon row — exact Orca layout: ⚙ · ℹ · ↺ · ⊞  |  user avatar */}
+      {/* Bottom icon row — icon row: ⚙ · ℹ · ↺ · ⊞  |  user avatar */}
       <div style={{
         borderTop: `1px solid ${S.border}`,
         display: 'flex', alignItems: 'center',
@@ -1006,7 +1006,7 @@ export function App() {
 
   const { showTabBar, showFab, sessionBadge, unreadBadge } =
     surface.kind === 'shell' ? surface.nav : { showTabBar: false, showFab: false, sessionBadge: null, unreadBadge: null };
-  // Always show sidebar on desktop for shell views (matches Orca behavior)
+  // Always show sidebar on desktop for shell views
   const showSidebar = isDesktop && surface.kind === 'shell';
 
   return (
@@ -1151,7 +1151,7 @@ export function App() {
       <UpdateNotification currentVersion={__APP_VERSION__} />
       </div>{/* end main row */}
 
-      {/* Global bottom status bar — spans full width like Orca */}
+      {/* Global bottom status bar — spans full width */}
       <StatusBar
         connectionStatus={connectionStatus}
         latencyMs={latencyMs}

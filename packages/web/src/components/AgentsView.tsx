@@ -361,7 +361,7 @@ export function AgentsView() {
 
   const toggle = (label: string) => setCollapsed(prev => {
     const next = new Set(prev);
-    next.has(label) ? next.delete(label) : next.add(label);
+    if (next.has(label)) { next.delete(label); } else { next.add(label); }
     return next;
   });
 

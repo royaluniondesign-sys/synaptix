@@ -295,7 +295,7 @@ const INSTALLED_AGENTS_DEFAULT: InstalledAgent[] = [
 ];
 
 const AVAILABLE_AGENTS = [
-  { id: 'claude-teams',     label: 'Claude Agent Teams',  cmd: 'orca claude-teams --dangerously-skip-permissions' },
+  { id: 'claude-teams',     label: 'Claude Agent Teams',  cmd: 'synaptix claude-teams --dangerously-skip-permissions' },
   { id: 'openclaude',       label: 'OpenClaude',           cmd: 'openclaude --dangerously-skip-permissions' },
   { id: 'grok',             label: 'Grok',                 cmd: 'grok --permission-mode bypassPermissions' },
   { id: 'copilot',          label: 'GitHub Copilot',       cmd: 'copilot --yolo' },
@@ -552,7 +552,7 @@ function ProviderCard({ p }: { p: typeof PROVIDERS[0] }) {
     </Card>
   );
 }
-// CLI-based agent account setup (like Orca's "orca account add --agent X" pattern)
+// CLI-based agent account setup
 const CLI_AGENT_ACCOUNTS = [
   { id: 'opencode', label: 'OpenCode', cmd: 'synaptix account add --agent opencode', desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
   { id: 'codex',    label: 'Codex',    cmd: 'synaptix account add --agent codex',    desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
