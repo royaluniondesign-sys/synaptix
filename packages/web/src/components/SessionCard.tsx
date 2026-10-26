@@ -100,7 +100,10 @@ export function SessionCard({ session, isActive, onSelect, onClose }: SessionCar
       }}>
         <pre
           dangerouslySetInnerHTML={{
-            __html: session.snapshot || `<span style="color:${S.primary}">$ </span><span style="color:${S.text3}">_</span>`,
+            __html: session.snapshot
+              // Only allow <span style="..."> — strip scripts, event handlers, and other tags
+              ? session.snapshot.replace(/<(?!\/?(span)\b)[^>]*>/gi, '').replace(/\bon\w+\s*=/gi, 'data-blocked=')
+              : `<span style="color:${S.primary}">$ </span><span style="color:${S.text3}">_</span>`,
           }}
           style={{
             fontSize: 7.5, lineHeight: 1.4,

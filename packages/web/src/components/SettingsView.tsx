@@ -295,7 +295,7 @@ const INSTALLED_AGENTS_DEFAULT: InstalledAgent[] = [
 ];
 
 const AVAILABLE_AGENTS = [
-  { id: 'claude-teams',     label: 'Claude Agent Teams',  cmd: 'orca claude-teams --dangerously-skip-permissions' },
+  { id: 'claude-teams',     label: 'Claude Agent Teams',  cmd: 'synaptix claude-teams --dangerously-skip-permissions' },
   { id: 'openclaude',       label: 'OpenClaude',           cmd: 'openclaude --dangerously-skip-permissions' },
   { id: 'grok',             label: 'Grok',                 cmd: 'grok --permission-mode bypassPermissions' },
   { id: 'copilot',          label: 'GitHub Copilot',       cmd: 'copilot --yolo' },
@@ -552,7 +552,7 @@ function ProviderCard({ p }: { p: typeof PROVIDERS[0] }) {
     </Card>
   );
 }
-// CLI-based agent account setup (like Orca's "orca account add --agent X" pattern)
+// CLI-based agent account setup
 const CLI_AGENT_ACCOUNTS = [
   { id: 'opencode', label: 'OpenCode', cmd: 'synaptix account add --agent opencode', desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
   { id: 'codex',    label: 'Codex',    cmd: 'synaptix account add --agent codex',    desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
@@ -1319,7 +1319,10 @@ export function SettingsView(props: SettingsViewProps) {
               {group.items.map(item => {
                 const active = section === item.id && !query;
                 return (
-                  <button key={item.id} type="button" onClick={() => go(item.id)} style={{ width: '100%', height: 29, display: 'flex', alignItems: 'center', gap: 6, padding: '0 7px', borderRadius: 5, border: 'none', marginBottom: 1, background: active ? `${S.primary}16` : 'transparent', color: active ? S.primary : S.text2, fontSize: 11.5, fontWeight: active ? 600 : 400, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left', transition: 'all 100ms' }}>
+                  <button key={item.id} type="button" onClick={() => go(item.id)} style={{ width: '100%', height: 29, display: 'flex', alignItems: 'center', gap: 6, padding: '0 7px', borderRadius: 5, border: 'none', marginBottom: 1, background: active ? 'rgba(255,255,255,0.07)' : 'transparent', color: active ? S.text1 : S.text2, fontSize: 11.5, fontWeight: active ? 500 : 400, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left', transition: 'all 100ms' }}
+                    onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                    onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                  >
                     <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
                     {item.badge && <span style={{ fontSize: 7.5, fontWeight: 700, color: item.badge === 'Beta' ? S.warning : item.badge === 'Optional' ? S.text3 : S.text3, background: item.badge === 'Beta' ? `${S.warning}15` : S.surface3, padding: '1px 4px', borderRadius: 3, border: `1px solid ${item.badge === 'Beta' ? `${S.warning}28` : S.border}`, flexShrink: 0 }}>{item.badge.toUpperCase()}</span>}
                   </button>

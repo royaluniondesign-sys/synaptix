@@ -60,13 +60,11 @@ export function NotificationsView({
         )}
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: 8 }}>
+      <div style={{ flex: 1, overflow: 'auto' }}>
         {notifications.length === 0 ? (
           <EmptyState connected={connected} />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {notifications.map((event) => <NotificationRow key={event.id} event={event} />)}
-          </div>
+          notifications.map((event) => <NotificationRow key={event.id} event={event} />)
         )}
       </div>
     </div>
@@ -77,29 +75,27 @@ function NotificationRow({ event }: { event: NotificationEvent }) {
   const tone = LEVEL_TONE[event.level];
   return (
     <div style={{
-      display: 'flex', gap: 10, padding: '10px 12px', borderRadius: 9,
-      background: S.surface2, border: `1px solid ${S.border}`,
-      opacity: event.read ? 0.62 : 1,
-    }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 2, flexShrink: 0 }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: tone }} />
+      display: 'flex', gap: 10, padding: '9px 14px',
+      borderBottom: `1px solid ${S.border2}`,
+      opacity: event.read ? 0.55 : 1,
+      cursor: 'pointer',
+    }}
+      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.03)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
+    >
+      <div style={{ paddingTop: 4, flexShrink: 0 }}>
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: tone, display: 'block' }} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{
-            fontSize: 12, fontWeight: 600, color: S.text1, flex: 1, minWidth: 0,
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <span style={{ fontSize: 12, fontWeight: 500, color: S.text1, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {event.title}
           </span>
-          <span style={{ fontSize: 10, color: event.read ? S.text3 : S.primary, flexShrink: 0 }}>
+          <span style={{ fontSize: 10, color: S.text3, flexShrink: 0 }}>
             {formatRelativeTime(event.createdAt)}
           </span>
         </div>
-        <div style={{
-          fontSize: 11, color: S.text2, marginTop: 2,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
+        <div style={{ fontSize: 11, color: S.text3, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {event.body}
         </div>
       </div>
