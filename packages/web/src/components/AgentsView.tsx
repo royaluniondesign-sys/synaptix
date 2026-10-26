@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { T as S } from '../lib/design';
 
 interface AgentSession {
@@ -24,13 +25,26 @@ const SESSIONS: AgentSession[] = [
   { id: 's8', title: 'Sidebar redesign PR #69', preview: 'Agent: All 8 CI checks passed. PR merged to main.', agent: 'claude', msgs: 220, time: '2d ago', model: 'claude-sonnet-5', worktree: null, dir: 'Users/whitemelonis11' },
 ];
 
-const AgentIcon = ({ agent }: { agent: AgentSession['agent'] }) => {
-  if (agent === 'claude') return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill={S.warning} stroke="none"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+const AGENT_BG: Record<string, string> = {
+  claude: '#D97757', opencode: '#1e1b4b', aider: '#1a472a',
+};
+const AGENT_ICON: Record<string, ReactNode> = {
+  claude: <path fill="white" d="M18 6 L25.5 24 L22.5 24 L20.5 19.5 L15.5 19.5 L13.5 24 L10.5 24 Z M18 11.5 L21 18 L15 18 Z" />,
+  opencode: <text x="18" y="23" textAnchor="middle" fill="white" fontSize="13" fontWeight="700" fontFamily="monospace">{'</>'}</text>,
+  aider: <path fill="white" d="M10 12 L16 18 L10 24 L12 24 L18 18 L12 12 Z M18 23 L26 23 L26 21 L18 21 Z" />,
+};
+
+const AgentIcon = ({ agent }: { agent: string }) => {
+  const bg = AGENT_BG[agent] ?? '#3f3f46';
+  const icon = AGENT_ICON[agent] ?? (
+    <text x="18" y="23" textAnchor="middle" fill="white" fontSize="12" fontWeight="700" fontFamily="monospace">
+      {agent[0]?.toUpperCase()}
+    </text>
   );
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <svg width="16" height="16" viewBox="0 0 36 36" style={{ borderRadius: 4, flexShrink: 0 }}>
+      <rect width="36" height="36" rx="5" fill={bg} />
+      {icon}
     </svg>
   );
 };
