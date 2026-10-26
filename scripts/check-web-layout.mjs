@@ -65,18 +65,18 @@ for (const vp of viewports) {
     // Scroll with a real wheel event: setting scrollTop from script also works
     // on overflow:hidden elements, so it would not prove the user can scroll.
     const geometry = await page.evaluate(() => {
-      const el = document.querySelector('.tm-orca-grid')
+      const el = document.querySelector('.tm-ws-grid')
       if (!el) return null
       const rect = el.getBoundingClientRect()
       return { client: el.clientHeight, scrollHeight: el.scrollHeight, x: rect.left + rect.width / 2, y: rect.top + Math.min(rect.height / 2, 300) }
     })
-    check(geometry !== null, 'phone: scroll container .tm-orca-grid not found')
+    check(geometry !== null, 'phone: scroll container .tm-ws-grid not found')
     if (geometry) {
       check(geometry.scrollHeight > geometry.client + 100, `phone: content (${geometry.scrollHeight}px) is not taller than the container (${geometry.client}px)`)
       await page.mouse.move(geometry.x, geometry.y)
       await page.mouse.wheel(0, 600)
       await page.waitForTimeout(300)
-      const scrolled = await page.evaluate(() => document.querySelector('.tm-orca-grid')?.scrollTop ?? 0)
+      const scrolled = await page.evaluate(() => document.querySelector('.tm-ws-grid')?.scrollTop ?? 0)
       check(scrolled > 0, 'phone: the content area does not scroll with the wheel')
     }
   }
