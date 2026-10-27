@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { ReactNode } from 'react';
 import { T as S } from '../lib/design';
 
 interface AgentSession {
@@ -25,26 +24,32 @@ const SESSIONS: AgentSession[] = [
   { id: 's8', title: 'Sidebar redesign PR #69', preview: 'Agent: All 8 CI checks passed. PR merged to main.', agent: 'claude', msgs: 220, time: '2d ago', model: 'claude-sonnet-5', worktree: null, dir: 'Users/whitemelonis11' },
 ];
 
-const AGENT_BG: Record<string, string> = {
-  claude: '#D97757', opencode: '#1e1b4b', aider: '#1a472a',
-};
-const AGENT_ICON: Record<string, ReactNode> = {
-  claude: <path fill="white" d="M18 6 L25.5 24 L22.5 24 L20.5 19.5 L15.5 19.5 L13.5 24 L10.5 24 Z M18 11.5 L21 18 L15 18 Z" />,
-  opencode: <text x="18" y="23" textAnchor="middle" fill="white" fontSize="13" fontWeight="700" fontFamily="monospace">{'</>'}</text>,
-  aider: <path fill="white" d="M10 12 L16 18 L10 24 L12 24 L18 18 L12 12 Z M18 23 L26 23 L26 21 L18 21 Z" />,
-};
-
 const AgentIcon = ({ agent }: { agent: string }) => {
-  const bg = AGENT_BG[agent] ?? '#3f3f46';
-  const icon = AGENT_ICON[agent] ?? (
-    <text x="18" y="23" textAnchor="middle" fill="white" fontSize="12" fontWeight="700" fontFamily="monospace">
-      {agent[0]?.toUpperCase()}
-    </text>
+  if (agent === 'claude') return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="#D97757" fillRule="nonzero" style={{ flexShrink: 0 }}>
+      <path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" />
+    </svg>
   );
+  if (agent === 'opencode') return (
+    <svg width="14" height="14" viewBox="0 0 512 512" fill="none" style={{ flexShrink: 0, color: S.text2 }}>
+      <path d="M320 224V352H192V224H320Z" fill="currentColor" fillOpacity="0.28" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z" fill="currentColor" />
+    </svg>
+  );
+  if (agent === 'aider') return (
+    <svg width="14" height="14" viewBox="0 0 436 436" style={{ flexShrink: 0, color: S.text2 }}>
+      <g transform="translate(0,436) scale(0.1,-0.1)" fill="currentColor" stroke="none">
+        <path d="M0 2180 l0 -2180 2180 0 2180 0 0 2180 0 2180 -2180 0 -2180 0 0 -2180z m2705 1818 c20 -20 28 -121 30 -398 l2 -305 216 -5 c118 -3 218 -8 222 -12 3 -3 10 -46 15 -95 5 -48 16 -126 25 -172 17 -86 17 -81 -17 -233 -14 -67 -13 -365 2 -438 21 -100 22 -159 5 -247 -24 -122 -24 -363 1 -458 23 -88 23 -213 1 -330 -9 -49 -17 -109 -17 -132 l0 -43 203 0 c111 0 208 -4 216 -9 10 -6 18 -51 27 -148 8 -76 16 -152 20 -168 7 -39 -23 -361 -37 -387 -10 -18 -21 -19 -214 -16 -135 2 -208 7 -215 14 -22 22 -33 301 -21 501 6 102 8 189 5 194 -8 13 -417 12 -431 -2 -12 -12 -8 -146 8 -261 8 -55 8 -95 1 -140 -6 -35 -14 -99 -17 -143 -9 -123 -14 -141 -41 -154 -18 -8 -217 -11 -679 -11 l-653 0 -11 33 c-31 97 -43 336 -27 533 5 56 6 113 2 128 l-6 26 -194 0 c-211 0 -252 4 -261 28 -12 33 -17 392 -6 522 15 186 -2 174 260 180 115 3 213 8 217 12 4 4 1 52 -5 105 -7 54 -17 130 -22 168 -7 56 -5 91 11 171 10 55 22 130 26 166 4 36 10 72 15 79 7 12 128 15 665 19 l658 5 8 30 c5 18 4 72 -3 130 -12 115 -7 346 11 454 10 61 10 75 -1 82 -8 5 -300 9 -650 9 l-636 0 -27 25 c-18 16 -26 34 -26 57 0 18 -5 87 -10 153 -10 128 5 449 22 472 5 7 26 13 46 15 78 6 1281 3 1287 -4z" />
+        <path d="M1360 1833 c0 -5 -1 -164 -3 -356 l-2 -347 625 -1 c704 -1 708 -1 722 7 5 4 7 20 4 38 -29 141 -32 491 -6 595 9 38 8 45 -7 57 -15 11 -139 13 -675 14 -362 0 -658 -3 -658 -7z" />
+      </g>
+    </svg>
+  );
+  // Fallback: letter icon matching Orca's AgentLetterIcon
+  const letter = (agent[0] ?? '?').toUpperCase();
   return (
-    <svg width="16" height="16" viewBox="0 0 36 36" style={{ borderRadius: 4, flexShrink: 0 }}>
-      <rect width="36" height="36" rx="5" fill={bg} />
-      {icon}
+    <svg width="14" height="14" viewBox="0 0 14 14" style={{ flexShrink: 0, color: S.text3 }}>
+      <rect width="14" height="14" rx="3" fill="currentColor" fillOpacity="0.2" />
+      <text x="7" y="10.5" textAnchor="middle" fontSize="8.5" fill="currentColor" fontWeight="700" fontFamily="system-ui, -apple-system, sans-serif">{letter}</text>
     </svg>
   );
 };
