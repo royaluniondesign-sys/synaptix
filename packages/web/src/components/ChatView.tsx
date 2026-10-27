@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { T as S } from '../lib/design';
+import { AgentIcon } from '../lib/agent-icons';
 
 export type ChatProvider = 'claude-cli' | 'ollama' | 'openai' | 'openrouter';
 
@@ -29,10 +30,22 @@ const PROVIDER_LABELS: Record<ChatProvider, string> = {
 function ProviderIcon({ provider, size = 16 }: { provider: ChatProvider; size?: number }) {
   if (provider === 'claude-cli') {
     return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-        <rect width="24" height="24" rx="6" fill="#D97757" />
-        <text x="12" y="17" textAnchor="middle" fill="white" fontSize="13" fontWeight="700" fontFamily="serif">A</text>
-      </svg>
+      <span style={{
+        width: size, height: size, borderRadius: Math.round(size * 0.25),
+        background: '#D97757', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
+        <AgentIcon agent="claude" size={Math.round(size * 0.7)} />
+      </span>
+    );
+  }
+  if (provider === 'openai') {
+    return (
+      <span style={{
+        width: size, height: size, borderRadius: Math.round(size * 0.25),
+        background: '#10a37f', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
+        <AgentIcon agent="openai" size={Math.round(size * 0.7)} />
+      </span>
     );
   }
   if (provider === 'ollama') {
@@ -43,14 +56,6 @@ function ProviderIcon({ provider, size = 16 }: { provider: ChatProvider; size?: 
         <circle cx="10" cy="11.5" r="1.2" fill="#1c1c1e"/>
         <circle cx="14" cy="11.5" r="1.2" fill="#1c1c1e"/>
         <path d="M9 7.5 Q12 5 15 7.5" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-      </svg>
-    );
-  }
-  if (provider === 'openai') {
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-        <rect width="24" height="24" rx="6" fill="#10a37f" />
-        <path d="M12 4.5a4.5 4.5 0 0 1 4.33 5.77A3.5 3.5 0 0 1 18 13.5a3.5 3.5 0 0 1-3.5 3.5h-5A3.5 3.5 0 0 1 6 13.5a3.5 3.5 0 0 1 1.67-2.97A4.5 4.5 0 0 1 12 4.5z" fill="white" opacity="0.9"/>
       </svg>
     );
   }
