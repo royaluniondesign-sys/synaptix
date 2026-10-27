@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { T as S } from '../lib/design';
 import { AgentIcon } from '../lib/agent-icons';
 
@@ -30,13 +30,14 @@ const SESSIONS: AgentSession[] = [
 ];
 
 
-function SessionCard({ session, onSelect }: { session: AgentSession; onSelect: () => void }) {
+function SessionCard({ session, onSelect, onContextMenu }: { session: AgentSession; onSelect: () => void; onContextMenu: (e: React.MouseEvent) => void }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={onSelect}
+      onContextMenu={onContextMenu}
       style={{
         padding: '10px 14px', cursor: 'pointer',
         background: hovered ? 'rgba(255,255,255,0.03)' : 'transparent',
@@ -185,6 +186,143 @@ function SessionDetail({ session, onClose }: { session: AgentSession; onClose: (
           Copy path
         </button>
       </div>
+    </div>
+  );
+}
+
+interface CtxMenu { x: number; y: number; session: AgentSession }
+
+function SessionContextMenu({ menu, onClose, onAction }: {
+  menu: CtxMenu;
+  onClose: () => void;
+  onAction: (a: string, s: AgentSession) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+
+  const item = (label: string, icon: React.ReactNode, action: string, danger?: boolean) => (
+    <button key={action} type="button"
+      onClick={() => { onAction(action, menu.session); onClose(); }}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 7,
+        width: '100%', padding: '5px 10px', border: 'none', background: 'none',
+        color: danger ? S.error : S.text2, fontSize: 11, cursor: 'pointer',
+        fontFamily: 'inherit', textAlign: 'left',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+    >
+      <span style={{ color: S.text3, display: 'flex' }}>{icon}</span>
+      {label}
+    </button>
+  );
+  const sep = () => <div style={{ height: 1, margin: '3px 0', background: S.border }} />;
+
+  const I = (d: string) => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} />
+    </svg>
+  );
+
+  return (
+    <div ref={ref} style={{
+      position: 'fixed', zIndex: 9999,
+      left: menu.x, top: menu.y,
+      background: S.surface2, border: `1px solid ${S.border}`,
+      borderRadius: 7, boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+      padding: '4px 0', minWidth: 200, overflow: 'hidden',
+    }}>
+      <div style={{ padding: '3px 10px 5px', fontSize: 10, color: S.text3, fontWeight: 500 }}>Session</div>
+      {item('Rename', I('M3 12h18M3 6h18M3 18h18'), 'rename')}
+      {item('Open in terminal', I('M4 17l6-6-6-6M12 19h8'), 'open-terminal')}
+      {item('Copy session path', I('M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'), 'copy-path')}
+      {item('Copy session name', I('M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'), 'copy-name')}
+      {sep()}
+      {item('Pin session', I('M12 2l3 9h-6z M12 11v11'), 'pin')}
+      {item('Mark as unread', I('M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0'), 'mark-unread')}
+      {sep()}
+      {item('Delete session', I('M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2'), 'delete', true)}
+    </div>
+  );
+}
+
+function FilterDropdown({ onClose }: { onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [filters, setFilters] = useState({
+    hideSleeping: false,
+    hideDefault: false,
+    hideAutomation: false,
+    hideCli: false,
+  });
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+
+  const toggle = (key: keyof typeof filters) => setFilters(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const filterRow = (label: string, key: keyof typeof filters, icon: string) => (
+    <button key={key} type="button"
+      onClick={() => toggle(key)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+        padding: '5px 12px', border: 'none', background: 'none',
+        color: S.text2, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+    >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d={icon} />
+      </svg>
+      <span style={{ flex: 1 }}>{label}</span>
+      <span style={{
+        width: 14, height: 14, borderRadius: 3,
+        border: `1.5px solid ${filters[key] ? S.primary : S.border}`,
+        background: filters[key] ? S.primary : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'background 100ms',
+      }}>
+        {filters[key] && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+      </span>
+    </button>
+  );
+
+  const activeCount = Object.values(filters).filter(Boolean).length;
+
+  return (
+    <div ref={ref} style={{
+      position: 'absolute', zIndex: 999, right: 0, top: '100%', marginTop: 4,
+      background: S.surface2, border: `1px solid ${S.border}`,
+      borderRadius: 7, boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+      padding: '4px 0', minWidth: 220,
+    }}>
+      <div style={{ padding: '4px 12px 6px', fontSize: 10, color: S.text3, fontWeight: 500 }}>Filter sessions</div>
+      {filterRow('Hide sleeping sessions', 'hideSleeping', 'M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z')}
+      {filterRow('Hide default branch sessions', 'hideDefault', 'M6 3v7a6 6 0 006 6 6 6 0 006-6V3M4 21h16')}
+      {filterRow('Hide automation sessions', 'hideAutomation', 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z')}
+      {filterRow('Hide CLI-created sessions', 'hideCli', 'M4 17l6-6-6-6M12 19h8')}
+      {activeCount > 0 && (
+        <>
+          <div style={{ height: 1, margin: '3px 0', background: S.border }} />
+          <button type="button"
+            onClick={() => setFilters({ hideSleeping: false, hideDefault: false, hideAutomation: false, hideCli: false })}
+            style={{
+              display: 'flex', width: '100%', padding: '5px 12px', border: 'none',
+              background: 'none', color: S.text3, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >Reset filters</button>
+        </>
+      )}
     </div>
   );
 }
@@ -341,7 +479,18 @@ export function AgentsView() {
   const [search, setSearch] = useState('');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<AgentSession | null>(null);
-  const [showSearchModal, setShowSearchModal] = useState(true);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [ctxMenu, setCtxMenu] = useState<CtxMenu | null>(null);
+  const [showFilter, setShowFilter] = useState(false);
+
+  const handleContextMenu = (e: React.MouseEvent, session: AgentSession) => {
+    e.preventDefault();
+    setCtxMenu({ x: e.clientX, y: e.clientY, session });
+  };
+
+  const handleCtxAction = (action: string, _session: AgentSession) => {
+    if (action === 'open-terminal') setSelected(_session);
+  };
 
   const filtered = SESSIONS.filter(s =>
     !search || s.title.toLowerCase().includes(search.toLowerCase()) || s.preview.toLowerCase().includes(search.toLowerCase())
@@ -363,6 +512,7 @@ export function AgentsView() {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: S.bg, position: 'relative' }}>
       {showSearchModal && <SearchFeatureModal onClose={() => setShowSearchModal(false)} />}
+      {ctxMenu && <SessionContextMenu menu={ctxMenu} onClose={() => setCtxMenu(null)} onAction={handleCtxAction} />}
       {/* Header */}
       <div style={{
         padding: '12px 14px 10px', borderBottom: `1px solid ${S.border}`, flexShrink: 0,
@@ -382,10 +532,17 @@ export function AgentsView() {
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
             Local Mac
           </span>
-          <button type="button" style={{ background: 'none', border: 'none', color: S.text3, cursor: 'pointer', display: 'flex' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          </button>
-          <button type="button" style={{ background: 'none', border: 'none', color: S.text3, cursor: 'pointer', display: 'flex' }}>
+          <div style={{ position: 'relative' }}>
+            <button type="button" onClick={() => setShowFilter(v => !v)} style={{
+              background: showFilter ? S.surface3 : 'none', border: 'none',
+              color: showFilter ? S.text1 : S.text3, cursor: 'pointer', display: 'flex',
+              borderRadius: 4, padding: 3,
+            }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            </button>
+            {showFilter && <FilterDropdown onClose={() => setShowFilter(false)} />}
+          </div>
+          <button type="button" style={{ background: 'none', border: 'none', color: S.text3, cursor: 'pointer', display: 'flex', borderRadius: 4, padding: 3 }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           </button>
         </div>
@@ -464,7 +621,7 @@ export function AgentsView() {
 
               {/* Sessions */}
               {!collapsed.has(group.label) && group.sessions.map(s => (
-                <SessionCard key={s.id} session={s} onSelect={() => setSelected(s)} />
+                <SessionCard key={s.id} session={s} onSelect={() => setSelected(s)} onContextMenu={e => handleContextMenu(e, s)} />
               ))}
             </div>
           ))}
