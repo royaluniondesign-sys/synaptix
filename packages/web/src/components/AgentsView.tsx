@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import type { ReactNode } from 'react';
 import { T as S } from '../lib/design';
+import { AgentIcon } from '../lib/agent-icons';
 
 interface AgentSession {
   id: string;
   title: string;
   preview: string;
-  agent: 'claude' | 'opencode' | 'aider';
+  agent: string;
   msgs: number;
   time: string;
   model: string;
@@ -23,31 +23,12 @@ const SESSIONS: AgentSession[] = [
   { id: 's6', title: 'New session - 2026-10-...', preview: 'Agent: BIG_PICKLE_READY_NEXT_PHASE', agent: 'opencode', msgs: 2, time: '10d ago', model: 'big-pickle', worktree: null, dir: 'Users/whitemelonis11' },
   { id: 's7', title: 'QuickOpen UI fix sprint', preview: 'You: Replace emoji icons in QuickOpen.tsx with SVG icons matching sidebar style...', agent: 'claude', msgs: 48, time: '1d ago', model: 'claude-sonnet-5', worktree: 'claude/ui-fixes', dir: 'Users/whitemelonis11' },
   { id: 's8', title: 'Sidebar redesign PR #69', preview: 'Agent: All 8 CI checks passed. PR merged to main.', agent: 'claude', msgs: 220, time: '2d ago', model: 'claude-sonnet-5', worktree: null, dir: 'Users/whitemelonis11' },
+  { id: 's9', title: 'Auth middleware security review', preview: 'Agent: The JWT verification path has a subtle timing issue on token expiry boundary...', agent: 'copilot', msgs: 31, time: '5d ago', model: 'gpt-4o', worktree: null, dir: 'Users/whitemelonis11' },
+  { id: 's10', title: 'Refactor API routes to REST', preview: 'Agent: Here is the proposed endpoint map — POST /api/sessions, GET /api/sessions/:id...', agent: 'codex', msgs: 17, time: '6d ago', model: 'codex-1', worktree: null, dir: 'Users/whitemelonis11' },
+  { id: 's11', title: 'Kilo: build script optimisation', preview: 'Agent: Parallelising the type-check and build steps saves ~40 s on a 16-core machine...', agent: 'kilo', msgs: 9, time: '8d ago', model: 'kilo-3', worktree: null, dir: 'Users/whitemelonis11' },
+  { id: 's12', title: 'Gemini code review pass', preview: 'Agent: Found 3 potential null-dereference paths in the worktree fanout logic...', agent: 'gemini', msgs: 22, time: '9d ago', model: 'gemini-2.5-pro', worktree: null, dir: 'Users/whitemelonis11' },
 ];
 
-const AGENT_BG: Record<string, string> = {
-  claude: '#D97757', opencode: '#1e1b4b', aider: '#1a472a',
-};
-const AGENT_ICON: Record<string, ReactNode> = {
-  claude: <path fill="white" d="M18 6 L25.5 24 L22.5 24 L20.5 19.5 L15.5 19.5 L13.5 24 L10.5 24 Z M18 11.5 L21 18 L15 18 Z" />,
-  opencode: <text x="18" y="23" textAnchor="middle" fill="white" fontSize="13" fontWeight="700" fontFamily="monospace">{'</>'}</text>,
-  aider: <path fill="white" d="M10 12 L16 18 L10 24 L12 24 L18 18 L12 12 Z M18 23 L26 23 L26 21 L18 21 Z" />,
-};
-
-const AgentIcon = ({ agent }: { agent: string }) => {
-  const bg = AGENT_BG[agent] ?? '#3f3f46';
-  const icon = AGENT_ICON[agent] ?? (
-    <text x="18" y="23" textAnchor="middle" fill="white" fontSize="12" fontWeight="700" fontFamily="monospace">
-      {agent[0]?.toUpperCase()}
-    </text>
-  );
-  return (
-    <svg width="16" height="16" viewBox="0 0 36 36" style={{ borderRadius: 4, flexShrink: 0 }}>
-      <rect width="36" height="36" rx="5" fill={bg} />
-      {icon}
-    </svg>
-  );
-};
 
 function SessionCard({ session, onSelect }: { session: AgentSession; onSelect: () => void }) {
   const [hovered, setHovered] = useState(false);
