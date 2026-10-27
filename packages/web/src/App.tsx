@@ -282,10 +282,21 @@ const PROJECTS: Project[] = [
   { id: 'antigravity', name: 'antigravity', branches: [{ name: 'excited-bohr', badge: '' }, { name: 'excited-tesla', badge: '' }, { name: 'intelligent-galileo', badge: '' }, { name: 'serene-raman', badge: '' }] },
 ];
 
+const AGENT_OPTIONS = [
+  { id: 'claude',    label: 'Claude',    model: 'claude-sonnet-5' },
+  { id: 'opencode',  label: 'OpenCode',  model: 'gpt-4.1' },
+  { id: 'codex',     label: 'Codex',     model: 'codex-1' },
+  { id: 'copilot',   label: 'Copilot',   model: 'gpt-4o' },
+  { id: 'gemini',    label: 'Gemini',    model: 'gemini-2.5-pro' },
+  { id: 'aider',     label: 'Aider',     model: 'claude-3-7' },
+];
+
 function CreateWorktreeModal({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'smart'|'github'|'branch'|'name'>('smart');
   const [query, setQuery] = useState('');
   const [project, setProject] = useState('Termora');
+  const [agent, setAgent] = useState('claude');
+  const [agentOpen, setAgentOpen] = useState(false);
 
   return (
     <>
@@ -334,6 +345,58 @@ function CreateWorktreeModal({ onClose }: { onClose: () => void }) {
               <span style={{ fontSize: 10, color: S.text3, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>/Users/whitemelonis11/Documents/Termora</span>
               <svg width="10" height="10" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
+          </div>
+
+          {/* Agent */}
+          <div style={{ position: 'relative' }}>
+            <div style={{ fontSize: 11, color: S.text3, marginBottom: 6 }}>Agent</div>
+            <button
+              type="button"
+              onClick={() => setAgentOpen(v => !v)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                background: S.surface2, border: `1px solid ${agentOpen ? S.primary : S.border}`,
+                borderRadius: 7, padding: '0 10px', height: 36,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              <span style={{ flex: 1, fontSize: 12, color: S.text1, textAlign: 'left' }}>
+                {AGENT_OPTIONS.find(a => a.id === agent)?.label ?? 'Claude'}
+              </span>
+              <span style={{ fontSize: 10, color: S.text3 }}>
+                {AGENT_OPTIONS.find(a => a.id === agent)?.model}
+              </span>
+              <svg width="10" height="10" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            {agentOpen && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 2,
+                background: S.surface2, border: `1px solid ${S.border}`,
+                borderRadius: 7, boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                zIndex: 400, overflow: 'hidden',
+              }}>
+                {AGENT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => { setAgent(opt.id); setAgentOpen(false); }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '7px 12px', border: 'none', background: opt.id === agent ? 'rgba(255,255,255,0.05)' : 'none',
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = opt.id === agent ? 'rgba(255,255,255,0.05)' : 'none')}
+                  >
+                    <span style={{ fontSize: 12, color: S.text1, flex: 1, textAlign: 'left' }}>{opt.label}</span>
+                    <span style={{ fontSize: 10, color: S.text3 }}>{opt.model}</span>
+                    {opt.id === agent && (
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={S.primary} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Create From */}
@@ -517,14 +580,15 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
           type="button"
           onClick={onQuickOpen}
           style={{
-            width: '100%', height: 32, display: 'flex', alignItems: 'center',
-            gap: 8, padding: '0 10px 0 12px', border: 'none',
-            borderRadius: 0, background: 'transparent',
-            color: S.text3, fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
-            textAlign: 'left', transition: 'background 80ms',
+            width: '100%', height: 30, display: 'flex', alignItems: 'center',
+            gap: 8, padding: '0 8px', border: 'none',
+            borderRadius: 6, background: 'transparent',
+            color: S.text3, fontSize: 13, fontWeight: 500, letterSpacing: '-0.01em',
+            fontFamily: 'inherit', cursor: 'pointer',
+            textAlign: 'left', transition: 'background 80ms, color 80ms',
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLButtonElement).style.color = S.text2; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = S.text3; }}
         >
           <span style={{ color: S.text3, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{iconSearch}</span>
           <span style={{ flex: 1 }}>Search</span>

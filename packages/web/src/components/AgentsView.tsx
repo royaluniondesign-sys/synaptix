@@ -27,6 +27,10 @@ const SESSIONS: AgentSession[] = [
   { id: 's10', title: 'Refactor API routes to REST', preview: 'Agent: Here is the proposed endpoint map — POST /api/sessions, GET /api/sessions/:id...', agent: 'codex', msgs: 17, time: '6d ago', model: 'codex-1', worktree: null, dir: 'Users/whitemelonis11' },
   { id: 's11', title: 'Kilo: build script optimisation', preview: 'Agent: Parallelising the type-check and build steps saves ~40 s on a 16-core machine...', agent: 'kilo', msgs: 9, time: '8d ago', model: 'kilo-3', worktree: null, dir: 'Users/whitemelonis11' },
   { id: 's12', title: 'Gemini code review pass', preview: 'Agent: Found 3 potential null-dereference paths in the worktree fanout logic...', agent: 'gemini', msgs: 22, time: '9d ago', model: 'gemini-2.5-pro', worktree: null, dir: 'Users/whitemelonis11' },
+  { id: 's13', title: 'Migrate legacy auth to JWT', preview: 'Agent: Removed session cookie in favour of short-lived HS256 token signed with the env secret...', agent: 'aider', msgs: 58, time: '11d ago', model: 'claude-3-7', worktree: 'feat/jwt-auth', dir: 'Users/whitemelonis11' },
+  { id: 's14', title: 'Hermes Telegram bot command refactor', preview: 'Agent: Extracted all slash-command handlers into a flat dispatch table — O(1) lookup...', agent: 'hermes', msgs: 34, time: '13d ago', model: 'gpt-5', worktree: null, dir: 'Users/whitemelonis11' },
+  { id: 's15', title: 'Grok: database query optimiser', preview: 'Agent: Replaced full-table scan on sessions with a composite index on (status, updated_at)...', agent: 'grok', msgs: 11, time: '15d ago', model: 'grok-3', worktree: null, dir: 'Users/whitemelonis11' },
+  { id: 's16', title: 'Goose: onboarding flow UX pass', preview: 'Agent: Consolidated the 4-step wizard to 2 screens. Pairing code entry now auto-advances on fill...', agent: 'goose', msgs: 19, time: '17d ago', model: 'goose-2.5', worktree: 'ux/onboarding-v2', dir: 'Users/whitemelonis11' },
 ];
 
 
@@ -544,6 +548,16 @@ export function AgentsView() {
           </div>
           <button type="button" style={{ background: 'none', border: 'none', color: S.text3, cursor: 'pointer', display: 'flex', borderRadius: 4, padding: 3 }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+          <button type="button" style={{
+            height: 26, padding: '0 10px', borderRadius: 6,
+            border: 'none', background: S.primary,
+            color: '#fff', fontSize: 11, fontWeight: 600,
+            cursor: 'pointer', fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
+          }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New session
           </button>
         </div>
 
