@@ -246,27 +246,28 @@ function NavItem({ label, icon, active, badge, badgeColor, onClick }: {
       type="button"
       onClick={onClick}
       style={{
-        width: '100%', height: 32, display: 'flex', alignItems: 'center',
-        gap: 8, padding: '0 10px 0 12px', border: 'none',
-        borderRadius: 0,
-        background: active ? 'rgba(255,255,255,0.07)' : 'transparent',
-        color: active ? S.text1 : S.text2,
-        fontSize: 13,
+        width: '100%', height: 30, display: 'flex', alignItems: 'center',
+        gap: 8, padding: '0 8px', border: 'none',
+        borderRadius: 6,
+        background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
+        color: active ? S.text1 : `${S.text2}99`,
+        fontSize: 13, fontWeight: 500, letterSpacing: '-0.01em',
         fontFamily: 'inherit', cursor: 'pointer',
-        transition: 'background 80ms',
+        transition: 'background 80ms, color 80ms',
         textAlign: 'left', flexShrink: 0,
       }}
-      onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
-      onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+      onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLButtonElement).style.color = S.text2; } }}
+      onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = `${S.text2}99`; } }}
     >
-      <span style={{ color: S.text3, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: active ? S.text2 : S.text3, display: 'flex', alignItems: 'center', flexShrink: 0, transition: 'color 80ms' }}>{icon}</span>
       <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
       {badge != null && (
         <span style={{
           fontSize: 9, fontWeight: 600, minWidth: 14, textAlign: 'center',
-          background: S.surface3,
+          background: badgeColor ? `${badgeColor}22` : S.surface3,
           color: badgeColor ?? S.text2,
           padding: '1px 5px', borderRadius: 10,
+          border: `1px solid ${badgeColor ? `${badgeColor}44` : S.border}`,
         }}>{badge}</span>
       )}
     </button>
