@@ -159,7 +159,7 @@ export function streamChat(res: Response, chat: ChatRequest): void {
   const model = chat.model ?? (isOllama ? 'llama3.1' : chat.provider === 'openai' ? 'gpt-4o-mini' : 'meta-llama/llama-3.1-8b-instruct:free');
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (!isOllama) headers.Authorization = `Bearer ${chat.apiKey}`;
-  if (chat.provider === 'openrouter') headers['X-Title'] = 'Termora';
+  if (chat.provider === 'openrouter') headers['X-Title'] = 'Synaptix';
 
   void (async () => {
     try {
