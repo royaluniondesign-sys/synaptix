@@ -105,6 +105,56 @@ export function AgentIcon({ agent, size = 14 }: { agent: string; size?: number }
         </svg>
       );
 
+    // ── Qwen / QwenCode — Q with tail ────────────────────────────────────
+    case 'qwen':
+    case 'qwen-code':
+    case 'qwencode':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+          <circle cx="11" cy="11" r="7" stroke="#60a5fa" strokeWidth="2" />
+          <line x1="16" y1="16" x2="20" y2="20" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      );
+
+    // ── OpenClaw — three claw streaks ─────────────────────────────────────
+    case 'openclaw':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+          <path d="M8 4 Q6 12 8 20M12 3 Q12 12 12 21M16 4 Q18 12 16 20"
+            stroke="#f43f5e" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+      );
+
+    // ── Auto — sparkle (best available agent) ────────────────────────────
+    case 'auto':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+          <path d="M12 2 L13.5 10 L21 8 L15 14 L21 20 L13.5 18 L12 26 L10.5 18 L3 20 L9 14 L3 8 L10.5 10 Z"
+            fill="#818cf8" />
+        </svg>
+      );
+
+    // ── Ollama — llama silhouette ─────────────────────────────────────────
+    case 'ollama':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+          <ellipse cx="12" cy="16" rx="6" ry="5" fill="#a1a1aa" />
+          <ellipse cx="12" cy="8" rx="3.5" ry="4" fill="#a1a1aa" />
+          <rect x="10.5" y="8" width="3" height="3" fill="#a1a1aa" />
+          <ellipse cx="9.5" cy="5.5" rx="1.5" ry="2.5" fill="#a1a1aa" />
+          <ellipse cx="14.5" cy="5.5" rx="1.5" ry="2.5" fill="#a1a1aa" />
+        </svg>
+      );
+
+    // ── OpenRouter — routing arrows ───────────────────────────────────────
+    case 'openrouter':
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+          <path d="M4 9 L12 9 L12 13 L20 9 L12 5 L12 9" fill="none" stroke="#818cf8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M4 19 L12 19 L12 15 L20 19 L12 23 L12 19" fill="none" stroke="#818cf8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+
     // ── Mimo / MiMo ──────────────────────────────────────────────────────
     case 'mimo':
       return (
