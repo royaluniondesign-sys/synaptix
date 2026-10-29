@@ -1,71 +1,41 @@
 <div align="center">
 
-<!-- Synaptix logo mark -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="72" height="72" fill="none">
-  <line x1="48" y1="48" x2="20" y2="20" stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
-  <line x1="48" y1="48" x2="76" y2="20" stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
-  <line x1="48" y1="48" x2="20" y2="76" stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
-  <line x1="48" y1="48" x2="76" y2="76" stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
-  <line x1="48" y1="48" x2="48" y2="10"  stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
-  <line x1="48" y1="48" x2="48" y2="86"  stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
-  <line x1="48" y1="48" x2="10" y2="48"  stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
-  <line x1="48" y1="48" x2="86" y2="48"  stroke="#7170ff" stroke-width="2.4" stroke-linecap="round" opacity="0.35"/>
-  <circle cx="20" cy="20" r="6"  fill="#a78bfa" opacity="0.85"/>
-  <circle cx="76" cy="20" r="6"  fill="#7170ff" opacity="0.85"/>
-  <circle cx="20" cy="76" r="6"  fill="#7170ff" opacity="0.85"/>
-  <circle cx="76" cy="76" r="6"  fill="#a78bfa" opacity="0.85"/>
-  <circle cx="48" cy="10" r="3.5" fill="#6366f1" opacity="0.6"/>
-  <circle cx="48" cy="86" r="3.5" fill="#6366f1" opacity="0.6"/>
-  <circle cx="10" cy="48" r="3.5" fill="#6366f1" opacity="0.6"/>
-  <circle cx="86" cy="48" r="3.5" fill="#6366f1" opacity="0.6"/>
-  <circle cx="48" cy="48" r="15" fill="url(#rg)"/>
-  <circle cx="48" cy="48" r="10" fill="#7170ff"/>
-  <circle cx="48" cy="48" r="5"  fill="#c4b5fd"/>
-  <defs>
-    <radialGradient id="rg" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="#7170ff" stop-opacity="0.4"/>
-      <stop offset="100%" stop-color="#7170ff" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-</svg>
-
 # Synaptix
 
-**AI agent orchestration. Real terminals. Your machine.**
+### AI agent cockpit. Real terminals. Your machine.
 
 <br />
 
 [![CI](https://img.shields.io/github/actions/workflow/status/royaluniondesign-sys/synaptix/ci.yml?branch=main&style=flat-square&label=CI&labelColor=09090b)](https://github.com/royaluniondesign-sys/synaptix/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-7170ff?style=flat-square&logo=typescript&logoColor=white&labelColor=09090b)](https://typescriptlang.org)
-[![Node.js](https://img.shields.io/badge/Node.js-20%20%7C%2022%20%7C%2024-7170ff?style=flat-square&logo=node.js&logoColor=white&labelColor=09090b)](https://nodejs.org)
-[![PWA](https://img.shields.io/badge/Mobile-PWA%20installable-7170ff?style=flat-square&logo=pwa&logoColor=white&labelColor=09090b)](#quickstart)
-[![Terminal](https://img.shields.io/badge/PTY-real%20sessions-7170ff?style=flat-square&labelColor=09090b)](#terminal-cockpit)
-[![License: MIT](https://img.shields.io/badge/License-MIT-fafafa?style=flat-square&labelColor=09090b)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-20_|_22_|_24-7170ff?style=flat-square&logo=nodedotjs&logoColor=white&labelColor=09090b)](https://nodejs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-7170ff?style=flat-square&labelColor=09090b)](LICENSE)
 
 <br />
 
-<sub>
-  <b>Local-first</b> · <b>Real PTYs</b> · <b>QR pairing</b> · <b>WebSocket streaming</b> · <b>tmux persistence</b> · <b>Agent cockpit roadmap</b>
-</sub>
+<img src="docs/images/cockpit-desktop-v2.png" width="860" alt="Synaptix desktop cockpit" />
 
-<br /><br />
+<br />
 
-**Real terminal and agent control from any phone, tablet, or browser.**
+**Run Claude Code, Codex, Hermes, Aider, Gemini and more — all from one cockpit on your machine.**  
+Control real terminal sessions from any phone, tablet, or browser. Local-first. No cloud lock-in.
 
-A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-session terminal control, secure QR onboarding, tunnel status, persistent sessions, and a roadmap toward full SSH/SFTP, multi-machine, Git, worktree, and agent orchestration.
+<br />
 
-[**Website & live demo**](https://royaluniondesign-sys.github.io/synaptix/) · [Quickstart](#quickstart) · [Features](#features) · [How it works](#how-it-works) · [Multi-machine](#multi-machine) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
+[**Quickstart**](#quickstart) · [Features](#features) · [How it works](#how-it-works) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
-</div>
-
----
-
-<div align="center">
+<br />
 
 <table>
 <tr>
-<td align="center"><img src="docs/images/cockpit-desktop-v2.png" width="660" /><br /><sub><b>Desktop cockpit</b></sub></td>
-<td align="center"><img src="docs/images/mobile-companion-v2.png" width="195" /><br /><sub><b>Mobile companion</b></sub></td>
+<td align="center" width="55%">
+  <img src="docs/images/cockpit-desktop-v2.png" width="100%" alt="Desktop cockpit — agent registry, worktrees, file browser, control state" /><br />
+  <sub><b>Desktop cockpit</b> — agent registry, worktrees, terminal splits, control state</sub>
+</td>
+<td align="center" width="45%">
+  <img src="docs/images/mobile-companion-v2.png" width="260" alt="Mobile companion — responsive PWA" /><br />
+  <sub><b>Mobile companion</b> — installable PWA, QR pairing, full cockpit on phone</sub>
+</td>
 </tr>
 </table>
 
