@@ -62,16 +62,7 @@ A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-sess
 
 <div align="center">
 
-![Synaptix cockpit walkthrough](docs/images/cockpit-tour-v2.gif)
-
-<table>
-<tr>
-<td align="center"><img src="docs/images/cockpit-desktop-v2.png" width="560" /><br /><sub><b>Desktop cockpit</b></sub></td>
-<td align="center"><img src="docs/images/mobile-companion-v2.png" width="190" /><br /><sub><b>Mobile companion</b></sub></td>
-</tr>
-</table>
-
-[MP4 demo](docs/images/cockpit-tour-v2.mp4)
+![Synaptix cockpit walkthrough](docs/images/claude-code-demo.gif)
 
 </div>
 
@@ -141,29 +132,6 @@ See:
 - [Feature/platform map](docs/feature-platform-map.md)
 - [Platform readiness checklist](docs/platform-readiness-checklist.md)
 - [Desktop unsigned packaging contract](docs/desktop-unsigned-packaging.md)
-
---- | --- | --- |
-| Mobile companion | **Beta/live PWA** | Monitor sessions from phone, resume work, steer agents, and receive finish/needs-input notifications. Native wrappers/APK/App Store builds are roadmap. |
-| Parallel worktrees | **Backend foundation** | Fan one prompt across isolated git worktrees, compare outputs, and merge the winner. Worktree tests/fan-out exist; full UI is in progress. |
-| Terminal splits | **Roadmap UI** | Desktop-grade split panes, persistent scrollback, and restart-safe terminal layouts. Current app has real PTYs and tmux persistence. |
-| Design mode | **Roadmap** | Inspect a live Chromium surface, capture HTML/CSS/screenshot context, and send it into an agent prompt. |
-| GitHub/project task workflows | **Roadmap** | Browse PRs/issues/project boards, open worktrees from tasks, and review without context switching. |
-| SSH worktrees | **Roadmap** | Run agents on a beefy remote box with file editing, git, terminals, reconnect, and port forwarding. |
-| Annotate AI diffs | **Roadmap** | Comment on generated diff lines and send review notes back to the agent before commit. |
-| Drag files/images to agents | **Roadmap** | Attach repo files, screenshots, and images directly to agent prompts. |
-| Synaptix CLI | **Roadmap** | Script workflows such as `synaptix worktree create`, `synaptix snapshot`, `synaptix click`, and `synaptix fill`. |
-| Quick open | **Roadmap** | Search across worktrees, files, agents, commands, and repo context. |
-| Usage tracking | **Roadmap** | Track Claude/Codex/OpenCode/Hermes usage, rate-limit resets, and account/provider switching. |
-| Rich repo previews | **Roadmap** | Preview Markdown, images, PDFs, docs, browser panes, and logs in the workspace. |
-| Computer use | **Roadmap** | Let agents operate visible desktop/browser UI when a workflow needs real interaction. |
-| Notifications/unread state | **Roadmap** | Know when an agent finishes or needs attention; mark threads/tasks unread for later. |
-
-See:
-
-- [Product evolution plan](docs/product-evolution.md)
-- [Roadmap](ROADMAP.md)
-- [Current status](docs/current-status.md)
-- [App packaging blueprint](docs/app-packaging-blueprint.md)
 
 ---
 
