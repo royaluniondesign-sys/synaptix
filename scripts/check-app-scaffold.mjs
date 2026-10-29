@@ -25,7 +25,7 @@ ${missing.join('\n')}`);
 }
 
 const readme = readFileSync('README.md', 'utf8');
-for (const ref of ['claude-code-demo.gif']) {
+for (const ref of ['cockpit-desktop-v2.png', 'mobile-companion-v2.png']) {
   if (!readme.includes(ref)) {
     console.error(`README does not reference refreshed media: ${ref}`);
     process.exit(1);

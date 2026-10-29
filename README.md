@@ -62,7 +62,12 @@ A local-first, installable cockpit for Mac/Linux machines: real PTYs, multi-sess
 
 <div align="center">
 
-![Synaptix cockpit walkthrough](docs/images/claude-code-demo.gif)
+<table>
+<tr>
+<td align="center"><img src="docs/images/cockpit-desktop-v2.png" width="660" /><br /><sub><b>Desktop cockpit</b></sub></td>
+<td align="center"><img src="docs/images/mobile-companion-v2.png" width="195" /><br /><sub><b>Mobile companion</b></sub></td>
+</tr>
+</table>
 
 </div>
 
