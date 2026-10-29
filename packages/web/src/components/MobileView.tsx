@@ -4,213 +4,311 @@ import { T as S } from '../lib/design';
 
 interface MobileViewProps { connectionStatus: ConnectionStatus; tunnelUrl: string | null; authToken?: string | null }
 
+const serif = '"Instrument Serif", "Times New Roman", Georgia, serif';
+const mono  = '"Geist Mono", "JetBrains Mono", ui-monospace, monospace';
+
 export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
   const [copied, setCopied] = useState(false);
   const isConnected = connectionStatus === 'connected';
 
   const copyLink = () => {
     if (tunnelUrl) {
-      void navigator.clipboard.writeText(tunnelUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+      void navigator.clipboard.writeText(tunnelUrl).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
     }
   };
 
   return (
     <div style={{
-      height: '100%', display: 'flex', overflow: 'hidden',
-      background: S.bg,
-      backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
-      backgroundSize: '24px 24px',
-      position: 'relative',
+      height: '100%', display: 'flex', flexDirection: 'column',
+      overflow: 'auto', background: S.bg,
     }}>
-      {/* Left: Hero */}
+
+      {/* ── Hero band ── */}
       <div style={{
-        flex: 1, display: 'flex', flexDirection: 'column',
-        justifyContent: 'center', padding: '0 48px',
-        minWidth: 0,
+        background: '#7170ff', borderBottom: '3px solid #09090b',
+        padding: '52px 48px 48px', position: 'relative', overflow: 'hidden',
       }}>
+        {/* Label */}
         <div style={{
-          fontSize: 11, fontWeight: 600, letterSpacing: 1.5,
-          textTransform: 'uppercase', color: S.text3, marginBottom: 20,
+          display: 'inline-block',
+          background: '#09090b', color: '#fafafa',
+          padding: '6px 10px', marginBottom: 28,
+          fontFamily: mono, fontSize: 10, fontWeight: 500,
+          letterSpacing: '0.09em', textTransform: 'uppercase',
         }}>
-          Synaptix Mobile
+          Synaptix Mobile · Early Alpha · PWA installable
         </div>
 
+        {/* Big serif headline */}
         <h1 style={{
-          fontSize: 40, fontWeight: 700, color: S.text1,
-          margin: '0 0 18px', lineHeight: 1.15, letterSpacing: -1,
-          maxWidth: 420,
+          fontFamily: serif, fontWeight: 400,
+          fontSize: 'clamp(3.2rem, 8vw, 7rem)', lineHeight: 0.88,
+          letterSpacing: '-0.03em', margin: '0 0 36px',
+          color: '#09090b',
         }}>
-          Your agent sessions,<br />in your pocket.
+          Your machine,<br />
+          <em style={{ fontStyle: 'italic', color: '#fafafa', textShadow: '0.03em 0.03em 0 #09090b' }}>
+            in your hands.
+          </em>
         </h1>
 
+        {/* Lede */}
         <p style={{
-          fontSize: 15, color: S.text2, lineHeight: 1.65,
-          maxWidth: 400, margin: '0 0 28px',
+          fontFamily: 'Geist, system-ui, sans-serif',
+          fontSize: 'clamp(1rem, 1.8vw, 1.3rem)', fontWeight: 500,
+          lineHeight: 1.3, letterSpacing: '-0.015em',
+          color: '#09090b', margin: '0 0 36px', maxWidth: '28em',
         }}>
-          Monitor Claude agents from your phone. Check terminal output, review diffs, and trigger tasks while you're away from your desk.
+          Monitor Claude, Codex, Hermes and every other agent from any phone or tablet. Real terminals. No cloud lock-in.
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-          <span style={{ fontSize: 12, color: S.text3 }}>Coming to</span>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            padding: '4px 10px', borderRadius: 20,
-            background: S.surface2, border: `1px solid ${S.border}`,
-            fontSize: 12, color: S.text2,
-          }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            iOS
-          </span>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            padding: '4px 10px', borderRadius: 20,
-            background: S.surface2, border: `1px solid ${S.border}`,
-            fontSize: 12, color: S.text2,
-          }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341l-.012-.009L12.5 5l-.003.002L7.489 15.33l-.012.01A6.023 6.023 0 0 0 6 19a6 6 0 0 0 6 6 6 6 0 0 0 6-6 6.023 6.023 0 0 0-1.477-3.659z"/></svg>
-            Android
-          </span>
-        </div>
-
-        {tunnelUrl ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <a
-              href={tunnelUrl}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7,
-                height: 40, padding: '0 20px', borderRadius: 8,
-                background: S.text1, color: S.bg,
-                fontSize: 13, fontWeight: 600, textDecoration: 'none',
-              }}
-            >
-              Open on phone
-              <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        {/* CTA */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
+          {tunnelUrl ? (
+            <a href={tunnelUrl} target="_blank" rel="noreferrer" style={{
+              display: 'inline-block',
+              background: '#09090b', color: '#fafafa',
+              fontFamily: 'Geist, system-ui, sans-serif',
+              fontSize: '1rem', fontWeight: 600, lineHeight: 1,
+              padding: '18px 26px',
+              border: '3px solid #09090b',
+              boxShadow: '7px 7px 0 #fafafa',
+              textDecoration: 'none',
+              transition: 'transform 0.1s, box-shadow 0.1s',
+            }}>
+              Open on phone ↗
             </a>
-            <button type="button" onClick={copyLink} style={{
-              height: 40, padding: '0 16px', borderRadius: 8,
-              border: `1px solid ${S.border}`, background: 'transparent',
-              color: copied ? S.success : S.text2,
-              fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
-            }}>{copied ? 'Copied!' : 'Copy link'}</button>
-          </div>
-        ) : (
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '10px 16px', borderRadius: 8,
-            background: S.surface2, border: `1px solid ${S.border}`,
-            fontSize: 12, color: S.text3,
+          ) : (
+            <div style={{
+              display: 'inline-block',
+              background: 'rgba(0,0,0,0.18)', color: '#09090b',
+              fontFamily: 'Geist, system-ui, sans-serif',
+              fontSize: '1rem', fontWeight: 600, lineHeight: 1,
+              padding: '18px 26px',
+              border: '3px solid #09090b',
+            }}>
+              Start with TUNNEL=ngrok
+            </div>
+          )}
+          <button type="button" onClick={copyLink} style={{
+            display: 'inline-block',
+            background: '#fafafa', color: '#09090b',
+            fontFamily: 'Geist, system-ui, sans-serif',
+            fontSize: '1rem', fontWeight: 600, lineHeight: 1,
+            padding: '18px 26px',
+            border: '3px solid #09090b',
+            boxShadow: '7px 7px 0 #09090b',
+            cursor: 'pointer',
+            transition: 'transform 0.1s, box-shadow 0.1s',
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="1.75" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Start agent with <code style={{ fontFamily: 'monospace', color: S.text1 }}>TUNNEL=ngrok</code> to get a shareable link
-          </div>
-        )}
+            {copied ? 'Copied!' : 'Copy link'}
+          </button>
+        </div>
       </div>
 
-      {/* Right: Info card */}
+      {/* ── Status + How-to grid ── */}
       <div style={{
-        width: 300, margin: '32px 32px 32px 0', flexShrink: 0,
-        background: S.surface,
-        borderRadius: 14, border: `1px solid ${S.border}`,
-        overflow: 'hidden', display: 'flex', flexDirection: 'column',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        border: '3px solid #09090b',
+        borderTop: 'none',
       }}>
-        {/* Card header */}
+
+        {/* Status card */}
         <div style={{
-          padding: '16px 18px 14px',
-          borderBottom: `1px solid ${S.border2}`,
-          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '28px 28px 32px',
+          borderRight: '3px solid #09090b',
+          background: S.surface,
         }}>
           <div style={{
-            width: 28, height: 28, borderRadius: 7,
-            background: S.surface3,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            fontFamily: mono, fontSize: 9, fontWeight: 500,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: S.text3, marginBottom: 16,
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={S.text2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/>
-            </svg>
+            Connection
           </div>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: S.text1 }}>Mobile Companion</div>
-          </div>
-        </div>
 
-        <div style={{ flex: 1, overflow: 'auto' }}>
-          {/* Connection */}
-          <div style={{ padding: '14px 18px', borderBottom: `1px solid ${S.border2}` }}>
-            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', color: S.text3, marginBottom: 10 }}>Connection</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: S.surface2, borderRadius: 8 }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: isConnected ? S.success : S.error, flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, color: S.text1, fontWeight: 500 }}>{isConnected ? 'Agent online' : 'Agent offline'}</div>
-                {tunnelUrl && <div style={{ fontSize: 10, color: S.text3, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tunnelUrl}</div>}
-              </div>
-              {tunnelUrl && (
-                <button type="button" onClick={copyLink} style={{
-                  padding: '3px 8px', borderRadius: 4, border: `1px solid ${S.border}`,
-                  background: 'transparent', color: S.text3, fontSize: 10, cursor: 'pointer', fontFamily: 'inherit',
-                }}>{copied ? '✓' : 'Copy'}</button>
-              )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <span style={{
+              width: 10, height: 10, borderRadius: '50%',
+              background: isConnected ? '#10b981' : '#ef4444',
+              boxShadow: isConnected ? '0 0 0 3px rgba(16,185,129,0.2)' : '0 0 0 3px rgba(239,68,68,0.2)',
+              flexShrink: 0,
+            }} />
+            <span style={{
+              fontFamily: serif, fontSize: '1.4rem', fontWeight: 400,
+              color: S.text1, lineHeight: 1,
+            }}>
+              {isConnected ? 'Agent online' : 'Agent offline'}
+            </span>
+          </div>
+
+          {tunnelUrl ? (
+            <div style={{
+              fontFamily: mono, fontSize: 10,
+              color: S.text3, wordBreak: 'break-all',
+              padding: '8px 10px',
+              background: S.surface2, border: `1px solid ${S.border}`,
+              marginBottom: 14,
+            }}>
+              {tunnelUrl}
             </div>
-          </div>
+          ) : (
+            <div style={{
+              fontFamily: mono, fontSize: 10,
+              color: S.text3, padding: '8px 10px',
+              background: S.surface2, border: `1px solid ${S.border}`,
+              marginBottom: 14,
+            }}>
+              No tunnel URL yet
+            </div>
+          )}
 
-          {/* Add to Home Screen */}
-          <div style={{ padding: '14px 18px', borderBottom: `1px solid ${S.border2}` }}>
-            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', color: S.text3, marginBottom: 10 }}>Add to Home Screen</div>
+          {/* Platform pills */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {[
-              {
-                platform: 'Safari (iOS)',
-                icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
-                steps: 'Share button → Add to Home Screen',
-              },
-              {
-                platform: 'Chrome (Android)',
-                icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>,
-                steps: 'Menu (3 dots) → Add to Home screen',
-              },
-            ].map(({ platform, icon, steps }) => (
-              <div key={platform} style={{ display: 'flex', gap: 10, marginBottom: 10, alignItems: 'flex-start' }}>
-                <span style={{ color: S.text3, flexShrink: 0, marginTop: 1 }}>{icon}</span>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: S.text1 }}>{platform}</div>
-                  <div style={{ fontSize: 10, color: S.text3, marginTop: 2, lineHeight: 1.4 }}>{steps}</div>
-                </div>
-              </div>
+              { name: 'iOS · Safari', icon: '🍎' },
+              { name: 'Android · Chrome', icon: '🤖' },
+              { name: 'Desktop · PWA', icon: '🖥' },
+            ].map(({ name, icon }) => (
+              <span key={name} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '5px 10px',
+                fontFamily: mono, fontSize: 9,
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                border: `2px solid ${S.border}`,
+                color: S.text2,
+              }}>
+                {icon} {name}
+              </span>
             ))}
           </div>
+        </div>
 
-          {/* Quick actions */}
-          <div style={{ padding: '14px 18px' }}>
-            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', color: S.text3, marginBottom: 10 }}>Quick Actions</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {tunnelUrl ? (
-                <a href={tunnelUrl} target="_blank" rel="noreferrer" style={{
-                  flex: 1, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  borderRadius: 7, background: S.surface2, border: `1px solid ${S.border}`,
-                  fontSize: 12, color: S.text1, textDecoration: 'none', fontWeight: 500,
-                }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-                  Open
-                </a>
-              ) : (
-                <div style={{
-                  flex: 1, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: 7, background: S.surface2, border: `1px solid ${S.border}`,
-                  fontSize: 11, color: S.text3,
-                }}>No link yet</div>
-              )}
-              <div style={{
-                flex: 1, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                borderRadius: 7, background: S.surface2, border: `1px solid ${S.border}`,
-                fontSize: 12, color: S.text3,
+        {/* Add to Home Screen */}
+        <div style={{
+          padding: '28px 28px 32px',
+          borderRight: '3px solid #09090b',
+          background: S.surface2,
+        }}>
+          <div style={{
+            fontFamily: mono, fontSize: 9, fontWeight: 500,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: S.text3, marginBottom: 16,
+          }}>
+            Add to Home Screen
+          </div>
+
+          <h3 style={{
+            fontFamily: serif, fontWeight: 400,
+            fontSize: '1.8rem', lineHeight: 0.95,
+            letterSpacing: '-0.02em', margin: '0 0 20px',
+            color: S.text1,
+          }}>
+            Install the<br /><em style={{ fontStyle: 'italic', color: '#9a99ff' }}>PWA</em>
+          </h3>
+
+          {[
+            { platform: 'Safari (iOS)', steps: 'Tap Share → Add to Home Screen' },
+            { platform: 'Chrome (Android)', steps: 'Menu ⋮ → Add to Home screen' },
+            { platform: 'Chrome (Desktop)', steps: 'Address bar → Install app icon' },
+          ].map(({ platform, steps }, i) => (
+            <div key={platform} style={{
+              display: 'grid', gridTemplateColumns: '1.2rem 1fr',
+              gap: '4px 10px', padding: '12px 0',
+              borderTop: i === 0 ? `2px solid ${S.border}` : `2px solid ${S.border}`,
+            }}>
+              <span style={{
+                fontFamily: serif, fontSize: '1rem', color: '#7170ff',
+                lineHeight: 1.4,
               }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                QR Code
+                {i + 1}
+              </span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: S.text1, marginBottom: 2 }}>{platform}</div>
+                <div style={{ fontFamily: mono, fontSize: 9, color: S.text3, letterSpacing: '0.04em' }}>{steps}</div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
+
+        {/* What you can do */}
+        <div style={{ padding: '28px 28px 32px', background: S.surface }}>
+          <div style={{
+            fontFamily: mono, fontSize: 9, fontWeight: 500,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: S.text3, marginBottom: 16,
+          }}>
+            From your phone
+          </div>
+
+          <h3 style={{
+            fontFamily: serif, fontWeight: 400,
+            fontSize: '1.8rem', lineHeight: 0.95,
+            letterSpacing: '-0.02em', margin: '0 0 20px',
+            color: S.text1,
+          }}>
+            Real control,<br /><em style={{ fontStyle: 'italic', color: '#9a99ff' }}>anywhere</em>
+          </h3>
+
+          {[
+            { title: 'Live terminal output', desc: 'Stream real PTY sessions from any agent' },
+            { title: 'Session management', desc: 'Create, rename, close and resume sessions' },
+            { title: 'Agent status', desc: 'See which agents are running and their state' },
+            { title: 'Notifications', desc: 'Know when a task finishes or needs input' },
+          ].map(({ title, desc }, i) => (
+            <div key={title} style={{
+              padding: '13px 0',
+              borderTop: `2px solid ${S.border}`,
+              display: 'flex', alignItems: 'flex-start', gap: 12,
+            }}>
+              <span style={{
+                width: 22, height: 22, borderRadius: '50%',
+                background: i === 0 ? '#7170ff' : S.surface3,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0, marginTop: 1,
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" stroke={i === 0 ? '#fff' : S.text3} fill="none" strokeWidth="2.5" strokeLinecap="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: S.text1, marginBottom: 2 }}>{title}</div>
+                <div style={{ fontSize: 11, color: S.text3, lineHeight: 1.4 }}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Run it strip ── */}
+      <div style={{
+        borderTop: '3px solid #09090b',
+        background: '#09090b', color: '#fafafa',
+        padding: '28px 48px',
+        display: 'flex', alignItems: 'center', gap: 32,
+        flexWrap: 'wrap',
+      }}>
+        <div style={{
+          fontFamily: serif, fontSize: '1.6rem', fontWeight: 400,
+          lineHeight: 1, color: '#fafafa', flexShrink: 0,
+        }}>
+          Run it
+        </div>
+        <code style={{
+          fontFamily: mono, fontSize: 13,
+          color: '#9a99ff', background: '#18181b',
+          padding: '10px 16px', border: '2px solid #3f3f46',
+          letterSpacing: '0.03em',
+        }}>
+          TUNNEL=ngrok npm run dev
+        </code>
+        <span style={{ fontFamily: mono, fontSize: 10, color: '#52525b', letterSpacing: '0.06em' }}>
+          THEN SCAN THE QR CODE PRINTED IN YOUR TERMINAL
+        </span>
       </div>
     </div>
   );
