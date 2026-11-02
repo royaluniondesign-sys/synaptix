@@ -62,7 +62,7 @@ describe('parseChatRequest', () => {
 });
 
 describe('POST /api/cockpit/chat', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'termora-cockpit-chat-'));
+  const dir = mkdtempSync(join(tmpdir(), 'synaptix-cockpit-chat-'));
   const dbPath = join(dir, 'test.db');
   let baseUrl = '';
   let authHeader = '';
