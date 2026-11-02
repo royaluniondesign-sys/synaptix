@@ -80,7 +80,7 @@ function CommandStrip({ activeCommand, onCommand, onCreateSession }: { activeCom
   return (
     <div className="tm-oct-command-strip">
       {COMMANDS.map((cmd) => (
-        <button key={cmd} className={cmd === activeCommand ? 'active' : ''} type="button" onClick={() => { onCommand(cmd); if (cmd === 'new terminal') onCreateSession(); }}>
+        <button key={cmd} title={cmd} className={cmd === activeCommand ? 'active' : ''} type="button" onClick={() => { onCommand(cmd); if (cmd === 'new terminal') onCreateSession(); }}>
           {cmd === 'new terminal' && <Icon name="plus" />}
           {cmd === 'spawn agent' && <Icon name="bot" />}
           {cmd === 'open file tree' && <Icon name="files" />}
@@ -90,7 +90,6 @@ function CommandStrip({ activeCommand, onCommand, onCreateSession }: { activeCom
           {cmd === 'fan out worktrees' && <Icon name="branch" />}
           {cmd === 'list worktrees' && <Icon name="activity" />}
           {cmd === 'clean worktrees' && <Icon name="close" />}
-          <span>{cmd}</span>
         </button>
       ))}
     </div>
@@ -471,12 +470,12 @@ export function DashboardView({ sessions, activeSessionId, onSessionSelect, onCr
     : activeFile ? `Could not load ${activeFile}.` : 'Select a file in the tree to preview it.');
 
   return (
-    <div className="tm-orca-stage">
+    <div className="tm-ws-stage">
       <WindowChrome activeTask={activeTask} />
       <CommandStrip activeCommand={activeCommand} onCommand={runBackendAction} onCreateSession={onCreateSession} />
-      <div className="tm-orca-grid operational">
+      <div className="tm-ws-grid operational">
         <WorkspaceSidebar status={cockpitStatus} tasks={tasks} activeTaskId={activeTask.id} activeCommand={activeCommand} onTaskSelect={setActiveTaskId} onCommand={runBackendAction} onCreateSession={onCreateSession} />
-        <main className="tm-orca-center operational">
+        <main className="tm-ws-center operational">
           <LiveSessionPane sessions={sessions} activeSessionId={activeSessionId} activeTask={activeTask} onSessionSelect={onSessionSelect} onCloseSession={onCloseSession} wsClient={wsClient} messageBus={messageBus} getSessionOutput={getSessionOutput} />
           <div className="tm-oct-split-stack operational">
             <UtilityPanel activeTask={activeTask} activeCommand={`${activeCommand} · backend ${lastBackendAction}${cockpitError ? ` · ${cockpitError}` : ''}`} fanoutPrompt={fanoutPrompt} onPromptChange={setFanoutPrompt} gates={gateSummary(cockpitStatus)} />

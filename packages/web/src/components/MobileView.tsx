@@ -1,39 +1,11 @@
 import { useState } from 'react';
 import type { ConnectionStatus } from '../lib/ws-client';
+import { T as S } from '../lib/design';
 
 interface MobileViewProps { connectionStatus: ConnectionStatus; tunnelUrl: string | null; authToken?: string | null }
 
-const S = {
-  bg: '#09090b', surface: '#111113', surface2: '#1c1c1f', surface3: '#2a2a2e',
-  border: 'rgba(255,255,255,0.07)', primary: '#7170ff', success: '#10b981',
-  warning: '#f59e0b', text1: '#f4f4f5', text2: '#a1a1aa', text3: '#52525b',
-} as const;
-
-function PhoneMockup({ url }: { url: string | null }) {
-  return (
-    <div style={{
-      width: 140, height: 260, borderRadius: 22, border: `2px solid ${S.surface3}`,
-      background: S.surface, position: 'relative', overflow: 'hidden',
-      boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
-    }}>
-      {/* Notch */}
-      <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', width: 50, height: 6, borderRadius: 3, background: S.surface3 }} />
-      {/* Screen content */}
-      <div style={{ margin: '24px 8px 8px', background: '#08090a', borderRadius: 14, height: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 10 }}>
-        <svg width="24" height="24" viewBox="0 0 36 36" style={{ display: 'block' }}>
-          <rect width="36" height="36" rx="8" fill={S.primary} />
-          <text x="18" y="25" textAnchor="middle" fill="white" fontSize="18" fontWeight="700" fontFamily="Arial">T</text>
-        </svg>
-        <span style={{ fontSize: 10, color: S.text1, fontWeight: 700 }}>Synaptix</span>
-        {url ? (
-          <span style={{ fontSize: 7, color: S.success, textAlign: 'center', lineHeight: 1.3, wordBreak: 'break-all' }}>Connected</span>
-        ) : (
-          <span style={{ fontSize: 7, color: S.text3, textAlign: 'center' }}>Scan QR to pair</span>
-        )}
-      </div>
-    </div>
-  );
-}
+const serif = '"Instrument Serif", "Times New Roman", Georgia, serif';
+const mono  = '"Geist Mono", "JetBrains Mono", ui-monospace, monospace';
 
 export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
   const [copied, setCopied] = useState(false);
@@ -41,99 +13,302 @@ export function MobileView({ connectionStatus, tunnelUrl }: MobileViewProps) {
 
   const copyLink = () => {
     if (tunnelUrl) {
-      void navigator.clipboard.writeText(tunnelUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+      void navigator.clipboard.writeText(tunnelUrl).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
     }
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: S.bg }}>
-      {/* Header */}
-      <div style={{ padding: '14px 20px 12px', borderBottom: `1px solid ${S.border}`, background: S.surface, flexShrink: 0 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: S.text1, margin: 0, letterSpacing: -0.3 }}>Synaptix Mobile</h2>
-        <p style={{ fontSize: 11, color: S.text3, margin: '3px 0 0' }}>Connect your phone to this agent session</p>
+    <div style={{
+      height: '100%', display: 'flex', flexDirection: 'column',
+      overflow: 'auto', background: S.bg,
+    }}>
+
+      {/* ── Hero band ── */}
+      <div style={{
+        background: '#7170ff', borderBottom: '3px solid #09090b',
+        padding: '52px 48px 48px', position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Label */}
+        <div style={{
+          display: 'inline-block',
+          background: '#09090b', color: '#fafafa',
+          padding: '6px 10px', marginBottom: 28,
+          fontFamily: mono, fontSize: 10, fontWeight: 500,
+          letterSpacing: '0.09em', textTransform: 'uppercase',
+        }}>
+          Synaptix Mobile · Early Alpha · PWA installable
+        </div>
+
+        {/* Big serif headline */}
+        <h1 style={{
+          fontFamily: serif, fontWeight: 400,
+          fontSize: 'clamp(3.2rem, 8vw, 7rem)', lineHeight: 0.88,
+          letterSpacing: '-0.03em', margin: '0 0 36px',
+          color: '#09090b',
+        }}>
+          Your machine,<br />
+          <em style={{ fontStyle: 'italic', color: '#fafafa', textShadow: '0.03em 0.03em 0 #09090b' }}>
+            in your hands.
+          </em>
+        </h1>
+
+        {/* Lede */}
+        <p style={{
+          fontFamily: 'Geist, system-ui, sans-serif',
+          fontSize: 'clamp(1rem, 1.8vw, 1.3rem)', fontWeight: 500,
+          lineHeight: 1.3, letterSpacing: '-0.015em',
+          color: '#09090b', margin: '0 0 36px', maxWidth: '28em',
+        }}>
+          Monitor Claude, Codex, Hermes and every other agent from any phone or tablet. Real terminals. No cloud lock-in.
+        </p>
+
+        {/* CTA */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
+          {tunnelUrl ? (
+            <a href={tunnelUrl} target="_blank" rel="noreferrer" style={{
+              display: 'inline-block',
+              background: '#09090b', color: '#fafafa',
+              fontFamily: 'Geist, system-ui, sans-serif',
+              fontSize: '1rem', fontWeight: 600, lineHeight: 1,
+              padding: '18px 26px',
+              border: '3px solid #09090b',
+              boxShadow: '7px 7px 0 #fafafa',
+              textDecoration: 'none',
+              transition: 'transform 0.1s, box-shadow 0.1s',
+            }}>
+              Open on phone ↗
+            </a>
+          ) : (
+            <div style={{
+              display: 'inline-block',
+              background: 'rgba(0,0,0,0.18)', color: '#09090b',
+              fontFamily: 'Geist, system-ui, sans-serif',
+              fontSize: '1rem', fontWeight: 600, lineHeight: 1,
+              padding: '18px 26px',
+              border: '3px solid #09090b',
+            }}>
+              Start with TUNNEL=ngrok
+            </div>
+          )}
+          <button type="button" onClick={copyLink} style={{
+            display: 'inline-block',
+            background: '#fafafa', color: '#09090b',
+            fontFamily: 'Geist, system-ui, sans-serif',
+            fontSize: '1rem', fontWeight: 600, lineHeight: 1,
+            padding: '18px 26px',
+            border: '3px solid #09090b',
+            boxShadow: '7px 7px 0 #09090b',
+            cursor: 'pointer',
+            transition: 'transform 0.1s, box-shadow 0.1s',
+          }}>
+            {copied ? 'Copied!' : 'Copy link'}
+          </button>
+        </div>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '24px 20px' }}>
-        <div style={{ display: 'flex', gap: 40, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          {/* Phone mockup */}
-          <PhoneMockup url={tunnelUrl} />
+      {/* ── Status + How-to grid ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        border: '3px solid #09090b',
+        borderTop: 'none',
+      }}>
 
-          {/* Instructions */}
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: S.text1, marginBottom: 8 }}>How to connect</div>
-              {[
-                'Open your browser on your phone',
-                tunnelUrl ? `Navigate to: ${tunnelUrl}` : 'Start the agent to get a tunnel URL',
-                'Log in with the same token',
-                'Your phone is now a Synaptix companion',
-              ].map((step, i) => (
-                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'flex-start' }}>
-                  <div style={{
-                    width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-                    background: isConnected && i < 2 ? `${S.success}20` : S.surface2,
-                    border: `1px solid ${isConnected && i < 2 ? S.success : S.border}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 10, fontWeight: 700, color: isConnected && i < 2 ? S.success : S.text3,
-                  }}>{i + 1}</div>
-                  <span style={{ fontSize: 12, color: i === 1 && tunnelUrl ? S.primary : S.text2, lineHeight: 1.5, marginTop: 2, wordBreak: 'break-all' }}>{step}</span>
-                </div>
-              ))}
-            </div>
+        {/* Status card */}
+        <div style={{
+          padding: '28px 28px 32px',
+          borderRight: '3px solid #09090b',
+          background: S.surface,
+        }}>
+          <div style={{
+            fontFamily: mono, fontSize: 9, fontWeight: 500,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: S.text3, marginBottom: 16,
+          }}>
+            Connection
+          </div>
 
-            {/* Tunnel URL */}
-            {tunnelUrl && (
-              <div style={{ background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 9, padding: '12px 14px', marginBottom: 14 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: S.text3, letterSpacing: 0.5, marginBottom: 6 }}>TUNNEL URL</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <code style={{ flex: 1, fontSize: 11, color: S.primary, fontFamily: "'JetBrains Mono',monospace", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {tunnelUrl}
-                  </code>
-                  <button type="button" onClick={copyLink} style={{
-                    height: 26, padding: '0 10px', borderRadius: 5,
-                    border: `1px solid ${copied ? S.success : S.border}`,
-                    background: copied ? `${S.success}12` : 'transparent',
-                    color: copied ? S.success : S.text2,
-                    fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                  }}>{copied ? 'Copied!' : 'Copy'}</button>
-                </div>
-              </div>
-            )}
-
-            {!tunnelUrl && (
-              <div style={{ background: `${S.warning}08`, border: `1px solid ${S.warning}20`, borderRadius: 9, padding: '10px 14px', fontSize: 12, color: S.text3 }}>
-                <span style={{ color: S.warning, fontWeight: 600 }}>No tunnel active.</span> Start the agent with <code style={{ fontFamily: 'monospace', color: S.primary }}>TUNNEL=ngrok</code> to get a public URL.
-              </div>
-            )}
-
-            <div style={{
-              marginTop: 12, padding: '12px 16px', borderRadius: 9,
-              background: `${S.primary}08`, border: `1px solid ${S.primary}20`,
-              fontSize: 12, color: S.text3, lineHeight: 1.6,
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <span style={{
+              width: 10, height: 10, borderRadius: '50%',
+              background: isConnected ? '#10b981' : '#ef4444',
+              boxShadow: isConnected ? '0 0 0 3px rgba(16,185,129,0.2)' : '0 0 0 3px rgba(239,68,68,0.2)',
+              flexShrink: 0,
+            }} />
+            <span style={{
+              fontFamily: serif, fontSize: '1.4rem', fontWeight: 400,
+              color: S.text1, lineHeight: 1,
             }}>
-              <span style={{ color: S.primary, fontWeight: 600 }}>In development:</span> Native iOS and Android companion apps. Use the web PWA for now — tap the share button in Safari/Chrome and choose "Add to Home Screen" for a native-like experience.
-            </div>
+              {isConnected ? 'Agent online' : 'Agent offline'}
+            </span>
+          </div>
 
-            {/* Add to Home Screen instructions */}
+          {tunnelUrl ? (
             <div style={{
-              marginTop: 10, padding: '12px 16px', borderRadius: 9,
+              fontFamily: mono, fontSize: 10,
+              color: S.text3, wordBreak: 'break-all',
+              padding: '8px 10px',
               background: S.surface2, border: `1px solid ${S.border}`,
-              fontSize: 12, color: S.text2, lineHeight: 1.6,
+              marginBottom: 14,
             }}>
-              <div style={{ fontWeight: 700, color: S.text1, marginBottom: 8, fontSize: 11, letterSpacing: 0.4 }}>ADD TO HOME SCREEN</div>
-              {[
-                { label: 'Safari (iOS)', steps: 'Tap the Share icon (□↑) → "Add to Home Screen" → Add' },
-                { label: 'Chrome (Android)', steps: 'Tap the ⋮ menu → "Add to Home screen" → Add' },
-                { label: 'Chrome (iOS)', steps: 'Tap the Share icon (□↑) → "Add to Home Screen" → Add' },
-              ].map(({ label, steps }) => (
-                <div key={label} style={{ marginBottom: 6 }}>
-                  <span style={{ color: S.primary, fontWeight: 600 }}>{label}:</span>{' '}
-                  <span>{steps}</span>
-                </div>
-              ))}
+              {tunnelUrl}
             </div>
+          ) : (
+            <div style={{
+              fontFamily: mono, fontSize: 10,
+              color: S.text3, padding: '8px 10px',
+              background: S.surface2, border: `1px solid ${S.border}`,
+              marginBottom: 14,
+            }}>
+              No tunnel URL yet
+            </div>
+          )}
+
+          {/* Platform pills */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {[
+              { name: 'iOS · Safari', icon: '🍎' },
+              { name: 'Android · Chrome', icon: '🤖' },
+              { name: 'Desktop · PWA', icon: '🖥' },
+            ].map(({ name, icon }) => (
+              <span key={name} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '5px 10px',
+                fontFamily: mono, fontSize: 9,
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                border: `2px solid ${S.border}`,
+                color: S.text2,
+              }}>
+                {icon} {name}
+              </span>
+            ))}
           </div>
         </div>
+
+        {/* Add to Home Screen */}
+        <div style={{
+          padding: '28px 28px 32px',
+          borderRight: '3px solid #09090b',
+          background: S.surface2,
+        }}>
+          <div style={{
+            fontFamily: mono, fontSize: 9, fontWeight: 500,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: S.text3, marginBottom: 16,
+          }}>
+            Add to Home Screen
+          </div>
+
+          <h3 style={{
+            fontFamily: serif, fontWeight: 400,
+            fontSize: '1.8rem', lineHeight: 0.95,
+            letterSpacing: '-0.02em', margin: '0 0 20px',
+            color: S.text1,
+          }}>
+            Install the<br /><em style={{ fontStyle: 'italic', color: '#9a99ff' }}>PWA</em>
+          </h3>
+
+          {[
+            { platform: 'Safari (iOS)', steps: 'Tap Share → Add to Home Screen' },
+            { platform: 'Chrome (Android)', steps: 'Menu ⋮ → Add to Home screen' },
+            { platform: 'Chrome (Desktop)', steps: 'Address bar → Install app icon' },
+          ].map(({ platform, steps }, i) => (
+            <div key={platform} style={{
+              display: 'grid', gridTemplateColumns: '1.2rem 1fr',
+              gap: '4px 10px', padding: '12px 0',
+              borderTop: i === 0 ? `2px solid ${S.border}` : `2px solid ${S.border}`,
+            }}>
+              <span style={{
+                fontFamily: serif, fontSize: '1rem', color: '#7170ff',
+                lineHeight: 1.4,
+              }}>
+                {i + 1}
+              </span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: S.text1, marginBottom: 2 }}>{platform}</div>
+                <div style={{ fontFamily: mono, fontSize: 9, color: S.text3, letterSpacing: '0.04em' }}>{steps}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* What you can do */}
+        <div style={{ padding: '28px 28px 32px', background: S.surface }}>
+          <div style={{
+            fontFamily: mono, fontSize: 9, fontWeight: 500,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: S.text3, marginBottom: 16,
+          }}>
+            From your phone
+          </div>
+
+          <h3 style={{
+            fontFamily: serif, fontWeight: 400,
+            fontSize: '1.8rem', lineHeight: 0.95,
+            letterSpacing: '-0.02em', margin: '0 0 20px',
+            color: S.text1,
+          }}>
+            Real control,<br /><em style={{ fontStyle: 'italic', color: '#9a99ff' }}>anywhere</em>
+          </h3>
+
+          {[
+            { title: 'Live terminal output', desc: 'Stream real PTY sessions from any agent' },
+            { title: 'Session management', desc: 'Create, rename, close and resume sessions' },
+            { title: 'Agent status', desc: 'See which agents are running and their state' },
+            { title: 'Notifications', desc: 'Know when a task finishes or needs input' },
+          ].map(({ title, desc }, i) => (
+            <div key={title} style={{
+              padding: '13px 0',
+              borderTop: `2px solid ${S.border}`,
+              display: 'flex', alignItems: 'flex-start', gap: 12,
+            }}>
+              <span style={{
+                width: 22, height: 22, borderRadius: '50%',
+                background: i === 0 ? '#7170ff' : S.surface3,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0, marginTop: 1,
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" stroke={i === 0 ? '#fff' : S.text3} fill="none" strokeWidth="2.5" strokeLinecap="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: S.text1, marginBottom: 2 }}>{title}</div>
+                <div style={{ fontSize: 11, color: S.text3, lineHeight: 1.4 }}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Run it strip ── */}
+      <div style={{
+        borderTop: '3px solid #09090b',
+        background: '#09090b', color: '#fafafa',
+        padding: '28px 48px',
+        display: 'flex', alignItems: 'center', gap: 32,
+        flexWrap: 'wrap',
+      }}>
+        <div style={{
+          fontFamily: serif, fontSize: '1.6rem', fontWeight: 400,
+          lineHeight: 1, color: '#fafafa', flexShrink: 0,
+        }}>
+          Run it
+        </div>
+        <code style={{
+          fontFamily: mono, fontSize: 13,
+          color: '#9a99ff', background: '#18181b',
+          padding: '10px 16px', border: '2px solid #3f3f46',
+          letterSpacing: '0.03em',
+        }}>
+          TUNNEL=ngrok npm run dev
+        </code>
+        <span style={{ fontFamily: mono, fontSize: 10, color: '#52525b', letterSpacing: '0.06em' }}>
+          THEN SCAN THE QR CODE PRINTED IN YOUR TERMINAL
+        </span>
       </div>
     </div>
   );

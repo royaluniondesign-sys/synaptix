@@ -4,13 +4,7 @@ import { useDevices } from '../hooks/useDevices';
 import { formatRelativeTime } from '../lib/format-relative-time';
 import type { SkinId, KeyboardMode, PerKeyColors } from '../lib/types';
 import type { ConnectionStatus } from '../lib/ws-client';
-
-const S = {
-  bg: '#09090b', surface: '#0c0c0f', surface2: '#18181b', surface3: '#27272a',
-  border: '#27272a', borderLight: '#3f3f46',
-  primary: '#a78bfa', success: '#10b981', error: '#ef4444', warning: '#f59e0b',
-  text1: '#fafafa', text2: '#a1a1aa', text3: '#52525b',
-} as const;
+import { T as S } from '../lib/design';
 
 export interface SettingsViewProps {
   skin: SkinId;
@@ -153,34 +147,30 @@ function Logo({ id, size = 36 }: { id: string; size?: number }) {
     hermes: '#7c3aed', openclaw: '#be123c', ollama: '#1c1c1e', openai: '#0d0d0d',
     openrouter: '#6366f1', grok: '#111', gemini: '#1a73e8', auto: '#6366f1',
     copilot: '#24292e', aider: '#1a472a', gemma: '#4285f4', mistral: '#ff6b35',
-    deepseek: '#0052cc',
+    deepseek: '#0052cc', kilo: '#000000', kilocode: '#000000',
   };
   const fill = bg[id] ?? S.surface3;
 
   const icons: Record<string, React.ReactNode> = {
-    // Claude / Anthropic — their stylized A mark
-    claude: <path fill="white" d="M18 6 L25.5 24 L22.5 24 L20.5 19.5 L15.5 19.5 L13.5 24 L10.5 24 Z M18 11.5 L21 18 L15 18 Z" />,
-
-    // Codex / OpenAI — abstract bloom (hexagonal rotation)
-    codex: (
-      <>
-        {[0,60,120,180,240,300].map(angle => (
-          <ellipse key={angle} cx="18" cy="18" rx="4" ry="9" fill="white" opacity="0.9"
-            transform={`rotate(${angle} 18 18)`} />
-        ))}
-        <circle cx="18" cy="18" r="3.5" fill={fill} />
-      </>
+    // Claude / Anthropic — real coral logomark, scaled to 36×36
+    claude: (
+      <g transform="translate(3,3) scale(1.25)">
+        <path fill="white" fillRule="nonzero" d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" />
+      </g>
     ),
 
-    // OpenAI (same as codex but slightly different size)
+    // Codex / OpenAI — real swirl path, scaled to 36×36
+    codex: (
+      <g transform="translate(5,5) scale(1.085)">
+        <path fill="white" fillRule="evenodd" d="M9.205 8.658v-2.26c0-.19.072-.333.238-.428l4.543-2.616c.619-.357 1.356-.523 2.117-.523 2.854 0 4.662 2.212 4.662 4.566 0 .167 0 .357-.024.547l-4.71-2.759a.797.797 0 00-.856 0l-5.97 3.473zm10.609 8.8V12.06c0-.333-.143-.57-.429-.737l-5.97-3.473 1.95-1.118a.433.433 0 01.476 0l4.543 2.617c1.309.76 2.189 2.378 2.189 3.948 0 1.808-1.07 3.473-2.76 4.163zM7.802 12.703l-1.95-1.142c-.167-.095-.239-.238-.239-.428V5.899c0-2.545 1.95-4.472 4.591-4.472 1 0 1.927.333 2.712.928L8.23 5.067c-.285.166-.428.404-.428.737v6.898zM12 15.128l-2.795-1.57v-3.33L12 8.658l2.795 1.57v3.33L12 15.128zm1.796 7.23c-1 0-1.927-.332-2.712-.927l4.686-2.712c.285-.166.428-.404.428-.737v-6.898l1.974 1.142c.167.095.238.238.238.428v5.233c0 2.545-1.974 4.472-4.614 4.472zm-5.637-5.303l-4.544-2.617c-1.308-.761-2.188-2.378-2.188-3.948A4.482 4.482 0 014.21 6.327v5.423c0 .333.143.571.428.738l5.947 3.449-1.95 1.118a.432.432 0 01-.476 0zm-.262 3.9c-2.688 0-4.662-2.021-4.662-4.519 0-.19.024-.38.047-.57l4.686 2.71c.286.167.571.167.856 0l5.97-3.448v2.26c0 .19-.07.333-.237.428l-4.543 2.616c-.619.357-1.356.523-2.117.523zm5.899 2.83a5.947 5.947 0 005.827-4.756C22.287 18.339 24 15.84 24 13.296c0-1.665-.713-3.282-1.998-4.448.119-.5.19-.999.19-1.498 0-3.401-2.759-5.947-5.946-5.947-.642 0-1.26.095-1.88.31A5.962 5.962 0 0010.205 0a5.947 5.947 0 00-5.827 4.757C1.713 5.447 0 7.945 0 10.49c0 1.666.713 3.283 1.998 4.448-.119.5-.19 1-.19 1.499 0 3.401 2.759 5.946 5.946 5.946.642 0 1.26-.095 1.88-.309a5.96 5.96 0 004.162 1.713z" />
+      </g>
+    ),
+
+    // OpenAI (same swirl)
     openai: (
-      <>
-        {[0,60,120,180,240,300].map(angle => (
-          <ellipse key={angle} cx="18" cy="18" rx="4" ry="9" fill="white" opacity="0.9"
-            transform={`rotate(${angle} 18 18)`} />
-        ))}
-        <circle cx="18" cy="18" r="3.5" fill={fill} />
-      </>
+      <g transform="translate(5,5) scale(1.085)">
+        <path fill="white" fillRule="evenodd" d="M9.205 8.658v-2.26c0-.19.072-.333.238-.428l4.543-2.616c.619-.357 1.356-.523 2.117-.523 2.854 0 4.662 2.212 4.662 4.566 0 .167 0 .357-.024.547l-4.71-2.759a.797.797 0 00-.856 0l-5.97 3.473zm10.609 8.8V12.06c0-.333-.143-.57-.429-.737l-5.97-3.473 1.95-1.118a.433.433 0 01.476 0l4.543 2.617c1.309.76 2.189 2.378 2.189 3.948 0 1.808-1.07 3.473-2.76 4.163zM7.802 12.703l-1.95-1.142c-.167-.095-.239-.238-.239-.428V5.899c0-2.545 1.95-4.472 4.591-4.472 1 0 1.927.333 2.712.928L8.23 5.067c-.285.166-.428.404-.428.737v6.898zM12 15.128l-2.795-1.57v-3.33L12 8.658l2.795 1.57v3.33L12 15.128zm1.796 7.23c-1 0-1.927-.332-2.712-.927l4.686-2.712c.285-.166.428-.404.428-.737v-6.898l1.974 1.142c.167.095.238.238.238.428v5.233c0 2.545-1.974 4.472-4.614 4.472zm-5.637-5.303l-4.544-2.617c-1.308-.761-2.188-2.378-2.188-3.948A4.482 4.482 0 014.21 6.327v5.423c0 .333.143.571.428.738l5.947 3.449-1.95 1.118a.432.432 0 01-.476 0zm-.262 3.9c-2.688 0-4.662-2.021-4.662-4.519 0-.19.024-.38.047-.57l4.686 2.71c.286.167.571.167.856 0l5.97-3.448v2.26c0 .19-.07.333-.237.428l-4.543 2.616c-.619.357-1.356.523-2.117.523zm5.899 2.83a5.947 5.947 0 005.827-4.756C22.287 18.339 24 15.84 24 13.296c0-1.665-.713-3.282-1.998-4.448.119-.5.19-.999.19-1.498 0-3.401-2.759-5.947-5.946-5.947-.642 0-1.26.095-1.88.31A5.962 5.962 0 0010.205 0a5.947 5.947 0 00-5.827 4.757C1.713 5.447 0 7.945 0 10.49c0 1.666.713 3.283 1.998 4.448-.119.5-.19 1-.19 1.499 0 3.401 2.759 5.946 5.946 5.946.642 0 1.26-.095 1.88-.309a5.96 5.96 0 004.162 1.713z" />
+      </g>
     ),
 
     // Gemini — 4-pointed star (tall vertical, shorter horizontal)
@@ -252,17 +242,33 @@ function Logo({ id, size = 36 }: { id: string; size?: number }) {
       </>
     ),
 
-    // Aider — simple terminal chevron
-    aider: <path fill="white" d="M10 12 L16 18 L10 24 L12 24 L18 18 L12 12 Z M18 23 L26 23 L26 21 L18 21 Z" />,
-
-    // GitHub Copilot
-    copilot: (
+    // Aider — pixelated terminal icon (simplified from aider.chat, fits 36×36)
+    aider: (
       <>
-        <circle cx="18" cy="14" r="7" fill="none" stroke="white" strokeWidth="2" />
-        <circle cx="13" cy="22" r="3.5" fill="white" />
-        <circle cx="23" cy="22" r="3.5" fill="white" />
-        <rect x="14.5" y="20.5" width="7" height="3" fill="white" />
+        <path fill="white" d="M10 10 L10 26 L26 26 L26 10 Z" fillOpacity="0" stroke="white" strokeWidth="1.5" />
+        <path fill="none" d="M13 16 L17 20 L13 24" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="19" y1="24" x2="24" y2="24" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
       </>
+    ),
+
+    // Kilo — black bg + yellow glyph (scaled to fit 36×36 viewBox from 512×512)
+    kilo: (
+      <g transform="translate(4,4) scale(0.054687)">
+        <path fill="#FAF74F" d="M322 377H377V421H307.857L278 391.143V322H322V377ZM421 307.857L391.143 278H322V322L377 322V377H421V307.857ZM234 278H190V322H234V278ZM91 391.143L120.857 421H234V377H135V278H91V391.143ZM371.172 189.999V120.856L341.315 90.9995H278V135H327.172V189.999H278V233.999H421V189.999H371.172ZM135 91H91V233.999H135V184.5H190V233.999H234V184.5L190 140.5H135V91ZM234 91H190V140.5H234V91Z" />
+      </g>
+    ),
+    kilocode: (
+      <g transform="translate(4,4) scale(0.054687)">
+        <path fill="#FAF74F" d="M322 377H377V421H307.857L278 391.143V322H322V377ZM421 307.857L391.143 278H322V322L377 322V377H421V307.857ZM234 278H190V322H234V278ZM91 391.143L120.857 421H234V377H135V278H91V391.143ZM371.172 189.999V120.856L341.315 90.9995H278V135H327.172V189.999H278V233.999H421V189.999H371.172ZM135 91H91V233.999H135V184.5H190V233.999H234V184.5L190 140.5H135V91ZM234 91H190V140.5H234V91Z" />
+      </g>
+    ),
+
+    // GitHub Copilot — Primer Octicons paths
+    copilot: (
+      <g transform="translate(9,10) scale(1.125)">
+        <path fill="white" d="M7.998 15.035c-4.562 0-7.873-2.914-7.998-3.749V9.338c.085-.628.677-1.686 1.588-2.065.013-.07.024-.143.036-.218.029-.183.06-.384.126-.612-.201-.508-.254-1.084-.254-1.656 0-.87.128-1.769.693-2.484.579-.733 1.494-1.124 2.724-1.261 1.206-.134 2.262.034 2.944.765.05.053.096.108.139.165.044-.057.094-.112.143-.165.682-.731 1.738-.899 2.944-.765 1.23.137 2.145.528 2.724 1.261.566.715.693 1.614.693 2.484 0 .572-.053 1.148-.254 1.656.066.228.098.429.126.612.012.076.024.148.037.218.924.385 1.522 1.471 1.591 2.095v1.872c0 .766-3.351 3.795-8.002 3.795Zm0-1.485c2.28 0 4.584-1.11 5.002-1.433V7.862l-.023-.116c-.49.21-1.075.291-1.727.291-1.146 0-2.059-.327-2.71-.991A3.222 3.222 0 0 1 8 6.303a3.24 3.24 0 0 1-.544.743c-.65.664-1.563.991-2.71.991-.652 0-1.236-.081-1.727-.291l-.023.116v4.255c.419.323 2.722 1.433 5.002 1.433ZM6.762 2.83c-.193-.206-.637-.413-1.682-.297-1.019.113-1.479.404-1.713.7-.247.312-.369.789-.369 1.554 0 .793.129 1.171.308 1.371.162.181.519.379 1.442.379.853 0 1.339-.235 1.638-.54.315-.322.527-.827.617-1.553.117-.935-.037-1.395-.241-1.614Zm4.155-.297c-1.044-.116-1.488.091-1.681.297-.204.219-.359.679-.242 1.614.091.726.303 1.231.618 1.553.299.305.784.54 1.638.54.922 0 1.28-.198 1.442-.379.179-.2.308-.578.308-1.371 0-.765-.123-1.242-.37-1.554-.233-.296-.693-.587-1.713-.7Z" />
+        <path fill="white" d="M6.25 9.037a.75.75 0 0 1 .75.75v1.501a.75.75 0 0 1-1.5 0V9.787a.75.75 0 0 1 .75-.75Zm4.25.75v1.501a.75.75 0 0 1-1.5 0V9.787a.75.75 0 0 1 1.5 0Z" />
+      </g>
     ),
   };
 
@@ -301,7 +307,7 @@ const INSTALLED_AGENTS_DEFAULT: InstalledAgent[] = [
 ];
 
 const AVAILABLE_AGENTS = [
-  { id: 'claude-teams',     label: 'Claude Agent Teams',  cmd: 'orca claude-teams --dangerously-skip-permissions' },
+  { id: 'claude-teams',     label: 'Claude Agent Teams',  cmd: 'synaptix claude-teams --dangerously-skip-permissions' },
   { id: 'openclaude',       label: 'OpenClaude',           cmd: 'openclaude --dangerously-skip-permissions' },
   { id: 'grok',             label: 'Grok',                 cmd: 'grok --permission-mode bypassPermissions' },
   { id: 'copilot',          label: 'GitHub Copilot',       cmd: 'copilot --yolo' },
@@ -558,7 +564,7 @@ function ProviderCard({ p }: { p: typeof PROVIDERS[0] }) {
     </Card>
   );
 }
-// CLI-based agent account setup (like Orca's "orca account add --agent X" pattern)
+// CLI-based agent account setup
 const CLI_AGENT_ACCOUNTS = [
   { id: 'opencode', label: 'OpenCode', cmd: 'synaptix account add --agent opencode', desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
   { id: 'codex',    label: 'Codex',    cmd: 'synaptix account add --agent codex',    desc: 'Add accounts by running this command in a terminal on the Synaptix host. Selection applies to new explicit agent launches on that host; direct SSH relay and Windows-hosted WSL launches use their own credentials.' },
@@ -642,7 +648,7 @@ function ClaudeAccountCard() {
           </button>
         </div>
         {addClicked && (
-          <div style={{ background: S.bg, border: `1px solid ${S.borderLight}`, borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
+          <div style={{ background: S.bg, border: `1px solid ${S.surface4}`, borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: S.text1, marginBottom: 6 }}>Add Claude account</div>
             <div style={{ fontSize: 10, color: S.text3, marginBottom: 8, lineHeight: 1.5 }}>Paste a Claude session token or API key. Stored locally only — never sent to any server.</div>
             <div style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
@@ -911,7 +917,7 @@ function AppearanceSection({ skin, onSkinChange }: { skin: SkinId; onSkinChange:
       <Card>
         {THEMES.map((t, i) => (
           <button key={t.id} type="button" onClick={() => pick(t.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderBottom: i < THEMES.length - 1 ? `1px solid ${S.border}` : 'none', background: theme === t.id ? `${S.primary}10` : 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
-            <div style={{ width: 38, height: 22, borderRadius: 5, background: t.bg, border: `1px solid ${S.borderLight}`, display: 'flex', alignItems: 'center', paddingLeft: 6, flexShrink: 0 }}><div style={{ width: 3, height: 11, borderRadius: 1, background: t.cursor }} /></div>
+            <div style={{ width: 38, height: 22, borderRadius: 5, background: t.bg, border: `1px solid ${S.surface4}`, display: 'flex', alignItems: 'center', paddingLeft: 6, flexShrink: 0 }}><div style={{ width: 3, height: 11, borderRadius: 1, background: t.cursor }} /></div>
             <span style={{ fontSize: 13, fontWeight: theme === t.id ? 600 : 400, color: theme === t.id ? S.text1 : S.text2, flex: 1 }}>{t.name}</span>
             {theme === t.id && <svg width="13" height="13" viewBox="0 0 24 24" stroke={S.primary} fill="none" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
           </button>
@@ -1034,7 +1040,7 @@ function ShortcutsSection() {
         {SHORTCUTS.map((s, i) => (
           <Row key={s.label} label={s.label} last={i === SHORTCUTS.length - 1}>
             <div style={{ display: 'flex', gap: 3 }}>
-              {s.keys.map(k => <kbd key={k} style={{ fontSize: 10, fontFamily: "'JetBrains Mono',monospace", background: S.surface3, border: `1px solid ${S.borderLight}`, borderRadius: 4, padding: '2px 6px', color: S.text2 }}>{k}</kbd>)}
+              {s.keys.map(k => <kbd key={k} style={{ fontSize: 10, fontFamily: "'JetBrains Mono',monospace", background: S.surface3, border: `1px solid ${S.surface4}`, borderRadius: 4, padding: '2px 6px', color: S.text2 }}>{k}</kbd>)}
             </div>
           </Row>
         ))}
@@ -1325,7 +1331,10 @@ export function SettingsView(props: SettingsViewProps) {
               {group.items.map(item => {
                 const active = section === item.id && !query;
                 return (
-                  <button key={item.id} type="button" onClick={() => go(item.id)} style={{ width: '100%', height: 29, display: 'flex', alignItems: 'center', gap: 6, padding: '0 7px', borderRadius: 5, border: 'none', marginBottom: 1, background: active ? `${S.primary}16` : 'transparent', color: active ? S.primary : S.text2, fontSize: 11.5, fontWeight: active ? 600 : 400, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left', transition: 'all 100ms' }}>
+                  <button key={item.id} type="button" onClick={() => go(item.id)} style={{ width: '100%', height: 29, display: 'flex', alignItems: 'center', gap: 6, padding: '0 7px', borderRadius: 5, border: 'none', marginBottom: 1, background: active ? 'rgba(255,255,255,0.07)' : 'transparent', color: active ? S.text1 : S.text2, fontSize: 11.5, fontWeight: active ? 500 : 400, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left', transition: 'all 100ms' }}
+                    onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                    onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                  >
                     <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
                     {item.badge && <span style={{ fontSize: 7.5, fontWeight: 700, color: item.badge === 'Beta' ? S.warning : item.badge === 'Optional' ? S.text3 : S.text3, background: item.badge === 'Beta' ? `${S.warning}15` : S.surface3, padding: '1px 4px', borderRadius: 3, border: `1px solid ${item.badge === 'Beta' ? `${S.warning}28` : S.border}`, flexShrink: 0 }}>{item.badge.toUpperCase()}</span>}
                   </button>

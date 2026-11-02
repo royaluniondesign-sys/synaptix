@@ -23,23 +23,9 @@ import { useNotifications } from './hooks/useNotifications';
 import { useOnboarding } from './hooks/useOnboarding';
 import { usePorts } from './hooks/usePorts';
 import { resolveAppSurface } from './lib/app-model';
+import { T as S } from './lib/design';
 import type { View } from './lib/types';
 import type { ConnectionStatus, TerminalWSClient } from './lib/ws-client';
-
-const S = {
-  bg: '#08090a',
-  surface: '#0f1011',
-  surface2: '#191a1b',
-  surface3: '#28282c',
-  border: 'rgba(255,255,255,0.08)',
-  primary: '#7170ff',
-  success: '#10b981',
-  error: '#ef4444',
-  warning: '#f59e0b',
-  text1: '#f7f8f8',
-  text2: '#d0d6e0',
-  text3: '#8a8f98',
-} as const;
 
 const TAB_CONFIG = [
   {
@@ -248,7 +234,6 @@ function FABButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-const PROJECTS: string[] = [];
 
 function NavItem({ label, icon, active, badge, badgeColor, onClick }: {
   label: string;
@@ -261,28 +246,252 @@ function NavItem({ label, icon, active, badge, badgeColor, onClick }: {
       type="button"
       onClick={onClick}
       style={{
-        width: '100%', height: 32, display: 'flex', alignItems: 'center',
-        gap: 8, padding: '0 10px', borderRadius: 6, border: 'none',
-        marginBottom: 1,
-        background: active ? `${S.primary}16` : 'transparent',
-        color: active ? S.primary : S.text2,
-        fontSize: 12.5, fontWeight: active ? 600 : 400,
+        width: '100%', height: 30, display: 'flex', alignItems: 'center',
+        gap: 8, padding: '0 8px', border: 'none',
+        borderRadius: 6,
+        background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
+        color: active ? S.text1 : `${S.text2}99`,
+        fontSize: 13, fontWeight: 500, letterSpacing: '-0.01em',
         fontFamily: 'inherit', cursor: 'pointer',
-        transition: 'background 100ms, color 100ms',
+        transition: 'background 80ms, color 80ms',
         textAlign: 'left', flexShrink: 0,
       }}
+      onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLButtonElement).style.color = S.text2; } }}
+      onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = `${S.text2}99`; } }}
     >
-      <span style={{ color: active ? S.primary : S.text3, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: active ? S.text2 : S.text3, display: 'flex', alignItems: 'center', flexShrink: 0, transition: 'color 80ms' }}>{icon}</span>
       <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
       {badge != null && (
         <span style={{
-          fontSize: 9, fontWeight: 700, minWidth: 16, textAlign: 'center',
-          background: badgeColor ? `${badgeColor}25` : S.surface3,
-          color: badgeColor ?? S.text3,
-          padding: '1px 5px', borderRadius: 8,
+          fontSize: 9, fontWeight: 600, minWidth: 14, textAlign: 'center',
+          background: badgeColor ? `${badgeColor}22` : S.surface3,
+          color: badgeColor ?? S.text2,
+          padding: '1px 5px', borderRadius: 10,
+          border: `1px solid ${badgeColor ? `${badgeColor}44` : S.border}`,
         }}>{badge}</span>
       )}
     </button>
+  );
+}
+
+interface Project { id: string; name: string; branches: { name: string; badge: string }[] }
+const PROJECTS: Project[] = [
+  { id: 'documents', name: 'Documents', branches: [] },
+  { id: 'rud-web',   name: 'RUD-WEB',   branches: [{ name: 'claude/eloquent-maxwe...', badge: 'primary' }] },
+  { id: 'termora',   name: 'Termora',   branches: [{ name: 'main', badge: 'primary' }] },
+  { id: 'antigravity', name: 'antigravity', branches: [{ name: 'excited-bohr', badge: '' }, { name: 'excited-tesla', badge: '' }, { name: 'intelligent-galileo', badge: '' }, { name: 'serene-raman', badge: '' }] },
+];
+
+const AGENT_OPTIONS = [
+  { id: 'claude',    label: 'Claude',    model: 'claude-sonnet-5' },
+  { id: 'opencode',  label: 'OpenCode',  model: 'gpt-4.1' },
+  { id: 'codex',     label: 'Codex',     model: 'codex-1' },
+  { id: 'copilot',   label: 'Copilot',   model: 'gpt-4o' },
+  { id: 'gemini',    label: 'Gemini',    model: 'gemini-2.5-pro' },
+  { id: 'aider',     label: 'Aider',     model: 'claude-3-7' },
+];
+
+function CreateWorktreeModal({ onClose }: { onClose: () => void }) {
+  const [tab, setTab] = useState<'smart'|'github'|'branch'|'name'>('smart');
+  const [query, setQuery] = useState('');
+  const [project, setProject] = useState('Termora');
+  const [agent, setAgent] = useState('claude');
+  const [agentOpen, setAgentOpen] = useState(false);
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 300, backdropFilter: 'blur(2px)' }} />
+      <div style={{
+        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+        width: 'min(94vw,480px)', background: S.surface,
+        border: `1px solid ${S.border}`, borderRadius: 12,
+        zIndex: 301, boxShadow: '0 32px 80px rgba(0,0,0,0.8)',
+        display: 'flex', flexDirection: 'column',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: '16px 18px 14px', borderBottom: `1px solid ${S.border}` }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: S.text1, flex: 1 }}>Create worktree</span>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: S.text3, cursor: 'pointer', display: 'flex' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Project */}
+          <div>
+            <div style={{ fontSize: 11, color: S.text3, marginBottom: 6 }}>Project</div>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: S.surface2, border: `1px solid ${S.border}`,
+              borderRadius: 7, padding: '0 10px', height: 36,
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="1.75" strokeLinecap="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+              <span style={{ flex: 1, fontSize: 12, color: S.text1 }}>{project}</span>
+              <span style={{ fontSize: 10, color: S.text3, background: S.surface3, border: `1px solid ${S.border}`, borderRadius: 4, padding: '1px 6px' }}>Project</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+
+          {/* Run on */}
+          <div>
+            <div style={{ fontSize: 11, color: S.text3, marginBottom: 6 }}>Run on</div>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: S.surface2, border: `1px solid ${S.border}`,
+              borderRadius: 7, padding: '0 10px', height: 36,
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="1.75" strokeLinecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+              <span style={{ fontSize: 12, color: S.text1, fontWeight: 500 }}>Local Mac</span>
+              <span style={{ fontSize: 10, color: S.text3, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>/Users/whitemelonis11/Documents/Termora</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+
+          {/* Agent */}
+          <div style={{ position: 'relative' }}>
+            <div style={{ fontSize: 11, color: S.text3, marginBottom: 6 }}>Agent</div>
+            <button
+              type="button"
+              onClick={() => setAgentOpen(v => !v)}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                background: S.surface2, border: `1px solid ${agentOpen ? S.primary : S.border}`,
+                borderRadius: 7, padding: '0 10px', height: 36,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              <span style={{ flex: 1, fontSize: 12, color: S.text1, textAlign: 'left' }}>
+                {AGENT_OPTIONS.find(a => a.id === agent)?.label ?? 'Claude'}
+              </span>
+              <span style={{ fontSize: 10, color: S.text3 }}>
+                {AGENT_OPTIONS.find(a => a.id === agent)?.model}
+              </span>
+              <svg width="10" height="10" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            {agentOpen && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 2,
+                background: S.surface2, border: `1px solid ${S.border}`,
+                borderRadius: 7, boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                zIndex: 400, overflow: 'hidden',
+              }}>
+                {AGENT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => { setAgent(opt.id); setAgentOpen(false); }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '7px 12px', border: 'none', background: opt.id === agent ? 'rgba(255,255,255,0.05)' : 'none',
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = opt.id === agent ? 'rgba(255,255,255,0.05)' : 'none')}
+                  >
+                    <span style={{ fontSize: 12, color: S.text1, flex: 1, textAlign: 'left' }}>{opt.label}</span>
+                    <span style={{ fontSize: 10, color: S.text3 }}>{opt.model}</span>
+                    {opt.id === agent && (
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={S.primary} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Create From */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+              <span style={{ fontSize: 11, color: S.text3 }}>Create From <span style={{ opacity: 0.5 }}>[Optional]</span></span>
+              <div style={{ flex: 1 }} />
+              <span style={{
+                fontSize: 10, color: S.text3, background: S.surface2,
+                border: `1px solid ${S.border}`, borderRadius: 4, padding: '1px 7px',
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                master
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </div>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', borderBottom: `1px solid ${S.border}`, marginBottom: 10 }}>
+              {(['smart','github','branch','name'] as const).map(t => (
+                <button key={t} type="button" onClick={() => setTab(t)} style={{
+                  padding: '6px 12px', background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: 12, fontFamily: 'inherit',
+                  color: tab === t ? S.text1 : S.text3,
+                  borderBottom: tab === t ? `2px solid ${S.primary}` : '2px solid transparent',
+                  marginBottom: -1,
+                  display: 'flex', alignItems: 'center', gap: 5,
+                }}>
+                  {t === 'smart' && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>}
+                  {t === 'github' && <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>}
+                  {t === 'branch' && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>}
+                  {t === 'name' && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>}
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {/* Search */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              background: S.bg, border: `1px solid ${S.border}`,
+              borderRadius: 7, padding: '0 10px', height: 34,
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="1.75" strokeLinecap="round">
+                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                autoFocus
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Type a name, #1234, branch, GitHub, GitLab, or Jira URL"
+                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: S.text1, fontSize: 12, fontFamily: 'inherit' }}
+              />
+            </div>
+
+            <div style={{ padding: '16px 0 4px', textAlign: 'center', color: S.text3, fontSize: 11 }}>
+              {query ? `No results for "${query}"` : 'Start typing to create a name or find a source.'}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          padding: '12px 18px', borderTop: `1px solid ${S.border}`,
+          gap: 12,
+        }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <div style={{
+              width: 32, height: 18, borderRadius: 9, background: S.surface3,
+              border: `1px solid ${S.border}`, position: 'relative',
+            }}>
+              <div style={{ width: 12, height: 12, borderRadius: '50%', background: S.text3, position: 'absolute', top: 2, left: 2 }} />
+            </div>
+            <span style={{ fontSize: 11, color: S.text3 }}>Create more</span>
+          </label>
+          <div style={{ flex: 1 }} />
+          <button type="button" onClick={onClose} style={{
+            height: 32, padding: '0 16px', borderRadius: 7,
+            border: `1px solid ${S.border}`, background: 'transparent',
+            color: S.text2, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+          }}>Cancel</button>
+          <button type="button" onClick={() => { setProject(project); onClose(); }} style={{
+            height: 32, padding: '0 14px', borderRadius: 7, border: 'none',
+            background: S.text1, color: S.bg,
+            fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', gap: 7,
+          }}>
+            Create worktree
+            <kbd style={{ fontSize: 9, opacity: 0.5, fontFamily: 'inherit' }}>⌘↵</kbd>
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -295,34 +504,35 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
   unreadBadge: string | null;
   connectionStatus: ConnectionStatus;
 }) {
-  const [search, setSearch] = useState('');
-  const [projectFilter, setProjectFilter] = useState('');
+  const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
+  const [showWorktree, setShowWorktree] = useState(false);
+  const toggleProject = (id: string) => setCollapsedProjects(prev => { const n = new Set(prev); if (n.has(id)) { n.delete(id); } else { n.add(id); } return n; });
+
   const isConnected = connectionStatus === 'connected';
-  const statusColor = isConnected ? S.success : connectionStatus === 'reconnecting' ? S.warning : S.error;
+  const isReconnecting = connectionStatus === 'reconnecting';
+  const statusColor = isConnected ? S.success : isReconnecting ? S.warning : S.error;
+  const statusLabel = isConnected ? 'Connected' : isReconnecting ? 'Reconnecting' : 'Offline';
 
-  const filteredProjects = PROJECTS.filter(p =>
-    projectFilter === '' || p.toLowerCase().includes(projectFilter.toLowerCase())
-  );
-
-  // SVG icons matching Orca's sidebar icons
-  const icons = {
-    search: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
-    checklist: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
-    tasks: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
-    automations: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-    dashboard: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>,
-    mobile: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>,
-    terminal: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>,
-    tunnels: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
-    chat: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-    bell: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
-    settings: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-    agents: <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="8" width="14" height="10" rx="3"/><path d="M12 4v4"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M9 17h6"/></svg>,
+  const I = {
+    cockpit:  <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>,
+    terminal: <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>,
+    agents:   <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="8" width="14" height="10" rx="3"/><path d="M12 4v4"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M9 17h6"/></svg>,
+    tasks:    <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
+    tunnels:  <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+    ports:    <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>,
+    chat:     <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+    bell:     <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+    settings: <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+    mobile:      <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>,
+    automations: <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
+    plus:        <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
   };
+
+  const iconSearch = <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
 
   return (
     <div style={{
-      width: 220,
+      width: 216,
       background: S.surface,
       borderRight: `1px solid ${S.border}`,
       display: 'flex',
@@ -330,193 +540,210 @@ function DesktopSidebar({ current, onChange, onNewSession, onQuickOpen, sessionB
       flexShrink: 0,
       overflow: 'hidden',
     }}>
-      {/* App header */}
-      <div style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${S.border}`, flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="20" height="20" viewBox="0 0 36 36">
-            <rect width="36" height="36" rx="8" fill={S.primary}/>
-            <text x="18" y="25" textAnchor="middle" fill="white" fontSize="18" fontWeight="700" fontFamily="Arial,sans-serif">S</text>
-          </svg>
-          <span style={{ fontSize: 13, fontWeight: 700, color: S.text1, letterSpacing: -0.4, flex: 1 }}>Synaptix</span>
-          <span style={{
-            width: 7, height: 7, borderRadius: '50%', background: statusColor,
-            animation: isConnected ? 'pulse-dot 2s ease-in-out infinite' : 'none',
-            flexShrink: 0,
-          }} />
-        </div>
-      </div>
 
-      {/* Search */}
-      <div style={{ padding: '8px 10px 6px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 6, padding: '0 8px', height: 28 }}>
-          {icons.search}
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search"
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: S.text1, fontSize: 12, fontFamily: 'inherit' }}
-          />
-        </div>
-      </div>
-
-      {/* Primary navigation — matches Orca exactly */}
-      <div style={{ padding: '0 6px', flexShrink: 0 }}>
-        {/* Onboarding checklist */}
-        <NavItem label="Onboarding checklist" icon={icons.checklist}
-          active={false} onClick={() => onChange('settings')} />
-
-        {/* Tasks */}
-        <NavItem label="Tasks" icon={icons.tasks}
-          active={current === 'tasks'}
-          badge={sessionBadge} badgeColor={S.primary}
-          onClick={() => onChange('tasks')} />
-
-        {/* Automations */}
-        <NavItem label="Automations" icon={icons.automations}
-          active={current === 'automations'}
-          onClick={() => onChange('automations')} />
-
-        {/* Agent Dashboard */}
-        <NavItem label="Agent Dashboard" icon={icons.dashboard}
-          active={current === 'dashboard'}
-          onClick={() => onChange('dashboard')} />
-
-        {/* Synaptix Mobile */}
-        <NavItem label="Synaptix Mobile" icon={icons.mobile}
-          active={current === 'mobile'}
-          onClick={() => onChange('mobile')} />
-
-        {/* Agents */}
-        <NavItem label="Agents" icon={icons.agents}
-          active={current === 'agents'}
-          onClick={() => onChange('agents')} />
-      </div>
-
-      <div style={{ borderTop: `1px solid ${S.border}`, margin: '4px 10px' }} />
-
-      {/* Secondary navigation */}
-      <div style={{ padding: '0 6px', flexShrink: 0 }}>
-        <NavItem label="Terminals" icon={icons.terminal}
-          active={current === 'terminal'}
-          badge={sessionBadge} badgeColor={S.text3}
-          onClick={() => onChange('terminal')} />
-        <NavItem label="Tunnels" icon={icons.tunnels}
-          active={current === 'tunnels'}
-          onClick={() => onChange('tunnels')} />
-        <NavItem label="Chat" icon={icons.chat}
-          active={current === 'chat'}
-          onClick={() => onChange('chat')} />
-        <NavItem label="Notifications" icon={icons.bell}
-          active={current === 'notifications'}
-          badge={unreadBadge} badgeColor={S.error}
-          onClick={() => onChange('notifications')} />
-      </div>
-
-      <div style={{ borderTop: `1px solid ${S.border}`, margin: '4px 10px' }} />
-
-      {/* Projects section */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', padding: '4px 14px 2px', flexShrink: 0 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: S.text2, flex: 1 }}>Projects</span>
-          <button type="button" onClick={onNewSession} title="New session" style={{
-            background: 'transparent', border: 'none', color: S.text3, cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center',
-          }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-        </div>
-
-        {/* Project filter input */}
-        <div style={{ padding: '2px 8px 4px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 5, padding: '0 7px', height: 24 }}>
-            {icons.search}
-            <input
-              type="text"
-              value={projectFilter}
-              onChange={e => setProjectFilter(e.target.value)}
-              placeholder="Filter…"
-              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: S.text1, fontSize: 11, fontFamily: 'inherit' }}
-            />
-          </div>
-        </div>
-
-        {/* Project list */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '0 6px' }}>
-          {filteredProjects.length > 0 ? (
-            filteredProjects.map(proj => (
-              <button key={proj} type="button" onClick={() => onChange('tasks')} style={{
-                width: '100%', height: 29, display: 'flex', alignItems: 'center',
-                gap: 8, padding: '0 8px', borderRadius: 5,
-                border: 'none', marginBottom: 1,
-                background: 'transparent', color: S.text2,
-                fontSize: 12, fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left',
-                transition: 'background 100ms',
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = S.surface2; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-              >
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: S.surface3, border: `1px solid ${S.border}`, flexShrink: 0 }} />
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{proj}</span>
-              </button>
-            ))
-          ) : (
-            <p style={{ fontSize: 11, color: S.text3, padding: '6px 8px', lineHeight: 1.5, margin: 0 }}>
-              No agent activity matches these filters.
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Bottom: settings + profile */}
-      <div style={{ borderTop: `1px solid ${S.border}`, padding: '8px 10px 10px', flexShrink: 0 }}>
-        {/* Settings + ⌘K row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 8 }}>
-          <button type="button" onClick={() => onChange('settings')} title="Settings (⌘,)"
-            style={{
-              flex: 1, height: 30, borderRadius: 6, border: `1px solid ${S.border}`,
-              background: current === 'settings' ? `${S.primary}14` : 'transparent',
-              color: current === 'settings' ? S.primary : S.text3,
-              fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', gap: 6, padding: '0 8px',
-            }}>
-            {icons.settings}
-            <span>Settings</span>
-          </button>
-          <button type="button" onClick={onQuickOpen} title="Quick Open (⌘K)"
-            style={{
-              width: 30, height: 30, borderRadius: 6, border: `1px solid ${S.border}`,
-              background: 'transparent', color: S.text3,
-              fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-            ⌘K
-          </button>
-        </div>
-
-        {/* Profile row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {/* Header */}
+      <div style={{
+        padding: '12px 12px 10px',
+        borderBottom: `1px solid ${S.border2}`,
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <div style={{
-            width: 26, height: 26, borderRadius: '50%',
-            background: `linear-gradient(135deg, ${S.primary}, #a78bfa)`,
+            width: 26, height: 26, borderRadius: 7, flexShrink: 0,
+            background: S.surface3,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={S.text2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
             </svg>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: S.text1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              User
-            </div>
-            <div style={{ fontSize: 9, color: S.text3 }}>v{__APP_VERSION__}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: S.text1 }}>Synaptix</div>
           </div>
-          <span style={{
-            fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-            background: `${S.primary}20`, border: `1px solid ${S.primary}40`,
-            color: S.primary, flexShrink: 0,
-          }}>Max</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%',
+              background: statusColor, flexShrink: 0,
+            }} />
+            <span style={{ fontSize: 10, color: S.text3 }}>{statusLabel}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav — flat list, no section dividers */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', paddingTop: 4 }}>
+
+
+        {/* Search shortcut */}
+        <button
+          type="button"
+          onClick={onQuickOpen}
+          style={{
+            width: '100%', height: 30, display: 'flex', alignItems: 'center',
+            gap: 8, padding: '0 8px', border: 'none',
+            borderRadius: 6, background: 'transparent',
+            color: S.text3, fontSize: 13, fontWeight: 500, letterSpacing: '-0.01em',
+            fontFamily: 'inherit', cursor: 'pointer',
+            textAlign: 'left', transition: 'background 80ms, color 80ms',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLButtonElement).style.color = S.text2; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = S.text3; }}
+        >
+          <span style={{ color: S.text3, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{iconSearch}</span>
+          <span style={{ flex: 1 }}>Search</span>
+          <span style={{ fontSize: 10, color: S.text3, opacity: 0.6, letterSpacing: 0 }}>⌘K</span>
+        </button>
+
+        <NavItem label="Cockpit" icon={I.cockpit} active={current === 'dashboard'} onClick={() => onChange('dashboard')} />
+        <NavItem label="Terminals" icon={I.terminal} active={current === 'terminal'}
+          badge={sessionBadge}
+          onClick={() => onChange('terminal')} />
+        <NavItem label="Agent Dashboard" icon={I.agents} active={current === 'agents'} onClick={() => onChange('agents')} />
+        <NavItem label="Tasks" icon={I.tasks} active={current === 'tasks'} onClick={() => onChange('tasks')} />
+        <NavItem label="Automations" icon={I.automations} active={current === 'automations'} onClick={() => onChange('automations')} />
+        <NavItem label="Tunnels" icon={I.tunnels} active={current === 'tunnels'} onClick={() => onChange('tunnels')} />
+        <NavItem label="Ports" icon={I.ports} active={current === 'ports'} onClick={() => onChange('ports')} />
+        <NavItem label="Chat" icon={I.chat} active={current === 'chat'} onClick={() => onChange('chat')} />
+        <NavItem label="Notifications" icon={I.bell} active={current === 'notifications'}
+          badge={unreadBadge}
+          onClick={() => onChange('notifications')} />
+        <NavItem label="Synaptix Mobile" icon={I.mobile} active={current === 'mobile'} onClick={() => onChange('mobile')} />
+
+        {/* Projects section */}
+        <div style={{ marginTop: 8, borderTop: `1px solid ${S.border}` }}>
+          {/* Section header */}
+          <div style={{ display: 'flex', alignItems: 'center', padding: '6px 10px 4px 12px', gap: 4 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: S.text3, flex: 1, letterSpacing: 0.2 }}>Projects</span>
+            {[
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
+            ].map((icon, i) => (
+              <button key={i} type="button" style={{ background: 'none', border: 'none', color: S.text3, cursor: 'pointer', display: 'flex', padding: 3, borderRadius: 4 }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = S.text2; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = S.text3; }}
+              >{icon}</button>
+            ))}
+            <button type="button" onClick={() => setShowWorktree(true)} style={{ background: 'none', border: 'none', color: S.text3, cursor: 'pointer', display: 'flex', padding: 3, borderRadius: 4 }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = S.text2; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = S.text3; }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+
+          {/* Project items */}
+          {PROJECTS.map(proj => (
+            <div key={proj.id}>
+              <div
+                onClick={() => toggleProject(proj.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 7,
+                  padding: '4px 10px 4px 12px', cursor: 'pointer',
+                  height: 28,
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
+              >
+                <svg width="9" height="9" viewBox="0 0 24 24" stroke={S.text3} fill="none" strokeWidth="2" strokeLinecap="round"
+                  style={{ transform: collapsedProjects.has(proj.id) ? 'rotate(-90deg)' : 'none', transition: 'transform 120ms', flexShrink: 0 }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="1.75" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span style={{ fontSize: 12, color: S.text2, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{proj.name}</span>
+              </div>
+              {!collapsedProjects.has(proj.id) && proj.branches.map(branch => (
+                <div key={branch.name} style={{
+                  display: 'flex', alignItems: 'center', gap: 7,
+                  padding: '3px 10px 3px 30px', height: 26, cursor: 'pointer',
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={S.text3} strokeWidth="1.75" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                    <line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>
+                  </svg>
+                  <span style={{ fontSize: 11, color: S.text3, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{branch.name}</span>
+                  {branch.badge && (
+                    <span style={{ fontSize: 9, color: S.text3, background: S.surface3, border: `1px solid ${S.border}`, borderRadius: 4, padding: '1px 5px', flexShrink: 0 }}>{branch.badge}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      {showWorktree && <CreateWorktreeModal onClose={() => setShowWorktree(false)} />}
+
+      {/* Bottom icon row — icon row: ⚙ · ℹ · ↺ · ⊞  |  user avatar */}
+      <div style={{
+        borderTop: `1px solid ${S.border}`,
+        display: 'flex', alignItems: 'center',
+        padding: '0 6px',
+        height: 36, flexShrink: 0,
+        gap: 2,
+      }}>
+        {([
+          {
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            title: 'Settings',
+            active: current === 'settings',
+            action: () => onChange('settings'),
+          },
+          {
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+            title: 'Help & keyboard shortcuts',
+            active: false,
+            action: onQuickOpen,
+          },
+          {
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+            title: 'Refresh connection',
+            active: false,
+            action: () => onChange('reconnect' as View),
+          },
+          {
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>,
+            title: 'New Terminal ⌘T',
+            active: false,
+            action: onNewSession,
+          },
+        ] as const).map((btn, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={btn.action}
+            title={btn.title}
+            style={{
+              width: 30, height: 30, border: 'none', borderRadius: 5, flexShrink: 0,
+              background: btn.active ? 'rgba(255,255,255,0.07)' : 'transparent',
+              color: btn.active ? S.text1 : S.text3,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+            onMouseEnter={e => { if (!btn.active) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLButtonElement).style.color = S.text2; }}
+            onMouseLeave={e => { if (!btn.active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = btn.active ? S.text1 : S.text3; }}
+          >
+            {btn.icon}
+          </button>
+        ))}
+
+        <div style={{ flex: 1 }} />
+
+        {/* User avatar */}
+        <div style={{
+          width: 24, height: 24, borderRadius: '50%',
+          background: S.primary,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0, cursor: 'pointer',
+          fontSize: 10, fontWeight: 700, color: '#fff',
+        }}
+          title="Account"
+          onClick={() => onChange('settings')}
+        >
+          C
         </div>
       </div>
     </div>
@@ -844,18 +1071,20 @@ export function App() {
 
   const { showTabBar, showFab, sessionBadge, unreadBadge } =
     surface.kind === 'shell' ? surface.nav : { showTabBar: false, showFab: false, sessionBadge: null, unreadBadge: null };
-  // Always show sidebar on desktop for shell views (matches Orca behavior)
+  // Always show sidebar on desktop for shell views
   const showSidebar = isDesktop && surface.kind === 'shell';
 
   return (
     <div style={{
       height: '100%',
       display: 'flex',
-      flexDirection: isDesktop ? 'row' : 'column',
+      flexDirection: 'column',
       background: S.bg,
       overflow: 'hidden',
       position: 'relative',
     }}>
+      {/* Main area: sidebar + content side by side */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: isDesktop ? 'row' : 'column', overflow: 'hidden', minHeight: 0 }}>
       {showSidebar && (
         <DesktopSidebar
           current={view}
@@ -869,16 +1098,6 @@ export function App() {
       )}
 
       <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <StatusBar
-          connectionStatus={connectionStatus}
-          latencyMs={latencyMs}
-          sessionCount={sessions.length}
-          portCount={ports.length}
-          tunnelCount={tunnelUrl ? 1 : 0}
-          tunnelUrl={tunnelUrl}
-          ports={ports}
-          onPortsClick={() => setView('ports')}
-        />
         <div style={{ flex: 1, overflow: 'hidden' }}>
           {view === 'dashboard' && (
             <DashboardView
@@ -945,14 +1164,7 @@ export function App() {
             />
           )}
           {view === 'agents' && (
-            <AgentsView
-              sessions={sessions}
-              connectionStatus={connectionStatus}
-              wsClient={wsClient}
-              messageBus={messageBus}
-              onSessionSelect={handleSessionSelect}
-              onCreateSession={handleCreateSession}
-            />
+            <AgentsView />
           )}
           {view === 'chat' && (
             <ChatView
@@ -1002,6 +1214,19 @@ export function App() {
       )}
 
       <UpdateNotification currentVersion={__APP_VERSION__} />
+      </div>{/* end main row */}
+
+      {/* Global bottom status bar — spans full width */}
+      <StatusBar
+        connectionStatus={connectionStatus}
+        latencyMs={latencyMs}
+        sessionCount={sessions.length}
+        portCount={ports.length}
+        tunnelCount={tunnelUrl ? 1 : 0}
+        tunnelUrl={tunnelUrl}
+        ports={ports}
+        onPortsClick={() => setView('ports')}
+      />
     </div>
   );
 }

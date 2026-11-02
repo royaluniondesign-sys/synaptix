@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AgentIcon } from '../lib/agent-icons';
 import {
   AGENT_STATES,
   classifyOutput,
@@ -88,7 +89,9 @@ export function AgentRegistryPanel({ authToken }: AgentRegistryPanelProps) {
             <ul className="tm-registry-list">
               {agents.map((agent) => (
                 <li key={agent.id}>
-                  <span className={`tm-registry-dot ${agent.available ? 'ok' : 'off'}`} title={agent.available ? 'installed' : 'not found on PATH'} />
+                  <span style={{ display: 'flex', flexShrink: 0, opacity: agent.available ? 1 : 0.4 }} title={agent.available ? 'installed' : 'not found on PATH'}>
+                    <AgentIcon agent={agent.id} size={14} />
+                  </span>
                   <div>
                     <strong>{agent.name}</strong>
                     <span>{agent.command} {agent.args.join(' ')}</span>
