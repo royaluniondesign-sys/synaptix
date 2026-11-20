@@ -72,7 +72,7 @@
   },
   "packageManager": "npm@10.8.0",
   "dependencies": {
-    "better-sqlite3": "^12.11.1"
+    "better-sqlite3": "^13.2.0"
   },
   "overrides": {
     "proxy-addr": "2.0.8",
